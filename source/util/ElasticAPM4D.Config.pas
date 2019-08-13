@@ -23,6 +23,7 @@ type
 implementation
 
 Uses
+  Windows,
   SysUtils,
   IOUtils;
 
@@ -67,12 +68,5 @@ begin
   Result := FFile.ReadString('main', 'url', '');
 end;
 
-initialization
-
-TElasticAPM4DConfig.InitializeFile;
-
-finalization
-
-TElasticAPM4DConfig.RealeseFile;
 
 end.

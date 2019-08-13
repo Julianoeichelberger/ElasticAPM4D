@@ -18,29 +18,36 @@ type
 
   TElasticAPM4D = class
   strict private
-    class var FEnabled: Boolean;
-    class var FMetadata: TElasticAPM4DMetadata;
-    class var FTransaction: TElasticAPM4DTransaction;
-    class var FSpanList: TObjectList<TElasticAPM4DSpan>;
-    class var FErrorList: TObjectList<TElasticAPM4DError>;
-    class var FOpenSpanStack: TList;
-    class var FUser: TElasticAPM4DUser;
+    class threadvar FMetadata: TElasticAPM4DMetadata;
+    class threadvar FTransaction: TElasticAPM4DTransaction;
+    class threadvar FSpanList: TObjectList<TElasticAPM4DSpan>;
+    class threadvar FErrorList: TObjectList<TElasticAPM4DError>;
+    class threadvar FOpenSpanStack: TList;
+    class threadvar FUser: TElasticAPM4DUser;
     class var FDataBase: TElasticAPM4DSpanContextDB;
     class var FVersion: string;
+    class var FEnabled: Boolean;
 
     class procedure SendJson;
     class function SpanIsOpen: Boolean;
+    class procedure KeepCreateLists;
+    class procedure KeepFreeLists;
+  private
+    class procedure Initialize;
+    class procedure Finalize;
   public
-    class constructor Create;
-    class destructor Destroy;
-
-    class procedure AddUser(AUser: TElasticAPM4DUser);
+    class procedure AddUser(AUser: TElasticAPM4DUser); overload;
+    class procedure AddUser(AUsername: string); overload;
     class procedure AddDataBase(ADataBase: TElasticAPM4DSpanContextDB);
     class procedure AddVersion(const AVersion: string);
 
-    class function StarTransaction(const AType, AName: string): TElasticAPM4DTransaction; overload;
-    class function StarTransaction(const AIdHttp: TIdCustomHTTP; const AName: string;
-      const AType: string = 'Request'): TElasticAPM4DTransaction; overload;
+    class function GetHeader: string;
+
+    class function StartCustomTransaction(const AType, AName, AHeader: string): TElasticAPM4DTransaction;
+    class function StarTransaction(const AName: string): TElasticAPM4DTransaction; overload;
+    class function StarTransaction(const AName, AHeader: string): TElasticAPM4DTransaction; overload;
+    class function StarTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
+      : TElasticAPM4DTransaction; overload;
 
     class function CurrentTransaction: TElasticAPM4DTransaction;
     class procedure EndTransaction(const AResult: string = 'Sucess');
@@ -61,11 +68,19 @@ implementation
 uses
   ElasticAPM4D.ndJson,
   ElasticAPM4D.SendThread,
-  ElasticAPM4D.Config;
+  ElasticAPM4D.Config,
+  ElasticAPM4D.Resources;
 
 class procedure TElasticAPM4D.AddUser(AUser: TElasticAPM4DUser);
 begin
   FUser := AUser;
+end;
+
+class procedure TElasticAPM4D.AddUser(AUsername: string);
+begin
+  if not Assigned(FUser) then
+    FUser := TElasticAPM4DUser.Create;
+  FUser.username := AUsername;
 end;
 
 class procedure TElasticAPM4D.AddVersion(const AVersion: string);
@@ -73,21 +88,55 @@ begin
   FVersion := AVersion;
 end;
 
-class constructor TElasticAPM4D.Create;
+class procedure TElasticAPM4D.AddDataBase(ADataBase: TElasticAPM4DSpanContextDB);
+begin
+  FDataBase := ADataBase;
+end;
+
+class procedure TElasticAPM4D.Initialize;
 begin
   FEnabled := TElasticAPM4DConfig.Enabled;
-  FOpenSpanStack := TList.Create;
   FVersion := '';
 end;
 
-class destructor TElasticAPM4D.Destroy;
+class procedure TElasticAPM4D.KeepCreateLists;
 begin
-  FOpenSpanStack.Free;
-  if Assigned(FUser) then
-    FUser.Free;
+  if not Assigned(FSpanList) then
+  begin
+    FSpanList := TObjectList<TElasticAPM4DSpan>.Create;
+    FOpenSpanStack := TList.Create;
+    FErrorList := TObjectList<TElasticAPM4DError>.Create;
+  end;
 end;
 
-class function TElasticAPM4D.StarTransaction(const AType, AName: string): TElasticAPM4DTransaction;
+class procedure TElasticAPM4D.KeepFreeLists;
+begin
+  if Assigned(FSpanList) then
+    FreeAndNil(FSpanList);
+  if Assigned(FErrorList) then
+    FreeAndNil(FErrorList);
+  if Assigned(FOpenSpanStack) then
+    FOpenSpanStack.Free;
+end;
+
+class procedure TElasticAPM4D.Finalize;
+begin
+  if Assigned(FUser) then
+    FUser.Free;
+  if Assigned(FDataBase) then
+    FDataBase.Free;
+end;
+
+class function TElasticAPM4D.GetHeader: string;
+begin
+  if SpanIsOpen then
+    Result := Format(sHEADER, [CurrentTransaction.trace_id, CurrentSpan.id])
+  else
+    Result := Format(sHEADER, [CurrentTransaction.trace_id, CurrentTransaction.id]);
+end;
+
+class function TElasticAPM4D.StartCustomTransaction(const AType, AName, AHeader: string)
+  : TElasticAPM4DTransaction;
 begin
   if Assigned(FTransaction) then
     raise EElasticAPM4DException.Create('Duplicate active transactions');
@@ -105,11 +154,23 @@ begin
   FTransaction := Result;
 end;
 
-class function TElasticAPM4D.StarTransaction(const AIdHttp: TIdCustomHTTP; const AName, AType: string)
+class function TElasticAPM4D.StarTransaction(const AName: string): TElasticAPM4DTransaction;
+begin
+  Result := StartCustomTransaction('Client', AName, '');
+end;
+
+class function TElasticAPM4D.StarTransaction(const AName, AHeader: string): TElasticAPM4DTransaction;
+begin
+  Result := StartCustomTransaction('Request', AName, AHeader);
+end;
+
+class function TElasticAPM4D.StarTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
   : TElasticAPM4DTransaction;
 begin
-  Result := StarTransaction(AType, AName);
-  // sHEADER
+  Result := StartCustomTransaction('Request', AName, '');
+  Result.Context.AutoCreatePage(AIdHttp);
+  Result.Context.AutoCreateResponse(AIdHttp);
+  Result.Context.AutoCreateRequest(AIdHttp);
 end;
 
 class function TElasticAPM4D.CurrentTransaction: TElasticAPM4DTransaction;
@@ -132,13 +193,12 @@ begin
 
   FTransaction.Free;
   FMetadata.Free;
+  KeepFreeLists;
 end;
 
 class function TElasticAPM4D.StartSpan(const AName, AType: string): TElasticAPM4DSpan;
 begin
-  if not Assigned(FSpanList) then
-    FSpanList := TObjectList<TElasticAPM4DSpan>.Create;
-
+  KeepCreateLists;
   if SpanIsOpen then
     Result := TElasticAPM4DSpan.Create(CurrentSpan)
   else
@@ -161,7 +221,7 @@ end;
 
 class procedure TElasticAPM4D.EndSpan;
 begin
-  if not Assigned(FSpanList) then
+  if not SpanIsOpen then
     exit;
 
   CurrentSpan.&End;
@@ -173,13 +233,11 @@ class procedure TElasticAPM4D.AddError(E: Exception);
 var
   LError: TElasticAPM4DError;
 begin
+  KeepCreateLists;
   if SpanIsOpen then
     LError := TElasticAPM4DError.Create(CurrentSpan)
   else
     LError := TElasticAPM4DError.Create(CurrentTransaction);
-
-  if not Assigned(FErrorList) then
-    FErrorList := TObjectList<TElasticAPM4DError>.Create;
 
   LError.Exception.&type := E.ClassName;
   LError.Exception.message := E.message;
@@ -189,28 +247,20 @@ end;
 
 class procedure TElasticAPM4D.AddError(AError: TElasticAPM4DError);
 begin
-  if not Assigned(FErrorList) then
-    FErrorList := TObjectList<TElasticAPM4DError>.Create;
-
+  KeepCreateLists;
   FErrorList.Add(AError)
-end;
-
-class procedure TElasticAPM4D.AddDataBase(ADataBase: TElasticAPM4DSpanContextDB);
-begin
-  FDataBase := ADataBase;
 end;
 
 class procedure TElasticAPM4D.AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException);
 var
   LError: TElasticAPM4DError;
 begin
+  KeepCreateLists;
+
   if SpanIsOpen then
     LError := TElasticAPM4DError.Create(CurrentSpan)
   else
     LError := TElasticAPM4DError.Create(CurrentTransaction);
-
-  if not Assigned(FErrorList) then
-    FErrorList := TObjectList<TElasticAPM4DError>.Create;
 
   LError.Exception.code := E.ErrorCode.ToString;
 
@@ -246,5 +296,15 @@ class function TElasticAPM4D.SpanIsOpen: Boolean;
 begin
   Result := FOpenSpanStack.Count > 0;
 end;
+
+initialization
+
+TElasticAPM4DConfig.InitializeFile;
+TElasticAPM4D.Initialize;
+
+finalization
+
+TElasticAPM4D.Finalize;
+TElasticAPM4DConfig.RealeseFile;
 
 end.
