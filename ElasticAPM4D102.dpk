@@ -56,6 +56,7 @@ contains
   ElasticAPM4D.SendThread in 'source\ElasticAPM4D.SendThread.pas',
   ElasticAPM4D.ndJson in 'source\ElasticAPM4D.ndJson.pas',
   ElasticAPM4D.Resources in 'source\util\ElasticAPM4D.Resources.pas',
-  ElasticAPM4D.Config in 'source\util\ElasticAPM4D.Config.pas';
+  ElasticAPM4D.Config in 'source\util\ElasticAPM4D.Config.pas',
+  ElasticAPM4D.SendPackage in 'source\ElasticAPM4D.SendPackage.pas';
 
 end.

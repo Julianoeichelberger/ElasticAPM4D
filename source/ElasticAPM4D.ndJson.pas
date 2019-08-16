@@ -40,18 +40,20 @@ procedure TElasticAPM4DndJson.Add(ASpans: TList<TElasticAPM4DSpan>);
 var
   LSpan: TElasticAPM4DSpan;
 begin
-  if Assigned(ASpans) then
-    for LSpan in ASpans.List do
-      FJson := FJson + sNDJsonSeparator + LSpan.ToJsonString;
+  if not Assigned(ASpans) then
+    exit;
+  for LSpan in ASpans.List do
+    FJson := FJson + sNDJsonSeparator + LSpan.ToJsonString;
 end;
 
 procedure TElasticAPM4DndJson.Add(AErro: TList<TElasticAPM4DError>);
 var
   LError: TElasticAPM4DError;
 begin
-  if Assigned(AErro) then
-    for LError in AErro.List do
-      FJson := FJson + sNDJsonSeparator + LError.ToJsonString;
+  if not Assigned(AErro) then
+    exit;
+  for LError in AErro.List do
+    FJson := FJson + sNDJsonSeparator + LError.ToJsonString;
 end;
 
 procedure TElasticAPM4DndJson.Add(ATransaction: TElasticAPM4DTransaction);
