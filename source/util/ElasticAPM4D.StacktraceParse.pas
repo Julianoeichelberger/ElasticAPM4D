@@ -8,7 +8,7 @@ uses
 type
   TElasticAPM4DStacktraceParse = class
   strict private
-    class function GetValueByRegEX(const AStr, ARegEX: string): string;
+    class function ExtractValue(const AStr, ARegEX: string): string;
     class function GetLine(const AStr: string): integer;
     class function GetUnitName(const AStr: string): string;
     class function GetClassName(const AStr: string): string;
@@ -28,7 +28,7 @@ Uses
 
 { TElasticAPM4DStacktraceParse }
 
-class function TElasticAPM4DStacktraceParse.GetValueByRegEX(const AStr: string; const ARegEX: string): string;
+class function TElasticAPM4DStacktraceParse.ExtractValue(const AStr: string; const ARegEX: string): string;
 var
   LMath: TMatch;
 begin
@@ -41,17 +41,17 @@ end;
 
 class function TElasticAPM4DStacktraceParse.GetLine(const AStr: string): integer;
 begin
-  Result := StrToIntDef(GetValueByRegEX(AStr, REGEx_LINE), 0);
+  Result := StrToIntDef(ExtractValue(AStr, REGEx_LINE), 0);
 end;
 
 class function TElasticAPM4DStacktraceParse.GetClassName(const AStr: string): string;
 begin
-  Result := GetValueByRegEX(AStr, REGEx_CLASSNAME);
+  Result := ExtractValue(AStr, REGEx_CLASSNAME);
 end;
 
 class function TElasticAPM4DStacktraceParse.GetContextLine(const AStr: string): string;
 begin
-  Result := GetValueByRegEX(AStr, REGEx_CONTEXT_LINE);
+  Result := ExtractValue(AStr, REGEx_CONTEXT_LINE);
   if Pos('(', Result) > 0 then
     Result := Result + ')';
 end;
@@ -69,7 +69,7 @@ var
 begin
   for I := 0 to Pred(Length(LIST_REGEx_UNIT_NAME)) do
   begin
-    Result := GetValueByRegEX(AStr, LIST_REGEx_UNIT_NAME[I]);
+    Result := ExtractValue(AStr, LIST_REGEx_UNIT_NAME[I]);
     if not Result.IsEmpty then
       Break;
   end;
@@ -80,7 +80,7 @@ end;
 
 class function TElasticAPM4DStacktraceParse.CanMakeParse(const AStr: string): Boolean;
 begin
-  Result := not GetValueByRegEX(AStr, REGEx_MAKE_PARSE).IsEmpty;
+  Result := not ExtractValue(AStr, REGEx_MAKE_PARSE).IsEmpty;
 end;
 
 class function TElasticAPM4DStacktraceParse.Parse(const AStr: string): TElasticAPM4DStacktrace;

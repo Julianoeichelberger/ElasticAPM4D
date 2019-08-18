@@ -54,8 +54,7 @@ implementation
 { TElasticAPM4D }
 
 uses
-  ElasticAPM4D.Config,
-  ElasticAPM4D.Resources;
+  ElasticAPM4D.Config;
 
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin

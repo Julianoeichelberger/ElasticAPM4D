@@ -11,6 +11,7 @@ type
     Ftitle: string;
     function GetParentProcessId: longint;
     function GetProcessId: longint;
+    function GetProcessName: string;
   public
     Constructor Create;
 
@@ -31,7 +32,7 @@ Uses
 
 constructor TElasticAPM4DProcess.Create;
 begin
-  Ftitle := Application.Title;
+  Ftitle := GetProcessName;
   FPid := GetProcessId;
   FPpid := GetParentProcessId;
 end;
@@ -53,6 +54,22 @@ begin
         Exit(LEntry.th32ProcessID);
   except
     Exit;
+  end;
+end;
+
+function TElasticAPM4DProcess.GetProcessName: string;
+var
+  hProcess: THandle;
+  ModName: Array [0 .. MAX_PATH + 1] of Char;
+begin
+  Result := Application.Title;
+  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, FPid);
+  try
+    if hProcess <> 0 then
+      if GetModuleFileName(hProcess, ModName, SizeOf(ModName)) <> 0 then
+        Result := ModName;
+  finally
+    CloseHandle(hProcess);
   end;
 end;
 
