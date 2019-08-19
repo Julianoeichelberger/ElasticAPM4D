@@ -78,14 +78,12 @@ end;
 
 class procedure TElasticAPM4DConfig.InitializeFile;
 begin
-  if not TFile.Exists(GetFileName) then
-    TDirectory.CreateDirectory(GetFileName);
   FFile := TIniFile.Create(GetFileName);
 
   if not FFile.ValueExists('apm', 'enabled') then
     FFile.WriteString('apm', 'enabled', 'False');
 
-  FConfigs.Enabled := FFile.ReadBool('apm', 'enabled', False);
+  FConfigs.Enabled := FFile.ReadString('apm', 'enabled', 'False').ToBoolean;
   if not FConfigs.Enabled then
     exit;
 

@@ -48,7 +48,7 @@ type
     property id: string read Fid;
     property trace_id: string read Ftrace_id write Ftrace_id;
     property parent_id: string read Fparent_id write Fparent_id;
-    property name: string read Fname;
+    property name: string read Fname write Fname;
     property &type: string read Ftype;
     property span_count: TElasticAPM4DSpanCount read Fspan_count;
     property Context: TElasticAPM4DContext read Fcontext;

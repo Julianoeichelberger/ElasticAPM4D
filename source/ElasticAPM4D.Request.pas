@@ -38,19 +38,20 @@ type
 
   TElasticAPM4DRequest = class
   private
-    FBody: String;     
-    Fcookies: TObject;      
+    FFreeCookies: Boolean;
+    FBody: String;
+    Fcookies: TObject;
     Fheaders: TArray<String>;
     FHttp_version: String;
     FMethod: String;
     FSocket: TElasticAPM4DRequestSocket;
     FUrl: TElasticAPM4DRequestURL;
   public
-    constructor Create; overload;
+    constructor Create(const AFreeCookies: Boolean = True); overload;
     constructor Create(AIdHTTP: TIdCustomHTTP); overload;
     destructor Destroy; override;
 
-    property body: String read FBody write FBody;  
+    property body: String read FBody write FBody;
     property cookies: TObject read Fcookies write Fcookies;
     property headers: TArray<String> read Fheaders write Fheaders;
     property http_version: String read FHttp_version write FHttp_version;
@@ -63,8 +64,9 @@ implementation
 
 { TElasticAPM4DRequest }
 
-constructor TElasticAPM4DRequest.Create;
+constructor TElasticAPM4DRequest.Create(const AFreeCookies: Boolean);
 begin
+  FFreeCookies := AFreeCookies;
   FSocket := TElasticAPM4DRequestSocket.Create;
   FUrl := TElasticAPM4DRequestURL.Create;
 end;
@@ -87,7 +89,7 @@ destructor TElasticAPM4DRequest.Destroy;
 begin
   FUrl.Free;
   FSocket.Free;
-  if Assigned(Fcookies) then
+  if Assigned(Fcookies) and FFreeCookies then
     Fcookies.Free;
   inherited;
 end;

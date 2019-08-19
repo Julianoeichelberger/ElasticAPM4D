@@ -127,15 +127,15 @@ end;
 constructor TElasticAPM4DSpanContext.Create;
 begin
   FService := TElasticAPM4DSpanService.Create;
+  FDb := TElasticAPM4DSpanContextDB.Create;
 end;
 
 destructor TElasticAPM4DSpanContext.Destroy;
 begin
   FService.Free;
+  FDb.Free;
   if Assigned(FHttp) then
     FHttp.Free;
-  if Assigned(FDb) then
-    FDb.Free;
   inherited;
 end;
 

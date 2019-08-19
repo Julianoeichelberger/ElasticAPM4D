@@ -17,7 +17,7 @@ class function TElasticAPM4DTimestampEpoch.Now: Int64;
 var
   LDate: TDateTime;
 begin
-  LDate := Now;
+  LDate := Date;
   Result := StrToInt64(FormatFloat('0', DateTimeToUnix(LDate, False)) + FormatDateTime('zzz', LDate) + '000');
 end;
 

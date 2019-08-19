@@ -23,12 +23,16 @@ type
     FErrorList: TObjectList<TElasticAPM4DError>;
     FOpenSpanStack: TList;
     FUser: TElasticAPM4DUser;
+    FHeader: string;
+    procedure SetHeader(const Value: string);
+    function ExtractTraceId: string;
+    function ExtractParentID: string;
+    function GetHeader: string;
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Send;
-    function GetHeader: string;
     function SpanIsOpen: Boolean;
     function CurrentSpan: TElasticAPM4DSpan;
 
@@ -38,6 +42,7 @@ type
     property ErrorList: TObjectList<TElasticAPM4DError> read FErrorList write FErrorList;
     property OpenSpanStack: TList read FOpenSpanStack write FOpenSpanStack;
     property User: TElasticAPM4DUser read FUser write FUser;
+    property Header: string read GetHeader write SetHeader;
   end;
 
 implementation
@@ -58,6 +63,7 @@ begin
   FOpenSpanStack := TList.Create;
   FErrorList := TObjectList<TElasticAPM4DError>.Create;
   FUser := TElasticAPM4DUser.Create;
+  FHeader := '';
 end;
 
 function TElasticAPM4DSendPackage.CurrentSpan: TElasticAPM4DSpan;
@@ -107,9 +113,29 @@ begin
     LndJson.Add(FErrorList);
 
     LThread := TElasticAPM4DSendThread.Create(TElasticAPM4DConfig.URL);
-    LThread.Send('', LndJson.Get);
+    LThread.Send(FHeader, LndJson.Get);
   finally
     LndJson.Free;
+  end;
+end;
+
+function TElasticAPM4DSendPackage.ExtractParentID: string;
+begin
+  Result := Copy(FHeader, 4, 32);
+end;
+
+function TElasticAPM4DSendPackage.ExtractTraceId: string;
+begin
+  Result := Copy(FHeader, 37, 16);
+end;
+
+procedure TElasticAPM4DSendPackage.SetHeader(const Value: string);
+begin
+  FHeader := Value;
+  if not FHeader.IsEmpty then
+  begin
+    FTransaction.trace_id := ExtractTraceId;
+    FTransaction.parent_id := ExtractParentID;
   end;
 end;
 

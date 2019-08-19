@@ -3,6 +3,10 @@ unit ElasticAPM4D.Context;
 interface
 
 uses
+{$IFDEF dmvcframework}
+  MVCFramework.RESTClient,
+  MVCFramework,
+{$ENDIF}
   SysUtils,
   IdHTTP,
   ElasticAPM4D.User,
@@ -47,6 +51,10 @@ type
     procedure AutoCreateResponse(AIdHTTP: TIdCustomHTTP);
     procedure AutoCreateRequest(AIdHTTP: TIdCustomHTTP);
 
+{$IFDEF dmvcframework}
+    procedure AutoConfigureContext(const AResponse: IRESTResponse); overload;
+    procedure AutoConfigureContext(const AResponse: TWebContext); overload;
+{$ENDIF}
     property User: TElasticAPM4DUser read FUser write FUser;
     property Service: TElasticAPM4DService read FService write FService;
     property Request: TElasticAPM4DRequest read FRequest write FRequest;
@@ -77,6 +85,36 @@ begin
   FResponse.headers_sent := AIdHTTP.Response.CustomHeaders.Count > 0;
   FResponse.status_code := AIdHTTP.ResponseCode;
 end;
+
+{$IFDEF dmvcframework}
+
+procedure TElasticAPM4DContext.AutoConfigureContext(const AResponse: IRESTResponse);
+begin
+  FResponse := TElasticAPM4DContextResponse.Create;
+  FResponse.status_code := AResponse.ResponseCode;
+  FResponse.finished := AResponse.ResponseCode < 300;
+  FResponse.headers_sent := AResponse.headers.Count > 0;
+  FResponse.headers := AResponse.headers.Text;
+
+  FRequest := TElasticAPM4DRequest.Create(False);
+  FRequest.body := AResponse.BodyAsString;
+  FRequest.cookies := AResponse.cookies;
+end;
+
+procedure TElasticAPM4DContext.AutoConfigureContext(const AResponse: TWebContext);
+begin
+  FResponse := TElasticAPM4DContextResponse.Create;
+  FResponse.status_code := AResponse.Response.StatusCode;
+  FResponse.finished := AResponse.Response.StatusCode < 300;
+  FResponse.headers_sent := AResponse.Response.CustomHeaders.Count > 0;
+  FResponse.headers := AResponse.Response.CustomHeaders.Text;
+
+  FRequest := TElasticAPM4DRequest.Create(False);
+  FRequest.body := AResponse.Request.body;
+  FRequest.cookies := AResponse.Response.cookies;
+end;
+
+{$ENDIF}
 
 constructor TElasticAPM4DContext.Create;
 begin
