@@ -10,6 +10,7 @@ type
     FPlatform: String;
     function GetHostName: string;
     function GetWindowsArquitecture: string;
+    function GetPlatform: String;
   public
     constructor Create;
 
@@ -34,6 +35,14 @@ begin
   Result := StrPas(buffer);
 end;
 
+function TElasticAPM4DSystem.GetPlatform: String;
+const
+  sPLATAFORM = '%s (%s) %s';
+begin
+  Result := Format(sPLATAFORM, [GetWindowsVersionString, GetWindowsEditionString,
+    GetWindowsServicePackVersionString]);
+end;
+
 function TElasticAPM4DSystem.GetWindowsArquitecture: string;
 begin
   Result := 'x86';
@@ -45,7 +54,7 @@ constructor TElasticAPM4DSystem.Create;
 begin
   FArchitecture := GetWindowsArquitecture;
   FHostname := GetHostName;
-  FPlatform := GetWindowsVersionString;
+  FPlatform := GetPlatform;
 end;
 
 end.

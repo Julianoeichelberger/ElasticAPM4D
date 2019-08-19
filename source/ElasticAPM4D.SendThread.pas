@@ -42,15 +42,13 @@ var
   LDataSend, LResult: TStringStream;
 begin
   inherited;
-
   LHttp := TIdHTTP.Create;
   LDataSend := TStringStream.Create(FJson, TEncoding.UTF8);
   LResult := TStringStream.Create('');
   try
     LHttp.Request.ContentType := 'application/x-ndjson';
     LHttp.Request.Charset := 'gzip';
-    if not FHeader.IsEmpty then
-      LHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', FHeader);
+    LHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', FHeader);
     try
       LHttp.Post(FUrl, LDataSend, LResult);
     except

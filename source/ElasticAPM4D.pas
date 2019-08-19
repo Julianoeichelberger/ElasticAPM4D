@@ -42,9 +42,7 @@ type
 
     class function StartCustomSpan(const AName: string; const AType: string = 'Method')
       : TElasticAPM4DSpan; overload;
-    class function StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string;
-      const ASendHeader: Boolean = True): TElasticAPM4DSpan; overload;
-
+    class function StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TElasticAPM4DSpan; overload;
     class function StartSpan(const AName, ASQL: string): TElasticAPM4DSpan; overload;
 
     class function CurrentSpan: TElasticAPM4DSpan;
@@ -57,11 +55,10 @@ type
     class function StarTransaction(const AName: string): TElasticAPM4DTransaction; overload;
 
 {$IFDEF dmvcframework}
-    class procedure EndTransaction(const AResponse: IRESTResponse); overload;
+    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse); overload;
     class procedure EndTransaction(const AContext: TWebContext); overload;
     class function StartTransaction(const AContext: TWebContext; const AActionName: string)
       : TElasticAPM4DTransaction; overload;
-{$ELSE}
 {$ENDIF}
   end;
 
@@ -191,12 +188,10 @@ begin
   CurrentTransaction.span_count.Inc;
 end;
 
-class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string;
-  const ASendHeader: Boolean): TElasticAPM4DSpan;
+class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TElasticAPM4DSpan;
 begin
   Result := StartCustomSpan(AName, 'Request');
-  if ASendHeader then
-    AIdHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', Header);
+  AIdHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', Header);
 end;
 
 class function TElasticAPM4D.CurrentSpan: TElasticAPM4DSpan;
@@ -271,17 +266,16 @@ end;
 class function TElasticAPM4D.StartTransaction(const AContext: TWebContext; const AActionName: string)
   : TElasticAPM4DTransaction;
 begin
-  TElasticAPM4D.AddUser(AContext.SessionId, AContext.LoggedUser.username);
-
   TElasticAPM4D.StartCustomTransaction('DMVCFramework',
     AActionName, AContext.Request.Headers['elastic-apm-traceparent']);
 end;
 
-class procedure TElasticAPM4D.EndTransaction(const AResponse: IRESTResponse);
+class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse);
 var
   LError: TElasticAPM4DError;
 begin
   CurrentTransaction.Context.AutoConfigureContext(AResponse);
+  CurrentTransaction.Context.Request.url.full := ARESTClient.url;
   if AResponse.HasError then
   begin
     LError := GetError;
@@ -298,7 +292,7 @@ end;
 
 class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
 begin
-  CurrentTransaction.Context.AutoConfigureContext(AContext.Response);
+  CurrentTransaction.Context.AutoConfigureContext(AContext);
 
   EndTransaction;
 end;

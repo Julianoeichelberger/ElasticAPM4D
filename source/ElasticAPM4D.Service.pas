@@ -32,6 +32,7 @@ type
     FName: String;
     FVersion: String;
   public
+    constructor Create;
     property name: String read FName write FName;
     property version: String read FVersion write FVersion;
   end;
@@ -164,6 +165,16 @@ begin
   FRuntime.Free;
   FFramework.Free;
   inherited;
+end;
+
+{ TElasticAPM4DServiceFramework }
+
+constructor TElasticAPM4DServiceFramework.Create;
+begin
+{$IFDEF dmvcframework}
+  FName := 'dmvcframework';
+  FVersion := '3.1.0';
+{$ENDIF}
 end;
 
 end.

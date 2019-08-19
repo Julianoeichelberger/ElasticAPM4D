@@ -53,7 +53,7 @@ type
 
 {$IFDEF dmvcframework}
     procedure AutoConfigureContext(const AResponse: IRESTResponse); overload;
-    procedure AutoConfigureContext(const AResponse: TWebContext); overload;
+    procedure AutoConfigureContext(const AContext: TWebContext); overload;
 {$ENDIF}
     property User: TElasticAPM4DUser read FUser write FUser;
     property Service: TElasticAPM4DService read FService write FService;
@@ -101,17 +101,20 @@ begin
   FRequest.cookies := AResponse.cookies;
 end;
 
-procedure TElasticAPM4DContext.AutoConfigureContext(const AResponse: TWebContext);
+procedure TElasticAPM4DContext.AutoConfigureContext(const AContext: TWebContext);
 begin
   FResponse := TElasticAPM4DContextResponse.Create;
-  FResponse.status_code := AResponse.Response.StatusCode;
-  FResponse.finished := AResponse.Response.StatusCode < 300;
-  FResponse.headers_sent := AResponse.Response.CustomHeaders.Count > 0;
-  FResponse.headers := AResponse.Response.CustomHeaders.Text;
+  FResponse.status_code := AContext.Response.StatusCode;
+  FResponse.finished := AContext.Response.StatusCode < 300;
+  FResponse.headers_sent := AContext.Response.CustomHeaders.Count > 0;
+  FResponse.headers := AContext.Response.CustomHeaders.Text;
 
   FRequest := TElasticAPM4DRequest.Create(False);
-  FRequest.body := AResponse.Request.body;
-  FRequest.cookies := AResponse.Response.cookies;
+  FRequest.body := AContext.Request.body;
+  FRequest.cookies := AContext.Response.cookies;
+  FRequest.method := AContext.Request.HTTPMethodAsString;
+
+  FUser.username := AContext.LoggedUser.username;
 end;
 
 {$ENDIF}
