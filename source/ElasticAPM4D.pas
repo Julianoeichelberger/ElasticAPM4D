@@ -59,7 +59,8 @@ type
     class function StartTransaction(AActionName: string; AContext: TWebContext)
       : TElasticAPM4DTransaction; overload;
 
-    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse); overload;
+    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
+      const AHttpMethod: string); overload;
     class procedure EndTransaction(const AContext: TWebContext); overload;
 {$ENDIF}
   end;
@@ -278,12 +279,14 @@ begin
     AActionName, AContext.Request.Headers['elastic-apm-traceparent']);
 end;
 
-class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse);
+class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
+  const AHttpMethod: string);
 var
   LError: TElasticAPM4DError;
 begin
   CurrentTransaction.Context.AutoConfigureContext(AResponse);
   CurrentTransaction.Context.Request.url.full := ARESTClient.url;
+  CurrentTransaction.Context.Request.method := AHttpMethod;
   if AResponse.HasError then
   begin
     LError := GetError;

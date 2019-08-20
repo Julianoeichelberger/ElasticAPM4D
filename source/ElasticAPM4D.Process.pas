@@ -59,17 +59,17 @@ end;
 
 function TElasticAPM4DProcess.GetProcessName: string;
 var
-  hProcess: THandle;
-  ModName: Array [0 .. MAX_PATH + 1] of Char;
+  LProcess: THandle;
+  LModName: Array [0 .. MAX_PATH + 1] of Char;
 begin
   Result := Application.Title;
-  hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, FPid);
+  LProcess := OpenProcess(PROCESS_ALL_ACCESS, False, FPid);
   try
-    if hProcess <> 0 then
-      if GetModuleFileName(hProcess, ModName, SizeOf(ModName)) <> 0 then
-        Result := ModName;
+    if LProcess <> 0 then
+      if GetModuleFileName(LProcess, LModName, SizeOf(LModName)) <> 0 then
+        Result := LModName;
   finally
-    CloseHandle(hProcess);
+    CloseHandle(LProcess);
   end;
 end;
 

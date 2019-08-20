@@ -4,7 +4,7 @@ interface
 
 type
   TElasticAPM4DTimestampEpoch = class
-    class function Get: Int64;
+    class function Get(ADate: TDatetime): Int64;
   end;
 
 implementation
@@ -13,12 +13,9 @@ Uses SysUtils, DateUtils;
 
 { TElasticAPM4DTimestampEpoch }
 
-class function TElasticAPM4DTimestampEpoch.Get: Int64;
-var
-  LDate: TDateTime;
+class function TElasticAPM4DTimestampEpoch.Get(ADate: TDatetime): Int64;
 begin
-  LDate := Now;
-  Result := StrToInt64(FormatFloat('0', DateTimeToUnix(LDate, False)) + FormatDateTime('zzz', LDate) + '000');
+  Result := StrToInt64(FormatFloat('0', DateTimeToUnix(ADate, False)) + FormatDateTime('zzz', ADate) + '000');
 end;
 
 end.
