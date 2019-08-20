@@ -22,6 +22,8 @@ type
 implementation
 
 Uses
+  Vcl.Forms,
+  IOUtils,
   SysUtils,
   IdHTTP;
 
@@ -51,8 +53,12 @@ begin
     LHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', FHeader);
     try
       LHttp.Post(FUrl, LDataSend, LResult);
+      LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+        + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
     except
       FCouldSend := False;
+      LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+        + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
     end;
   finally
     LDataSend.Free;

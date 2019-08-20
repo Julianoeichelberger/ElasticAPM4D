@@ -92,10 +92,15 @@ end;
 
 function TElasticAPM4DSendPackage.GetHeader: string;
 begin
-  if SpanIsOpen then
-    Result := Format(sHEADER, [FTransaction.trace_id, CurrentSpan.id])
-  else
-    Result := Format(sHEADER, [FTransaction.trace_id, FTransaction.id]);
+  Result := FHeader;
+  if Result.IsEmpty then
+  begin
+    if SpanIsOpen then
+      Result := Format(sHEADER, [FTransaction.trace_id, CurrentSpan.id])
+    else
+      Result := Format(sHEADER, [FTransaction.trace_id, FTransaction.id]);
+  end
+
 end;
 
 procedure TElasticAPM4DSendPackage.Send;
@@ -115,18 +120,19 @@ begin
     LThread := TElasticAPM4DSendThread.Create(TElasticAPM4DConfig.URL);
     LThread.Send(GetHeader, LndJson.Get);
   finally
+    FHeader := '';
     LndJson.Free;
   end;
 end;
 
 function TElasticAPM4DSendPackage.ExtractParentID: string;
 begin
-  Result := Copy(FHeader, 4, 32);
+  Result := Copy(FHeader, 37, 16);
 end;
 
 function TElasticAPM4DSendPackage.ExtractTraceId: string;
 begin
-  Result := Copy(FHeader, 37, 16);
+  Result := Copy(FHeader, 4, 32);
 end;
 
 procedure TElasticAPM4DSendPackage.SetHeader(const Value: string);
