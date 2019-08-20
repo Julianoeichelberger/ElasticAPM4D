@@ -41,7 +41,7 @@ type
     FFreeCookies: Boolean;
     FBody: String;
     Fcookies: TObject;
-    Fheaders: TArray<String>;
+    Fheaders: string;
     FHttp_version: String;
     FMethod: String;
     FSocket: TElasticAPM4DRequestSocket;
@@ -53,7 +53,7 @@ type
 
     property body: String read FBody write FBody;
     property cookies: TObject read Fcookies write Fcookies;
-    property headers: TArray<String> read Fheaders write Fheaders;
+    property headers: string read Fheaders write Fheaders;
     property http_version: String read FHttp_version write FHttp_version;
     property method: String read FMethod write FMethod;
     property socket: TElasticAPM4DRequestSocket read FSocket;
@@ -61,6 +61,9 @@ type
   end;
 
 implementation
+
+Uses
+  SysUtils;
 
 { TElasticAPM4DRequest }
 
@@ -82,7 +85,10 @@ begin
   FUrl.full := AIdHTTP.Request.url;
 
   for I := 0 to pred(AIdHTTP.Request.CustomHeaders.Count) do
-    Fheaders := Fheaders + [AIdHTTP.Request.CustomHeaders.Strings[I]];
+    Fheaders := Fheaders + ',' + AIdHTTP.Request.CustomHeaders.Strings[I];
+
+  if not Fheaders.isEmpty then
+    Fheaders := Fheaders.Remove(1, 1);
 end;
 
 destructor TElasticAPM4DRequest.Destroy;

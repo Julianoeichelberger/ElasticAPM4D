@@ -108,7 +108,7 @@ procedure TElasticAPM4DTransaction.Start(AType, AName: string);
 begin
   Fid := TElasticAPM4DUUid.GetUUid64b;
   Ftrace_id := TElasticAPM4DUUid.GetUUid128b;
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Now;
+  Ftimestamp := TElasticAPM4DTimestampEpoch.Get;
   Fsampled := true;
   Ftype := AType;
   Fname := AName;
@@ -116,7 +116,7 @@ end;
 
 procedure TElasticAPM4DTransaction.&End;
 begin
-  Fduration := TElasticAPM4DTimestampEpoch.Now - Ftimestamp;
+  Fduration := TElasticAPM4DTimestampEpoch.Get - Ftimestamp;
 end;
 
 function TElasticAPM4DTransaction.toJsonString: string;

@@ -97,7 +97,7 @@ type
     property duration: Int64 read FDuration write FDuration;
     property Context: TElasticAPM4DSpanContext read FContext;
     property Stacktrace: TArray<TElasticAPM4DStacktrace> read FStacktrace write FStacktrace;
-    property sync: Boolean read FSync write FSync;
+    property sync: Boolean read FSync write FSync default true;
     property Timestamp: Int64 read Ftimestamp;
   end;
 
@@ -149,7 +149,7 @@ begin
   FParent_id := AParent.id;
   FAction := '';
   FSubtype := '';
-  FSync := True;
+  FSync := true;
   FContext := TElasticAPM4DSpanContext.Create;
 end;
 
@@ -177,12 +177,12 @@ end;
 
 procedure TElasticAPM4DSpan.&End;
 begin
-  FDuration := TElasticAPM4DTimestampEpoch.Now - Ftimestamp;
+  FDuration := TElasticAPM4DTimestampEpoch.Get - Ftimestamp;
 end;
 
 procedure TElasticAPM4DSpan.Start;
 begin
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Now;
+  Ftimestamp := TElasticAPM4DTimestampEpoch.Get;
 end;
 
 function TElasticAPM4DSpan.ToJsonString: string;

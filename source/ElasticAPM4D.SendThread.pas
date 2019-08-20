@@ -52,8 +52,7 @@ begin
     try
       LHttp.Post(FUrl, LDataSend, LResult);
     except
-      on E: Exception do
-        FCouldSend := False;
+      FCouldSend := False;
     end;
   finally
     LDataSend.Free;

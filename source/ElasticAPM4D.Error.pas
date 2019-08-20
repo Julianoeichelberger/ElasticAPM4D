@@ -91,7 +91,7 @@ begin
   FException := TElasticAPM4DErrorException.Create;
   Fcontext := TElasticAPM4DContext.Create;
   FCulprit := '';
-  FTimestamp := TElasticAPM4DTimestampEpoch.Now;
+  FTimestamp := TElasticAPM4DTimestampEpoch.Get;
 end;
 
 constructor TElasticAPM4DError.Create(ATransaction: TElasticAPM4DTransaction);
