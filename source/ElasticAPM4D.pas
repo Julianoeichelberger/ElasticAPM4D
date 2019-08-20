@@ -53,13 +53,6 @@ type
     class procedure AddError(E: Exception); overload;
     class procedure AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException); overload;
     class function StarTransaction(const AName: string): TElasticAPM4DTransaction; overload;
-
-{$IFDEF dmvcframework}
-    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse); overload;
-    class procedure EndTransaction(const AContext: TWebContext); overload;
-    class function StartTransaction(const AContext: TWebContext; const AActionName: string)
-      : TElasticAPM4DTransaction; overload;
-{$ENDIF}
   end;
 
 implementation
@@ -142,7 +135,7 @@ end;
 
 class function TElasticAPM4D.StartSpan(const AName, ASQL: string): TElasticAPM4DSpan;
 begin
-  Result := StartCustomSpan(AName, 'sql');
+  Result := StartCustomSpan(AName, 'Sql');
   Result.Context.db.statement := ASQL;
 end;
 
@@ -203,6 +196,7 @@ class procedure TElasticAPM4D.EndSpan(const AIdHttp: TIdCustomHTTP);
 begin
   if not FPackage.SpanIsOpen then
     exit;
+  CurrentSpan.Context.http := TElasticAPM4DSpanContextHttp.Create;
   CurrentSpan.Context.http.method := AIdHttp.Request.method;
   CurrentSpan.Context.http.url := AIdHttp.Request.url;
   CurrentSpan.Context.http.status_code := AIdHttp.ResponseCode;
@@ -260,44 +254,6 @@ begin
 
   FPackage.ErrorList.Add(LError);
 end;
-
-{$IFDEF dmvcframework}
-
-class function TElasticAPM4D.StartTransaction(const AContext: TWebContext; const AActionName: string)
-  : TElasticAPM4DTransaction;
-begin
-  TElasticAPM4D.StartCustomTransaction('DMVCFramework',
-    AActionName, AContext.Request.Headers['elastic-apm-traceparent']);
-end;
-
-class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse);
-var
-  LError: TElasticAPM4DError;
-begin
-  CurrentTransaction.Context.AutoConfigureContext(AResponse);
-  CurrentTransaction.Context.Request.url.full := ARESTClient.url;
-  if AResponse.HasError then
-  begin
-    LError := GetError;
-
-    LError.Exception.code := AResponse.Error.HTTPError.ToString;
-    LError.Exception.&type := AResponse.Error.ExceptionClassname;
-    LError.Exception.message := AResponse.Error.ExceptionMessage;
-
-    AddError(LError);
-  end;
-
-  EndTransaction;
-end;
-
-class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
-begin
-  CurrentTransaction.Context.AutoConfigureContext(AContext);
-
-  EndTransaction;
-end;
-
-{$ENDIF}
 
 initialization
 
