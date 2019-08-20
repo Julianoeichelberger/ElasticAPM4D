@@ -23,11 +23,6 @@ type
     class threadvar FPackage: TElasticAPM4DSendPackage;
   private
     class procedure Finalize;
-
-{$IFDEF dmvcframework}
-    class procedure AutoConfigureContext(const AResponse: IRESTResponse); overload;
-    class procedure AutoConfigureContext(const AContext: TWebContext); overload;
-{$ENDIF}
   protected
     class var FUser: TElasticAPM4DUser;
     class var FDataBase: TElasticAPM4DSpanContextDB;
@@ -287,7 +282,7 @@ class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; con
 var
   LError: TElasticAPM4DError;
 begin
-  AutoConfigureContext(AResponse);
+  CurrentTransaction.Context.AutoConfigureContext(AResponse);
   CurrentTransaction.Context.Request.url.full := ARESTClient.url;
   if AResponse.HasError then
   begin
@@ -306,41 +301,10 @@ end;
 
 class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
 begin
-  AutoConfigureContext(AContext);
+  CurrentTransaction.Context.AutoConfigureContext(AContext);
   EndTransaction;
 end;
 
-class procedure TElasticAPM4D.AutoConfigureContext(const AResponse: IRESTResponse);
-begin
-  CurrentTransaction.Context.Response := TElasticAPM4DContextResponse.Create;
-  CurrentTransaction.Context.Response.status_code := AResponse.ResponseCode;
-  CurrentTransaction.Context.Response.finished := AResponse.ResponseCode < 300;
-  CurrentTransaction.Context.Response.headers_sent := AResponse.Headers.Count > 0;
-  CurrentTransaction.Context.Response.Headers := AResponse.Headers.Text;
-
-  CurrentTransaction.Context.Request := TElasticAPM4DRequest.Create;
-  CurrentTransaction.Context.Request.body := AResponse.BodyAsString;
-end;
-
-class procedure TElasticAPM4D.AutoConfigureContext(const AContext: TWebContext);
-begin
-  CurrentTransaction.Context.Response := TElasticAPM4DContextResponse.Create;
-  CurrentTransaction.Context.Response.status_code := AContext.Response.StatusCode;
-  CurrentTransaction.Context.Response.finished := AContext.Response.StatusCode < 300;
-  CurrentTransaction.Context.Response.headers_sent := AContext.Response.CustomHeaders.Count > 0;
-  CurrentTransaction.Context.Response.Headers := AContext.Response.CustomHeaders.Text;
-
-  CurrentTransaction.Context.Request := TElasticAPM4DRequest.Create;
-  CurrentTransaction.Context.Request.body := AContext.Request.body;
-  CurrentTransaction.Context.Request.method := AContext.Request.HTTPMethodAsString;
-
-  if not AContext.LoggedUser.username.IsEmpty then
-  begin
-    if not Assigned(FUser) then
-      FUser := TElasticAPM4DUser.Create;
-    FUser.username := AContext.LoggedUser.username;
-  end;
-end;
 {$ENDIF}
 
 initialization

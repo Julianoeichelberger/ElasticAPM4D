@@ -28,12 +28,12 @@ type
     FFinished: Boolean;
     FHeaders_sent: Boolean;
     FStatus_code: Integer;
-    Fheaders: string;
+    Fheaders: TObject;
   public
     property finished: Boolean read FFinished write FFinished;
     property headers_sent: Boolean read FHeaders_sent write FHeaders_sent;
     property status_code: Integer read FStatus_code write FStatus_code;
-    property headers: string read Fheaders write Fheaders;
+    property headers: TObject read Fheaders write Fheaders;
   end;
 
   TElasticAPM4DContext = class
@@ -94,11 +94,9 @@ begin
   FResponse.status_code := AResponse.ResponseCode;
   FResponse.finished := AResponse.ResponseCode < 300;
   FResponse.headers_sent := AResponse.headers.Count > 0;
-  FResponse.headers := AResponse.headers.Text;
 
   FRequest := TElasticAPM4DRequest.Create(False);
   FRequest.body := AResponse.BodyAsString;
-  FRequest.cookies := AResponse.cookies;
 end;
 
 procedure TElasticAPM4DContext.AutoConfigureContext(const AContext: TWebContext);
@@ -107,14 +105,17 @@ begin
   FResponse.status_code := AContext.Response.StatusCode;
   FResponse.finished := AContext.Response.StatusCode < 300;
   FResponse.headers_sent := AContext.Response.CustomHeaders.Count > 0;
-  FResponse.headers := AContext.Response.CustomHeaders.Text;
 
   FRequest := TElasticAPM4DRequest.Create(False);
   FRequest.body := AContext.Request.body;
-  FRequest.cookies := AContext.Response.cookies;
   FRequest.method := AContext.Request.HTTPMethodAsString;
 
-  FUser.username := AContext.LoggedUser.username;
+  if not AContext.LoggedUser.username.IsEmpty then
+  begin
+    if not Assigned(FUser) then
+      FUser := TElasticAPM4DUser.Create;
+    FUser.username := AContext.LoggedUser.username;
+  end;
 end;
 
 {$ENDIF}
