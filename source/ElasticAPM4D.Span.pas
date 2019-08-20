@@ -63,6 +63,7 @@ type
 
   TElasticAPM4DSpan = class
   private
+    FStartDate: TDateTime;
     FAction: String;
     FContext: TElasticAPM4DSpanContext;
     FDuration: Int64;
@@ -104,7 +105,7 @@ type
 implementation
 
 Uses
-
+  DateUtils,
   REST.Json,
   ElasticAPM4D.TimestampEpoch,
   ElasticAPM4D.Uuid;
@@ -151,6 +152,7 @@ begin
   FSubtype := '';
   FSync := true;
   FContext := TElasticAPM4DSpanContext.Create;
+  Ftimestamp := AParent.Timestamp; // Test
 end;
 
 constructor TElasticAPM4DSpan.Create(AParent: TElasticAPM4DTransaction);
@@ -163,6 +165,7 @@ begin
   FSubtype := '';
   FSync := False;
   FContext := TElasticAPM4DSpanContext.Create;
+  Ftimestamp := AParent.Timestamp; // Test
 end;
 
 destructor TElasticAPM4DSpan.Destroy;
@@ -177,12 +180,13 @@ end;
 
 procedure TElasticAPM4DSpan.&End;
 begin
-  FDuration := TElasticAPM4DTimestampEpoch.Get - Ftimestamp;
+  FDuration := MilliSecondsBetween(now, FStartDate);
 end;
 
 procedure TElasticAPM4DSpan.Start;
 begin
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Get;
+  FStartDate := now;
+  Ftimestamp := TElasticAPM4DTimestampEpoch.Get(FStartDate);
 end;
 
 function TElasticAPM4DSpan.ToJsonString: string;

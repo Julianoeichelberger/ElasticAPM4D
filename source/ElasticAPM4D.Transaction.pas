@@ -25,6 +25,7 @@ type
 
   TElasticAPM4DTransaction = class
   private
+    FStartDate: TDateTime;
     Fid: string;
     Ftrace_id: string;
     Fname: string;
@@ -61,6 +62,7 @@ type
 implementation
 
 Uses
+  DateUtils,
   REST.Json,
   ElasticAPM4D.UUid,
   ElasticAPM4D.TimestampEpoch;
@@ -106,9 +108,10 @@ end;
 
 procedure TElasticAPM4DTransaction.Start(AType, AName: string);
 begin
+  FStartDate := now;
   Fid := TElasticAPM4DUUid.GetUUid64b;
   Ftrace_id := TElasticAPM4DUUid.GetUUid128b;
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Get;
+  Ftimestamp := TElasticAPM4DTimestampEpoch.Get(FStartDate);
   Fsampled := true;
   Ftype := AType;
   Fname := AName;
@@ -116,13 +119,13 @@ end;
 
 procedure TElasticAPM4DTransaction.&End;
 begin
-  Fduration := TElasticAPM4DTimestampEpoch.Get - Ftimestamp;
+  Fduration := MilliSecondsBetween(now, FStartDate);
 end;
 
 function TElasticAPM4DTransaction.toJsonString: string;
 begin
-  result := TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings]);
-  result := format('{"transaction": %s}}', [result]);
+  Result := TJson.ObjectToJsonString(Self, [joIgnoreEmptyStrings]);
+  Result := format('{"transaction": %s}}', [Result]);
 end;
 
 end.
