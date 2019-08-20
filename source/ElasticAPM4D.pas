@@ -21,10 +21,16 @@ type
   TElasticAPM4D = class
   strict private
     class threadvar FPackage: TElasticAPM4DSendPackage;
-    class var FUser: TElasticAPM4DUser;
-    class var FDataBase: TElasticAPM4DSpanContextDB;
   private
     class procedure Finalize;
+
+{$IFDEF dmvcframework}
+    class procedure AutoConfigureContext(const AResponse: IRESTResponse); overload;
+    class procedure AutoConfigureContext(const AContext: TWebContext); overload;
+{$ENDIF}
+  protected
+    class var FUser: TElasticAPM4DUser;
+    class var FDataBase: TElasticAPM4DSpanContextDB;
     class function GetError: TElasticAPM4DError;
   public
     class procedure AddUser(AUserId, AUsername: string; AUserMail: string = ''); overload;
@@ -53,6 +59,14 @@ type
     class procedure AddError(E: Exception); overload;
     class procedure AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException); overload;
     class function StarTransaction(const AName: string): TElasticAPM4DTransaction; overload;
+
+{$IFDEF dmvcframework}
+    class function StartTransaction(AActionName: string; AContext: TWebContext)
+      : TElasticAPM4DTransaction; overload;
+
+    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse); overload;
+    class procedure EndTransaction(const AContext: TWebContext); overload;
+{$ENDIF}
   end;
 
 implementation
@@ -60,7 +74,9 @@ implementation
 { TElasticAPM4D }
 
 uses
-  ElasticAPM4D.Config;
+  ElasticAPM4D.Config,
+  ElasticAPM4D.Context,
+  ElasticAPM4D.Request;
 
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin
@@ -105,9 +121,12 @@ begin
   FPackage := TElasticAPM4DSendPackage.Create;
   FPackage.Transaction.Start(AType, AName);
 
-  FPackage.Transaction.Context.User.id := FUser.id;
-  FPackage.Transaction.Context.User.username := FUser.username;
-  FPackage.Transaction.Context.User.email := FUser.email;
+  if Assigned(FUser) then
+  begin
+    FPackage.Transaction.Context.User.id := FUser.id;
+    FPackage.Transaction.Context.User.username := FUser.username;
+    FPackage.Transaction.Context.User.email := FUser.email;
+  end;
 
   FPackage.Header := AHeader;
 
@@ -254,6 +273,75 @@ begin
 
   FPackage.ErrorList.Add(LError);
 end;
+
+{$IFDEF dmvcframework}
+
+class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWebContext)
+  : TElasticAPM4DTransaction;
+begin
+  Result := StartCustomTransaction('DMVCFramework',
+    AActionName, AContext.Request.Headers['elastic-apm-traceparent']);
+end;
+
+class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse);
+var
+  LError: TElasticAPM4DError;
+begin
+  AutoConfigureContext(AResponse);
+  CurrentTransaction.Context.Request.url.full := ARESTClient.url;
+  if AResponse.HasError then
+  begin
+    LError := GetError;
+
+    LError.Exception.code := AResponse.Error.HTTPError.ToString;
+    LError.Exception.&type := AResponse.Error.ExceptionClassname;
+    LError.Exception.message := AResponse.Error.ExceptionMessage;
+
+    AddError(LError);
+    EndTransaction('Error');
+  end
+  else
+    EndTransaction;
+end;
+
+class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
+begin
+  AutoConfigureContext(AContext);
+  EndTransaction;
+end;
+
+class procedure TElasticAPM4D.AutoConfigureContext(const AResponse: IRESTResponse);
+begin
+  CurrentTransaction.Context.Response := TElasticAPM4DContextResponse.Create;
+  CurrentTransaction.Context.Response.status_code := AResponse.ResponseCode;
+  CurrentTransaction.Context.Response.finished := AResponse.ResponseCode < 300;
+  CurrentTransaction.Context.Response.headers_sent := AResponse.Headers.Count > 0;
+  CurrentTransaction.Context.Response.Headers := AResponse.Headers.Text;
+
+  CurrentTransaction.Context.Request := TElasticAPM4DRequest.Create;
+  CurrentTransaction.Context.Request.body := AResponse.BodyAsString;
+end;
+
+class procedure TElasticAPM4D.AutoConfigureContext(const AContext: TWebContext);
+begin
+  CurrentTransaction.Context.Response := TElasticAPM4DContextResponse.Create;
+  CurrentTransaction.Context.Response.status_code := AContext.Response.StatusCode;
+  CurrentTransaction.Context.Response.finished := AContext.Response.StatusCode < 300;
+  CurrentTransaction.Context.Response.headers_sent := AContext.Response.CustomHeaders.Count > 0;
+  CurrentTransaction.Context.Response.Headers := AContext.Response.CustomHeaders.Text;
+
+  CurrentTransaction.Context.Request := TElasticAPM4DRequest.Create;
+  CurrentTransaction.Context.Request.body := AContext.Request.body;
+  CurrentTransaction.Context.Request.method := AContext.Request.HTTPMethodAsString;
+
+  if not AContext.LoggedUser.username.IsEmpty then
+  begin
+    if not Assigned(FUser) then
+      FUser := TElasticAPM4DUser.Create;
+    FUser.username := AContext.LoggedUser.username;
+  end;
+end;
+{$ENDIF}
 
 initialization
 

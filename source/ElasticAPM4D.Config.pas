@@ -90,7 +90,7 @@ begin
   if not FFile.ValueExists('apm', 'url') then
     FFile.WriteString('apm', 'url', 'http://127.0.0.1:8200/intake/v2/events');
 
-  FConfigs.URL := FFile.ReadString('main', 'url', '');
+  FConfigs.URL := FFile.ReadString('apm', 'url', '');
 
   if not FFile.ValueExists('service', 'name') then
     FFile.WriteString('service', 'name', '');

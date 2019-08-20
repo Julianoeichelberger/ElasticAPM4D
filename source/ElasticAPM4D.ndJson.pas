@@ -57,8 +57,11 @@ begin
 end;
 
 procedure TElasticAPM4DndJson.Add(ATransaction: TElasticAPM4DTransaction);
+var
+  LTrans: string;
 begin
-  FJson := FJson + sNDJsonSeparator + ATransaction.ToJsonString;
+  LTrans := ATransaction.ToJsonString;
+  FJson := FJson + sNDJsonSeparator + LTrans;
 end;
 
 function TElasticAPM4DndJson.Get: Widestring;

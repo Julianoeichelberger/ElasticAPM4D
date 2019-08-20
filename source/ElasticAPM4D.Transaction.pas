@@ -43,7 +43,7 @@ type
     procedure Start(AType, AName: string);
     procedure &End;
 
-    function ToJsonString: string;
+    function toJsonString: string;
 
     property id: string read Fid;
     property trace_id: string read Ftrace_id write Ftrace_id;
@@ -117,13 +117,12 @@ end;
 procedure TElasticAPM4DTransaction.&End;
 begin
   Fduration := TElasticAPM4DTimestampEpoch.Now - Ftimestamp;
-  Fspan_count.Reset;
 end;
 
-function TElasticAPM4DTransaction.ToJsonString: string;
+function TElasticAPM4DTransaction.toJsonString: string;
 begin
-  Result := format('{"transaction": %s}',
-    [TJson.ObjectToJsonString(self, [joDateFormatISO8601, joIgnoreEmptyStrings])]);
+  result := TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings]);
+  result := format('{"transaction": %s}}', [result]);
 end;
 
 end.

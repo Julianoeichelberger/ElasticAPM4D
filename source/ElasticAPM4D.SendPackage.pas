@@ -113,7 +113,7 @@ begin
     LndJson.Add(FErrorList);
 
     LThread := TElasticAPM4DSendThread.Create(TElasticAPM4DConfig.URL);
-    LThread.Send(FHeader, LndJson.Get);
+    LThread.Send(GetHeader, LndJson.Get);
   finally
     LndJson.Free;
   end;
