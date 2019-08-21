@@ -38,7 +38,6 @@ type
 
   TElasticAPM4DRequest = class
   private
-    FFreeCookies: Boolean;
     FBody: String;
     Fcookies: TObject;
     Fheaders: string;
@@ -47,7 +46,7 @@ type
     FSocket: TElasticAPM4DRequestSocket;
     FUrl: TElasticAPM4DRequestURL;
   public
-    constructor Create(const AFreeCookies: Boolean = True); overload;
+    constructor Create; overload;
     constructor Create(AIdHTTP: TIdCustomHTTP); overload;
     destructor Destroy; override;
 
@@ -63,13 +62,13 @@ type
 implementation
 
 Uses
+  StrUtils,
   SysUtils;
 
 { TElasticAPM4DRequest }
 
-constructor TElasticAPM4DRequest.Create(const AFreeCookies: Boolean);
+constructor TElasticAPM4DRequest.Create;
 begin
-  FFreeCookies := AFreeCookies;
   FSocket := TElasticAPM4DRequestSocket.Create;
   FUrl := TElasticAPM4DRequestURL.Create;
 end;
@@ -80,12 +79,19 @@ var
 begin
   Create;
   FMethod := AIdHTTP.Request.method;
-  FUrl.protocol := AIdHTTP.Response.ResponseText;
-  FUrl.hostname := AIdHTTP.Request.Host;
-  FUrl.full := AIdHTTP.Request.url;
+  FHttp_version := AIdHTTP.Version;
+  FSocket.encrypted := Assigned(AIdHTTP.socket);
+
+  FUrl.hostname := AIdHTTP.url.Host;
+  FUrl.full := AIdHTTP.url.GetFullURI;
+  FUrl.protocol := AIdHTTP.url.protocol;
+  FUrl.pathname := AIdHTTP.url.Path;
+  FUrl.port := StrToIntDef(AIdHTTP.url.port, 0);
+  FUrl.search := AIdHTTP.url.Params;
+  FUrl.raw := AIdHTTP.url.Document;
 
   for I := 0 to pred(AIdHTTP.Request.CustomHeaders.Count) do
-    Fheaders := Fheaders + ',' + AIdHTTP.Request.CustomHeaders.Strings[I];
+    Fheaders := Fheaders + ', ' + AIdHTTP.Request.CustomHeaders.Strings[I];
 
   if not Fheaders.isEmpty then
     Fheaders := Fheaders.Remove(1, 1);
@@ -95,7 +101,7 @@ destructor TElasticAPM4DRequest.Destroy;
 begin
   FUrl.Free;
   FSocket.Free;
-  if Assigned(Fcookies) and FFreeCookies then
+  if Assigned(Fcookies) then
     Fcookies.Free;
   inherited;
 end;

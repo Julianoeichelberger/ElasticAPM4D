@@ -3,6 +3,7 @@ unit ElasticAPM4D.Span;
 interface
 
 Uses
+  IdHttp,
   System.SysUtils,
   ElasticAPM4D.Service,
   ElasticAPM4D.StacktraceFrame,
@@ -55,6 +56,8 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
+
+    procedure AutoCreateHttp(AIdHttp: TIdCustomHTTP);
 
     property Service: TElasticAPM4DSpanService read FService write FService;
     property db: TElasticAPM4DSpanContextDB read FDb write FDb;
@@ -125,6 +128,14 @@ end;
 
 { TElasticAPM4DSpanContext }
 
+procedure TElasticAPM4DSpanContext.AutoCreateHttp(AIdHttp: TIdCustomHTTP);
+begin
+  FHttp := TElasticAPM4DSpanContextHttp.Create;
+  FHttp.method := AIdHttp.Request.method;
+  FHttp.url := AIdHttp.Request.url;
+  FHttp.status_code := AIdHttp.ResponseCode;
+end;
+
 constructor TElasticAPM4DSpanContext.Create;
 begin
   FService := TElasticAPM4DSpanService.Create;
@@ -163,7 +174,7 @@ begin
   FParent_id := AParent.id;
   FAction := '';
   FSubtype := '';
-  FSync := False;
+  FSync := true;
   FContext := TElasticAPM4DSpanContext.Create;
   Ftimestamp := AParent.Timestamp; // Test
 end;

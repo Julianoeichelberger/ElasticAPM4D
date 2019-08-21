@@ -17,6 +17,9 @@ uses
   ElasticAPM4D.User,
   ElasticAPM4D.SendPackage;
 
+const
+  sDefaultResult = 'Sucess';
+
 type
   TElasticAPM4D = class
   strict private
@@ -39,7 +42,9 @@ type
       : TElasticAPM4DTransaction; overload;
 
     class function CurrentTransaction: TElasticAPM4DTransaction;
-    class procedure EndTransaction(const AResult: string = 'Sucess'); overload;
+    class procedure EndTransaction(const AResult: string = sDefaultResult); overload;
+
+    class procedure EndTransaction(const AIdHttp: TIdCustomHTTP); overload;
 
     class function StartCustomSpan(const AName: string; const AType: string = 'Method')
       : TElasticAPM4DSpan; overload;
@@ -139,8 +144,6 @@ class function TElasticAPM4D.StarTransaction(const AIdHttp: TIdCustomHTTP; const
 begin
   Result := StartCustomTransaction('Request', AName, '');
   Result.Context.AutoCreatePage(AIdHttp);
-  Result.Context.AutoCreateResponse(AIdHttp);
-  Result.Context.AutoCreateRequest(AIdHttp);
 end;
 
 class function TElasticAPM4D.StarTransaction(const AName: string): TElasticAPM4DTransaction;
@@ -162,14 +165,24 @@ begin
   Result := FPackage.Transaction;
 end;
 
+class procedure TElasticAPM4D.EndTransaction(const AIdHttp: TIdCustomHTTP);
+begin
+  CurrentTransaction.Context.AutoCreateResponse(AIdHttp);
+  CurrentTransaction.Context.AutoCreateRequest(AIdHttp);
+
+  EndTransaction;
+end;
+
 class procedure TElasticAPM4D.EndTransaction(const AResult: string);
 begin
   if not Assigned(FPackage) then
     exit;
 
   FPackage.Transaction.Result := AResult;
-  FPackage.Transaction.&End;
+  if (AResult = sDefaultResult) and (FPackage.ErrorList.Count > 0) then
+    FPackage.Transaction.Result := 'Error';
 
+  FPackage.Transaction.&End;
   FPackage.Send;
   FreeAndNil(FPackage);
 end;
@@ -211,10 +224,9 @@ class procedure TElasticAPM4D.EndSpan(const AIdHttp: TIdCustomHTTP);
 begin
   if not FPackage.SpanIsOpen then
     exit;
-  CurrentSpan.Context.http := TElasticAPM4DSpanContextHttp.Create;
-  CurrentSpan.Context.http.method := AIdHttp.Request.method;
-  CurrentSpan.Context.http.url := AIdHttp.Request.url;
-  CurrentSpan.Context.http.status_code := AIdHttp.ResponseCode;
+
+  CurrentSpan.action := AIdHttp.Request.Method;
+  CurrentSpan.Context.AutoCreateHttp(AIdHttp);
   EndSpan;
 end;
 
@@ -286,7 +298,7 @@ var
 begin
   CurrentTransaction.Context.AutoConfigureContext(AResponse);
   CurrentTransaction.Context.Request.url.full := ARESTClient.url;
-  CurrentTransaction.Context.Request.method := AHttpMethod;
+  CurrentTransaction.Context.Request.Method := AHttpMethod;
   if AResponse.HasError then
   begin
     LError := GetError;
