@@ -34,11 +34,12 @@ type
     class procedure AddUser(AUserId, AUsername: string; AUserMail: string = ''); overload;
     class procedure AddDataBase(ADbType, ADbUser: string);
 
-    class function Header: string;
+    class function HeaderValue: string;
+    class function HeaderKey: string;
 
-    class function StartCustomTransaction(const AType, AName, AHeader: string): TElasticAPM4DTransaction;
-    class function StarTransaction(const AName, AHeader: string): TElasticAPM4DTransaction; overload;
-    class function StarTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
+    class function StartTransaction(const AName: string): TElasticAPM4DTransaction; overload;
+    class function StartCustomTransaction(const AType, AName: string): TElasticAPM4DTransaction;
+    class function StartTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
       : TElasticAPM4DTransaction; overload;
 
     class function CurrentTransaction: TElasticAPM4DTransaction;
@@ -58,7 +59,6 @@ type
     class procedure AddError(AError: TElasticAPM4DError); overload;
     class procedure AddError(E: Exception); overload;
     class procedure AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException); overload;
-    class function StarTransaction(const AName: string): TElasticAPM4DTransaction; overload;
 
 {$IFDEF dmvcframework}
     class function StartTransaction(AActionName: string; AContext: TWebContext)
@@ -105,7 +105,7 @@ begin
     FDataBase.Free;
 end;
 
-class function TElasticAPM4D.Header: string;
+class function TElasticAPM4D.HeaderValue: string;
 begin
   if not Assigned(FPackage) then
     raise EElasticAPM4DException.Create('Transaction not found');
@@ -113,8 +113,12 @@ begin
   Result := FPackage.Header;
 end;
 
-class function TElasticAPM4D.StartCustomTransaction(const AType, AName, AHeader: string)
-  : TElasticAPM4DTransaction;
+class function TElasticAPM4D.HeaderKey: string;
+begin
+  Result := 'elastic-apm-traceparent';
+end;
+
+class function TElasticAPM4D.StartCustomTransaction(const AType, AName: string): TElasticAPM4DTransaction;
 begin
   if Assigned(FPackage) then
     raise EElasticAPM4DException.Create('Duplicate active transactions');
@@ -129,26 +133,20 @@ begin
     FPackage.Transaction.Context.User.email := FUser.email;
   end;
 
-  FPackage.Header := AHeader;
-
   Result := FPackage.Transaction;
 end;
 
-class function TElasticAPM4D.StarTransaction(const AName, AHeader: string): TElasticAPM4DTransaction;
-begin
-  Result := StartCustomTransaction('Request', AName, AHeader);
-end;
-
-class function TElasticAPM4D.StarTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
+class function TElasticAPM4D.StartTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
   : TElasticAPM4DTransaction;
 begin
-  Result := StartCustomTransaction('Request', AName, '');
+  Result := StartCustomTransaction('Request', AName);
+  AIdHttp.Request.CustomHeaders.AddValue(HeaderKey, HeaderValue);
   Result.Context.AutoCreatePage(AIdHttp);
 end;
 
-class function TElasticAPM4D.StarTransaction(const AName: string): TElasticAPM4DTransaction;
+class function TElasticAPM4D.StartTransaction(const AName: string): TElasticAPM4DTransaction;
 begin
-  Result := StartCustomTransaction('Client', AName, '');
+  Result := StartCustomTransaction('Client', AName);
 end;
 
 class function TElasticAPM4D.StartSpan(const AName, ASQL: string): TElasticAPM4DSpan;
@@ -212,7 +210,7 @@ end;
 class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TElasticAPM4DSpan;
 begin
   Result := StartCustomSpan(AName, 'Request');
-  AIdHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', Header);
+  AIdHttp.Request.CustomHeaders.AddValue(HeaderKey, HeaderValue);
 end;
 
 class function TElasticAPM4D.CurrentSpan: TElasticAPM4DSpan;
@@ -288,7 +286,7 @@ class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWe
   : TElasticAPM4DTransaction;
 begin
   Result := StartCustomTransaction('DMVCFramework',
-    AActionName, AContext.Request.Headers['elastic-apm-traceparent']);
+    AActionName, AContext.Request.Headers[HeaderKey]);
 end;
 
 class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
