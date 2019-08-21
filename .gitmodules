@@ -1,3 +1,6 @@
 [submodule "jcl"]
 	path = jcl
 	url = git@github.com:project-jedi/jcl.git
+[submodule "dependences/jcl"]
+	path = dependences/jcl
+	url = git@github.com:project-jedi/jcl.git
