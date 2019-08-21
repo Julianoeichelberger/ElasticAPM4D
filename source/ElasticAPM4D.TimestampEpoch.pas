@@ -9,7 +9,9 @@ type
 
 implementation
 
-Uses SysUtils, DateUtils;
+Uses
+  SysUtils,
+  DateUtils;
 
 { TElasticAPM4DTimestampEpoch }
 

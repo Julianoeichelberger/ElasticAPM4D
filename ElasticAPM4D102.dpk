@@ -12,17 +12,18 @@ package ElasticAPM4D102;
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
+{$DEFINE dmvcframework}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
 {$RUNONLY}
@@ -44,7 +45,6 @@ contains
   ElasticAPM4D.System in 'source\ElasticAPM4D.System.pas',
   ElasticAPM4D.Process in 'source\ElasticAPM4D.Process.pas',
   ElasticAPM4D.StacktraceFrame in 'source\ElasticAPM4D.StacktraceFrame.pas',
-  ElasticAPM4D.StacktraceParse in 'source\ElasticAPM4D.StacktraceParse.pas',
   ElasticAPM4D.Service in 'source\ElasticAPM4D.Service.pas',
   ElasticAPM4D.Metadata in 'source\ElasticAPM4D.Metadata.pas',
   ElasticAPM4D.Request in 'source\ElasticAPM4D.Request.pas',
@@ -58,7 +58,8 @@ contains
   ElasticAPM4D.ndJson in 'source\ElasticAPM4D.ndJson.pas',
   ElasticAPM4D.Resources in 'source\ElasticAPM4D.Resources.pas',
   ElasticAPM4D.Config in 'source\ElasticAPM4D.Config.pas',
-  ElasticAPM4D.SendPackage in 'source\ElasticAPM4D.SendPackage.pas';
+  ElasticAPM4D.SendPackage in 'source\ElasticAPM4D.SendPackage.pas',
+  ElasticAPM4D.Jcl in 'source\ElasticAPM4D.Jcl.pas';
 
 end.
 

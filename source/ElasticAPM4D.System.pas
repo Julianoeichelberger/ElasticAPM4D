@@ -8,7 +8,7 @@ type
     FArchitecture: String;
     FHostname: String;
     FPlatform: String;
-    function GetHostName: string;
+    function GetHostNameInOS: string;
     function GetWindowsArquitecture: string;
     function GetPlatform: String;
   public
@@ -21,39 +21,51 @@ type
 
 implementation
 
-Uses JclSysInfo, Windows, SysUtils;
+Uses
+  JclSysInfo,
+{$IFDEF MSWINDOWS}
+  Windows,
+{$ENDIF}
+  SysUtils;
 
 { TElasticAPM4DSystem }
 
-function TElasticAPM4DSystem.GetHostName: string;
+function TElasticAPM4DSystem.GetHostNameInOS: string;
+{$IFDEF MSWINDOWS}
 var
-  buffer: array [0 .. MAX_COMPUTERNAME_LENGTH + 1] of Char;
-  Size: Cardinal;
+  l: DWORD;
+{$ENDIF}
 begin
-  Size := MAX_COMPUTERNAME_LENGTH + 1;
-  Windows.GetComputerName(@buffer, Size);
-  Result := StrPas(buffer);
+{$IFDEF LINUX}
+  Result := GetHostName;
+{$ENDIF}
+{$IFDEF MSWINDOWS}
+  l := 255;
+  SetLength(Result, l);
+  GetComputerName(PChar(Result), l);
+  SetLength(Result, l);
+{$ENDIF}
 end;
 
 function TElasticAPM4DSystem.GetPlatform: String;
-const
-  sPLATAFORM = '%s (%s) %s';
 begin
-  Result := Format(sPLATAFORM, [GetWindowsVersionString, GetWindowsEditionString,
-    GetWindowsServicePackVersionString]);
+  Result := GetOSVersionString
 end;
 
 function TElasticAPM4DSystem.GetWindowsArquitecture: string;
 begin
+  Result := '';
+{$IFDEF MSWINDOWS}
   Result := 'x86';
   if IsWindows64 then
     Result := 'x64';
+{$ENDIF}
 end;
 
 constructor TElasticAPM4DSystem.Create;
 begin
   FArchitecture := GetWindowsArquitecture;
-  FHostname := GetHostName;
+  FHostname := GetHostNameInOS;
   FPlatform := GetPlatform;
 end;
 

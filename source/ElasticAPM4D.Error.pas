@@ -68,7 +68,8 @@ implementation
 uses
   Rest.Json,
   ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.UUid;
+  ElasticAPM4D.UUid,
+  ElasticAPM4D.Jcl;
 
 { TElasticAPM4DErrorException }
 
@@ -89,6 +90,7 @@ procedure TElasticAPM4DError.InternalCreate;
 begin
   FId := TElasticAPM4DUUid.GetUUid128b;
   FException := TElasticAPM4DErrorException.Create;
+  FException.Stacktrace := TElasticAPM4DStacktraceJCL.Get;
   Fcontext := TElasticAPM4DContext.Create;
   FCulprit := '';
   FTimestamp := TElasticAPM4DTimestampEpoch.Get(now);

@@ -145,7 +145,6 @@
         <DCCReference Include="source\ElasticAPM4D.System.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Process.pas"/>
         <DCCReference Include="source\ElasticAPM4D.StacktraceFrame.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.StacktraceParse.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Metadata.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Request.pas"/>
@@ -160,6 +159,7 @@
         <DCCReference Include="source\ElasticAPM4D.Resources.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Config.pas"/>
         <DCCReference Include="source\ElasticAPM4D.SendPackage.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Jcl.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

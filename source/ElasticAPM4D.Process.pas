@@ -9,9 +9,11 @@ type
     FPid: Cardinal;
     FPpid: Integer;
     Ftitle: string;
+{$IFDEF MSWINDOWS}
     function GetParentProcessId: longint;
     function GetProcessId: longint;
     function GetProcessName: string;
+{$ENDIF}
   public
     Constructor Create;
 
@@ -23,18 +25,23 @@ type
 
 implementation
 
+{$IFDEF MSWINDOWS}
+
 Uses
   TLHelp32,
   psAPI,
   Winapi.Windows,
-  System.SysUtils,
   Vcl.Forms;
+{$ENDIF}
+{$IFDEF MSWINDOWS}
 
 constructor TElasticAPM4DProcess.Create;
 begin
+{$IFDEF MSWINDOWS}
   Ftitle := GetProcessName;
   FPid := GetProcessId;
   FPpid := GetParentProcessId;
+{$ENDIF}
 end;
 
 function TElasticAPM4DProcess.GetProcessId: longint;
@@ -99,5 +106,6 @@ begin
     CloseHandle(LSnapshot);
   end;
 end;
+{$ENDIF}
 
 end.
