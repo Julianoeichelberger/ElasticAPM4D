@@ -3,6 +3,7 @@ unit ElasticAPM4D.Error;
 interface
 
 uses
+  IdHTTP,
   System.SysUtils,
   ElasticAPM4D.Context,
   ElasticAPM4D.StacktraceFrame,
@@ -51,6 +52,7 @@ type
     constructor Create(ATransaction: TElasticAPM4DTransaction); overload;
     destructor Destroy; override;
 
+    procedure AutoConfigureError(const AIdHttp: TIdCustomHTTP);
     function ToJsonString: string;
 
     property id: String read FId;
@@ -69,7 +71,8 @@ uses
   Rest.Json,
   ElasticAPM4D.TimestampEpoch,
   ElasticAPM4D.UUid,
-  ElasticAPM4D.Jcl;
+  ElasticAPM4D.Jcl,
+  ElasticAPM4D.Resources;
 
 { TElasticAPM4DErrorException }
 
@@ -94,6 +97,13 @@ begin
   Fcontext := TElasticAPM4DContext.Create;
   FCulprit := '';
   FTimestamp := TElasticAPM4DTimestampEpoch.Get(now);
+end;
+
+procedure TElasticAPM4DError.AutoConfigureError(const AIdHttp: TIdCustomHTTP);
+begin
+  Fcontext.AutoCreatePage(AIdHttp);
+  Fcontext.AutoCreateResponse(AIdHttp);
+  Fcontext.AutoCreateRequest(AIdHttp);
 end;
 
 constructor TElasticAPM4DError.Create(ATransaction: TElasticAPM4DTransaction);
@@ -121,7 +131,7 @@ end;
 
 function TElasticAPM4DError.ToJsonString: string;
 begin
-  Result := format('{"error": %s}', [TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings,
+  Result := format(sErrorJsonId, [TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings,
     joIgnoreEmptyArrays])]);
 end;
 

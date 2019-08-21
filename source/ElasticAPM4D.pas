@@ -77,7 +77,7 @@ implementation
 uses
   ElasticAPM4D.Config,
   ElasticAPM4D.Context,
-  ElasticAPM4D.Request;
+  ElasticAPM4D.Resources;
 
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin
@@ -108,20 +108,20 @@ end;
 class function TElasticAPM4D.HeaderValue: string;
 begin
   if not Assigned(FPackage) then
-    raise EElasticAPM4DException.Create('Transaction not found');
+    raise EElasticAPM4DException.Create(sTransactionNotFount);
 
   Result := FPackage.Header;
 end;
 
 class function TElasticAPM4D.HeaderKey: string;
 begin
-  Result := 'elastic-apm-traceparent';
+  Result := sHEADER_KEY;
 end;
 
 class function TElasticAPM4D.StartCustomTransaction(const AType, AName: string): TElasticAPM4DTransaction;
 begin
   if Assigned(FPackage) then
-    raise EElasticAPM4DException.Create('Duplicate active transactions');
+    raise EElasticAPM4DException.Create(sDuplicateTransaction);
 
   FPackage := TElasticAPM4DSendPackage.Create;
   FPackage.Transaction.Start(AType, AName);
@@ -158,7 +158,7 @@ end;
 class function TElasticAPM4D.CurrentTransaction: TElasticAPM4DTransaction;
 begin
   if not Assigned(FPackage) then
-    raise EElasticAPM4DException.Create('Current transaction not found');
+    raise EElasticAPM4DException.Create(sTransactionNotFount);
 
   Result := FPackage.Transaction;
 end;
@@ -269,13 +269,11 @@ var
 begin
   LError := GetError;
 
+  LError.AutoConfigureError(AIdHttp);
+
   LError.Exception.code := E.ErrorCode.ToString;
   LError.Exception.&type := E.ClassName;
   LError.Exception.message := E.message;
-
-  LError.Context.AutoCreatePage(AIdHttp);
-  LError.Context.AutoCreateResponse(AIdHttp);
-  LError.Context.AutoCreateRequest(AIdHttp);
 
   FPackage.ErrorList.Add(LError);
 end;

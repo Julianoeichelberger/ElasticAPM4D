@@ -65,7 +65,8 @@ Uses
   DateUtils,
   REST.Json,
   ElasticAPM4D.UUid,
-  ElasticAPM4D.TimestampEpoch;
+  ElasticAPM4D.TimestampEpoch,
+  ElasticAPM4D.Resources;
 
 { TElasticAPM4DSpanCount }
 
@@ -124,8 +125,7 @@ end;
 
 function TElasticAPM4DTransaction.toJsonString: string;
 begin
-  Result := TJson.ObjectToJsonString(Self, [joIgnoreEmptyStrings]);
-  Result := format('{"transaction": %s}}', [Result]);
+  Result := format(sTransactionJsonId, [TJson.ObjectToJsonString(Self, [joIgnoreEmptyStrings])]);
 end;
 
 end.

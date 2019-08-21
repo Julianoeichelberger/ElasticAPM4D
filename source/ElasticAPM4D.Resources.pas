@@ -15,6 +15,15 @@ const
 
   sHEADER = '00-%s-%s-01';
 
+  sHEADER_KEY = 'elastic-apm-traceparent';
+  sSpanJsonId = '{"span": %s}';
+  sTransactionJsonId = '{"transaction": %s}}';
+  sMetadataJsonId = '{"metadata": %s}';
+  sErrorJsonId = '{"error": %s}';
+
+  sTransactionNotFount = 'Current transaction not found';
+  sDuplicateTransaction = 'Duplicate active transactions';
+
 implementation
 
 end.

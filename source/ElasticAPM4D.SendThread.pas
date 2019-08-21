@@ -22,10 +22,10 @@ type
 implementation
 
 Uses
-  Vcl.Forms,
   IOUtils,
   SysUtils,
-  IdHTTP;
+  IdHTTP,
+  ElasticAPM4D.Resources;
 
 { TElasticAPM4DSendThread }
 
@@ -50,15 +50,15 @@ begin
   try
     LHttp.Request.ContentType := 'application/x-ndjson';
     LHttp.Request.Charset := 'gzip';
-    LHttp.Request.CustomHeaders.AddValue('elastic-apm-traceparent', FHeader);
+    LHttp.Request.CustomHeaders.AddValue(sHEADER_KEY, FHeader);
     try
       LHttp.Post(FUrl, LDataSend, LResult);
-      LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
-        + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+      // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+      // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
     except
       FCouldSend := False;
-      LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
-        + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+      // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+      // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
     end;
   finally
     LDataSend.Free;

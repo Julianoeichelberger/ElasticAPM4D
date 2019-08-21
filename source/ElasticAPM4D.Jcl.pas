@@ -4,7 +4,6 @@ interface
 
 Uses
   System.Classes,
-  System.Generics.Collections,
   ElasticAPM4D.StacktraceFrame;
 
 type

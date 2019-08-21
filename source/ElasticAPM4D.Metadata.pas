@@ -31,7 +31,8 @@ implementation
 
 Uses
   SysUtils,
-  Rest.Json;
+  Rest.Json,
+  ElasticAPM4D.Resources;
 
 { TElasticAPM4DMetadata }
 
@@ -54,7 +55,7 @@ end;
 
 function TElasticAPM4DMetadata.ToJsonString: string;
 begin
-  result := format('{"metadata": %s}', [TJson.ObjectToJsonString(self)]);
+  result := format(sMetadataJsonId, [TJson.ObjectToJsonString(self)]);
 end;
 
 end.

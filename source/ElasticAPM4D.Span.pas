@@ -111,7 +111,8 @@ Uses
   DateUtils,
   REST.Json,
   ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.Uuid;
+  ElasticAPM4D.Uuid,
+  ElasticAPM4D.Resources;
 
 { TElasticAPM4DSpanService }
 
@@ -163,7 +164,6 @@ begin
   FSubtype := '';
   FSync := true;
   FContext := TElasticAPM4DSpanContext.Create;
-  Ftimestamp := AParent.Timestamp; // Test
 end;
 
 constructor TElasticAPM4DSpan.Create(AParent: TElasticAPM4DTransaction);
@@ -176,7 +176,6 @@ begin
   FSubtype := '';
   FSync := true;
   FContext := TElasticAPM4DSpanContext.Create;
-  Ftimestamp := AParent.Timestamp; // Test
 end;
 
 destructor TElasticAPM4DSpan.Destroy;
@@ -202,7 +201,7 @@ end;
 
 function TElasticAPM4DSpan.ToJsonString: string;
 begin
-  Result := format('{"span": %s}', [TJson.ObjectToJsonString(self, [joDateIsUTC, joIgnoreEmptyStrings])]);
+  Result := format(sSpanJsonId, [TJson.ObjectToJsonString(self, [joDateIsUTC, joIgnoreEmptyStrings])]);
 end;
 
 end.
