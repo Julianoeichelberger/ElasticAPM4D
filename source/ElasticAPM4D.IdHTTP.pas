@@ -23,9 +23,15 @@ Uses
 
 procedure TElasticAPM4DIdHttp.DoRequest(const AMethod: TIdHTTPMethod; AURL: string;
   ASource, AResponseContent: TStream; AIgnoreReplies: array of Int16);
+var
+  LExistsTransaction: Boolean;
 begin
-  try
+  LExistsTransaction := TElasticAPM4D.ExistsTransaction;
+  if LExistsTransaction then
+    TElasticAPM4D.StartSpan(Self, AURL)
+  else
     TElasticAPM4D.StartTransaction(Self, AURL);
+  try
     Try
       inherited;
     except
@@ -41,7 +47,10 @@ begin
       end;
     end;
   Finally
-    TElasticAPM4D.EndTransaction(Self);
+    if LExistsTransaction then
+      TElasticAPM4D.EndSpan(Self)
+    else
+      TElasticAPM4D.EndTransaction(Self);
   End;
 end;
 

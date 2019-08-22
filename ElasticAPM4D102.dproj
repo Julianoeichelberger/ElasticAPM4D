@@ -172,6 +172,7 @@
         <DCCReference Include="source\ElasticAPM4D.SendPackage.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Jcl.pas"/>
         <DCCReference Include="source\ElasticAPM4D.IdHTTP.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Auto.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

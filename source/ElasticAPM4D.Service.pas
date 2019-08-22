@@ -73,10 +73,12 @@ type
 implementation
 
 uses
-  System.IOUtils,
-  System.SysUtils,
+{$IFDEF MSWINDOWS}
   Windows,
-  Vcl.Forms;
+  Vcl.Forms,
+{$ENDIF}
+  System.IOUtils,
+  System.SysUtils;
 
 { TElasticAPM4DServiceAgent }
 
@@ -142,8 +144,9 @@ begin
   if not GetFileVersionInfo(PChar(Exe), Handle, Size, Buffer) or
     not VerQueryValue(Buffer, '\', Pointer(FixedPtr), Size) then
     RaiseLastOSError;
-  FVersion := Format('%d.%d.%d.%d', [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS)
-    .Lo, LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
+  FVersion := Format('%d.%d.%d.%d',
+    [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
+    LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
 end;
 
 { TElasticAPM4DService }

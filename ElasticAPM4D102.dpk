@@ -58,7 +58,9 @@ contains
   ElasticAPM4D.Config in 'source\ElasticAPM4D.Config.pas',
   ElasticAPM4D.SendPackage in 'source\ElasticAPM4D.SendPackage.pas',
   ElasticAPM4D.Jcl in 'source\ElasticAPM4D.Jcl.pas',
-  ElasticAPM4D.IdHTTP in 'source\ElasticAPM4D.IdHTTP.pas';
+  ElasticAPM4D.IdHTTP in 'source\ElasticAPM4D.IdHTTP.pas',
+  ElasticAPM4D.Auto in 'source\ElasticAPM4D.Auto.pas';
 
 end.
+
 

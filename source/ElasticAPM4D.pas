@@ -8,6 +8,7 @@ uses
   MVCFramework,
 {$ENDIF}
   IdHTTP,
+  System.Rtti,
   System.SysUtils,
   System.classes,
   Generics.Collections,
@@ -41,6 +42,8 @@ type
     class function StartCustomTransaction(const AType, AName: string): TElasticAPM4DTransaction;
     class function StartTransaction(const AIdHttp: TIdCustomHTTP; const AName: string)
       : TElasticAPM4DTransaction; overload;
+
+    class function ExistsTransaction: Boolean;
 
     class function CurrentTransaction: TElasticAPM4DTransaction;
     class procedure EndTransaction(const AResult: string = sDefaultResult); overload;
@@ -185,6 +188,11 @@ begin
   FreeAndNil(FPackage);
 end;
 
+class function TElasticAPM4D.ExistsTransaction: Boolean;
+begin
+  Result := Assigned(FPackage);
+end;
+
 class function TElasticAPM4D.StartCustomSpan(const AName, AType: string): TElasticAPM4DSpan;
 begin
   if FPackage.SpanIsOpen then
@@ -260,7 +268,7 @@ end;
 
 class procedure TElasticAPM4D.AddError(AError: TElasticAPM4DError);
 begin
-  FPackage.ErrorList.Add(AError)
+  FPackage.ErrorList.Add(AError);
 end;
 
 class procedure TElasticAPM4D.AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException);
@@ -287,6 +295,9 @@ begin
     AActionName, AContext.Request.Headers[HeaderKey]);
 end;
 
+{$ENDIF}
+{$IFDEF dmvcframework}
+
 class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
   const AHttpMethod: string);
 var
@@ -309,6 +320,8 @@ begin
   else
     EndTransaction;
 end;
+{$ENDIF}
+{$IFDEF dmvcframework}
 
 class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
 begin
