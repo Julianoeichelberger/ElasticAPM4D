@@ -24,6 +24,8 @@ const
   sTransactionNotFount = 'Current transaction not found';
   sDuplicateTransaction = 'Duplicate active transactions';
 
+  sDEFAULT_RESULT = 'Sucess';
+
 implementation
 
 end.

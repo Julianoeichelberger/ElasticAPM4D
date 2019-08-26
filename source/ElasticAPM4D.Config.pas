@@ -40,6 +40,7 @@ type
 implementation
 
 Uses
+  Windows,
   SysUtils,
   IOUtils;
 

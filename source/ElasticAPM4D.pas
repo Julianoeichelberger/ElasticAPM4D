@@ -12,14 +12,12 @@ uses
   System.SysUtils,
   System.classes,
   Generics.Collections,
+  ElasticAPM4D.Resources,
   ElasticAPM4D.Error,
   ElasticAPM4D.Span,
   ElasticAPM4D.Transaction,
   ElasticAPM4D.User,
   ElasticAPM4D.SendPackage;
-
-const
-  sDefaultResult = 'Sucess';
 
 type
   TElasticAPM4D = class
@@ -46,7 +44,7 @@ type
     class function ExistsTransaction: Boolean;
 
     class function CurrentTransaction: TElasticAPM4DTransaction;
-    class procedure EndTransaction(const AResult: string = sDefaultResult); overload;
+    class procedure EndTransaction(const AResult: string = sDEFAULT_RESULT); overload;
 
     class procedure EndTransaction(const AIdHttp: TIdCustomHTTP); overload;
 
@@ -67,8 +65,9 @@ type
     class function StartTransaction(AActionName: string; AContext: TWebContext)
       : TElasticAPM4DTransaction; overload;
 
-    class procedure EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
-      const AHttpMethod: string); overload;
+    class procedure EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient;
+      const AResponse: IRESTResponse; const AHttpMethod: string); overload;
+
     class procedure EndTransaction(const AContext: TWebContext); overload;
 {$ENDIF}
   end;
@@ -79,8 +78,7 @@ implementation
 
 uses
   ElasticAPM4D.Config,
-  ElasticAPM4D.Context,
-  ElasticAPM4D.Resources;
+  ElasticAPM4D.Context;
 
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin
@@ -177,10 +175,10 @@ end;
 class procedure TElasticAPM4D.EndTransaction(const AResult: string);
 begin
   if not Assigned(FPackage) then
-    exit;
+    raise EElasticAPM4DException.Create(sTransactionNotFount);
 
   FPackage.Transaction.Result := AResult;
-  if (AResult = sDefaultResult) and (FPackage.ErrorList.Count > 0) then
+  if (AResult = sDEFAULT_RESULT) and (FPackage.ErrorList.Count > 0) then
     FPackage.Transaction.Result := 'Error';
 
   FPackage.Transaction.&End;
@@ -291,15 +289,15 @@ end;
 class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWebContext)
   : TElasticAPM4DTransaction;
 begin
-  Result := StartCustomTransaction('DMVCFramework',
-    AActionName, AContext.Request.Headers[HeaderKey]);
+  Result := StartCustomTransaction('DMVCFramework', AActionName);
+  FPackage.Header := AContext.Request.Headers[HeaderKey];
 end;
 
 {$ENDIF}
 {$IFDEF dmvcframework}
 
-class procedure TElasticAPM4D.EndTransaction(const ARESTClient: TRESTClient; const AResponse: IRESTResponse;
-  const AHttpMethod: string);
+class procedure TElasticAPM4D.EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient;
+  const AResponse: IRESTResponse; const AHttpMethod: string);
 var
   LError: TElasticAPM4DError;
 begin

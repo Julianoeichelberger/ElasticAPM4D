@@ -95,7 +95,7 @@ begin
   FResponse.finished := AResponse.ResponseCode < 300;
   FResponse.headers_sent := AResponse.headers.Count > 0;
 
-  FRequest := TElasticAPM4DRequest.Create(False);
+  FRequest := TElasticAPM4DRequest.Create;
   FRequest.body := AResponse.BodyAsString;
 end;
 
@@ -106,7 +106,7 @@ begin
   FResponse.finished := AContext.Response.StatusCode < 300;
   FResponse.headers_sent := AContext.Response.CustomHeaders.Count > 0;
 
-  FRequest := TElasticAPM4DRequest.Create(False);
+  FRequest := TElasticAPM4DRequest.Create;
   FRequest.body := AContext.Request.body;
   FRequest.method := AContext.Request.HTTPMethodAsString;
 

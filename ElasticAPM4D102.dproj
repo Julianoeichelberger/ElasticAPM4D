@@ -151,6 +151,7 @@
         <DCCReference Include="IndyCore.dcp"/>
         <DCCReference Include="RESTComponents.dcp"/>
         <DCCReference Include="Jcl.dcp"/>
+        <DCCReference Include="inet.dcp"/>
         <DCCReference Include="source\ElasticAPM4D.Context.pas"/>
         <DCCReference Include="source\ElasticAPM4D.User.pas"/>
         <DCCReference Include="source\ElasticAPM4D.System.pas"/>

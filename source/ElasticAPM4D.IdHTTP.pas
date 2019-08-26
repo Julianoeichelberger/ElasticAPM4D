@@ -25,12 +25,16 @@ procedure TElasticAPM4DIdHttp.DoRequest(const AMethod: TIdHTTPMethod; AURL: stri
   ASource, AResponseContent: TStream; AIgnoreReplies: array of Int16);
 var
   LExistsTransaction: Boolean;
+  LName: string;
 begin
   LExistsTransaction := TElasticAPM4D.ExistsTransaction;
-  if LExistsTransaction then
-    TElasticAPM4D.StartSpan(Self, AURL)
-  else
+  LName := AURL;
+  if not LExistsTransaction then
+  begin
     TElasticAPM4D.StartTransaction(Self, AURL);
+    LName := 'DoRequest';
+  end;
+  TElasticAPM4D.StartSpan(Self, LName);
   try
     Try
       inherited;
@@ -47,9 +51,8 @@ begin
       end;
     end;
   Finally
-    if LExistsTransaction then
-      TElasticAPM4D.EndSpan(Self)
-    else
+    TElasticAPM4D.EndSpan(Self);
+    if not LExistsTransaction then
       TElasticAPM4D.EndTransaction(Self);
   End;
 end;

@@ -34,7 +34,8 @@ implementation
 
 { TElasticAPM4DAuto }
 
-uses ElasticAPM4D;
+uses
+  ElasticAPM4D;
 
 constructor TElasticAPM4DAuto.Create(Sender: TObject);
 begin
