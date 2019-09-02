@@ -78,6 +78,8 @@ end;
 
 class procedure TElasticAPM4DConfig.InitializeFile;
 begin
+  if GetFileName.Contains('Windows') then
+    Exit;
   FFile := TIniFile.Create(GetFileName);
 
   if not FFile.ValueExists('apm', 'enabled') then
@@ -85,7 +87,7 @@ begin
 
   FConfigs.Enabled := FFile.ReadString('apm', 'enabled', 'False').ToBoolean;
   if not FConfigs.Enabled then
-    exit;
+    Exit;
 
   if not FFile.ValueExists('apm', 'url') then
     FFile.WriteString('apm', 'url', 'http://127.0.0.1:8200/intake/v2/events');
@@ -110,7 +112,8 @@ end;
 
 class procedure TElasticAPM4DConfig.RealeseFile;
 begin
-  FFile.Free;
+  if Assigned(FFile) then
+    FFile.Free;
 end;
 
 end.

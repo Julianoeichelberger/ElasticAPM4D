@@ -1,11 +1,11 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{51C07539-AB7F-423E-9072-AD0C200C6A07}</ProjectGuid>
-        <MainSource>ElasticAPM4D102.dpk</MainSource>
+        <MainSource>ElasticAPM4Delphi.dpk</MainSource>
         <ProjectVersion>18.4</ProjectVersion>
-        <FrameworkType>None</FrameworkType>
+        <FrameworkType>VCL</FrameworkType>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">dmvcframework</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>3</TargetedPlatforms>
         <AppType>Package</AppType>
@@ -80,9 +80,9 @@
         <DCC_K>false</DCC_K>
         <GenDll>true</GenDll>
         <GenPackage>true</GenPackage>
-        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_CBuilderOutput>All</DCC_CBuilderOutput>
-        <SanitizedProjectName>ElasticAPM4D102</SanitizedProjectName>
+        <SanitizedProjectName>ElasticAPM4Delphi</SanitizedProjectName>
         <RuntimeOnlyPackage>true</RuntimeOnlyPackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Android)'!=''">
@@ -135,7 +135,7 @@
         <DCC_DebugInformation>0</DCC_DebugInformation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_3_Win32)'!=''">
-        <DCC_UnitSearchPath>dependences\delphimvcframework\sources;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>$(PRJ)\dmvc\sources;$(PRJ)\dmvc\lib\loggerpro;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_Define>dmvcframework;DEBUG;$(DCC_Define)</DCC_Define>
@@ -144,7 +144,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="rtl.dcp"/>
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="IndySystem.dcp"/>
         <DCCReference Include="IndyProtocols.dcp"/>
@@ -152,28 +151,30 @@
         <DCCReference Include="RESTComponents.dcp"/>
         <DCCReference Include="Jcl.dcp"/>
         <DCCReference Include="inet.dcp"/>
+        <DCCReference Include="source\ElasticAPM4D.Auto.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Config.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Context.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.User.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.System.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Process.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.StacktraceFrame.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Metadata.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Request.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Error.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.UUid.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.IdHTTP.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Jcl.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Metadata.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.MetricSet.Defaults.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.MetricSet.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.ndJson.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Process.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Request.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Resources.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.SendPackage.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.SendThread.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Span.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.StacktraceFrame.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.System.pas"/>
         <DCCReference Include="source\ElasticAPM4D.TimestampEpoch.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Span.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.SendThread.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.ndJson.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Resources.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Config.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.SendPackage.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Jcl.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.IdHTTP.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Auto.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.User.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.UUid.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -196,19 +197,13 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">ElasticAPM4D102.dpk</Source>
+                    <Source Name="MainSource">ElasticAPM4Delphi.dpk</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\19.0\Bpl\SeekLink.bpl">(untitled)</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\19.0\Bpl\KyoDevExpress.bpl">(untitled)</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="..\..\..\..\..\..\Public\Documents\Embarcadero\Studio\19.0\Bpl\ElasticAPM4D102.bpl" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>ElasticAPM4D102.bpl</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
                     <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
@@ -229,9 +224,15 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\..\..\..\..\..\Public\Documents\Embarcadero\Studio\19.0\Bpl\ElasticAPM4D102.bpl" Configuration="dmvcframework" Class="ProjectOutput">
+                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\19.0\Bpl\ElasticAPM4Delphi.bpl" Configuration="dmvcframework" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>ElasticAPM4D102.bpl</RemoteName>
+                        <RemoteName>ElasticAPM4Delphi.bpl</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\..\..\..\Public\Documents\Embarcadero\Studio\19.0\Bpl\ElasticAPM4Delphi.bpl" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>ElasticAPM4Delphi.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

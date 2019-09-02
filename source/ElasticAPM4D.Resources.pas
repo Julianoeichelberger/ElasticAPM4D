@@ -20,6 +20,7 @@ const
   sTransactionJsonId = '{"transaction": %s}}';
   sMetadataJsonId = '{"metadata": %s}';
   sErrorJsonId = '{"error": %s}';
+  smetricSetJsonId = '{"metricset": %s}';
 
   sTransactionNotFount = 'Current transaction not found';
   sDuplicateTransaction = 'Duplicate active transactions';
