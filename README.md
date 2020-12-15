@@ -1,3 +1,3 @@
 # ElasticAPM4D
-It´s a Agent for Elastic-APM in Delphi
+It´s an Agent for Elastic-APM in Delphi
 
