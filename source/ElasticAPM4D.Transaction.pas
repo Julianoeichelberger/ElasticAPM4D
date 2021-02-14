@@ -62,7 +62,7 @@ type
 implementation
 
 Uses
-  DateUtils,
+  System.DateUtils,
   REST.Json,
   ElasticAPM4D.UUid,
   ElasticAPM4D.TimestampEpoch,

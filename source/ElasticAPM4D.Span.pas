@@ -108,7 +108,7 @@ type
 implementation
 
 Uses
-  DateUtils,
+  System.DateUtils,
   REST.Json,
   ElasticAPM4D.TimestampEpoch,
   ElasticAPM4D.Uuid,

@@ -96,7 +96,7 @@ begin
   if LExistsTransaction then
     TElasticAPM4D.StartCustomSpan(AName)
   else
-    TElasticAPM4D.StartTransaction(AName);
+    TElasticAPM4D.StartTransaction('', AName);
   try
     Try
       AProc;

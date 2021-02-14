@@ -10,8 +10,8 @@ type
 implementation
 
 Uses
-  SysUtils,
-  DateUtils;
+  System.SysUtils,
+  System.DateUtils;
 
 { TElasticAPM4DTimestampEpoch }
 

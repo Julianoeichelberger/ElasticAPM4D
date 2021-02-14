@@ -9,18 +9,23 @@ type
   End;
 
   TElasticAPM4DMetricsetDefaults = class
+{$IFDEF MSWINDOWS}
     class function MemoryUsage: Int64;
     class function DiskInfo: TDiskInfo;
+{$ENDIF}
   end;
 
 implementation
 
+{$IFDEF MSWINDOWS}
 uses
   ActiveX, ComObj, Variants,
   TLHelp32, psAPI, Winapi.Windows, System.SysUtils;
+{$ENDIF}
 
 { TElasticAPM4DMetricsetDefaults }
 
+{$IFDEF MSWINDOWS}
 class function TElasticAPM4DMetricsetDefaults.MemoryUsage: Int64;
 var
   pmc: PPROCESS_MEMORY_COUNTERS;
@@ -63,5 +68,6 @@ begin;
     FWbemObject := Unassigned;
   end;
 end;
+{$ENDIF}
 
 end.

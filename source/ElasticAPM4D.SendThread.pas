@@ -22,8 +22,8 @@ type
 implementation
 
 Uses
-  IOUtils,
-  SysUtils,
+  System.IOUtils,
+  System.SysUtils,
   IdHTTP,
   ElasticAPM4D.Resources;
 

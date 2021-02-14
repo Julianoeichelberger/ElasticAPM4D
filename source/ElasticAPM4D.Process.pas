@@ -33,7 +33,6 @@ Uses
   Winapi.Windows,
   Vcl.Forms;
 {$ENDIF}
-{$IFDEF MSWINDOWS}
 
 constructor TElasticAPM4DProcess.Create;
 begin
@@ -44,6 +43,7 @@ begin
 {$ENDIF}
 end;
 
+{$IFDEF MSWINDOWS}
 function TElasticAPM4DProcess.GetProcessId: longint;
 var
   LHandle: THandle;

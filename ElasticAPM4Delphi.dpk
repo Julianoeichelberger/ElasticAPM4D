@@ -12,38 +12,34 @@ package ElasticAPM4Delphi;
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION ON}
+{$OPTIMIZATION OFF}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES OFF}
+{$STACKFRAMES ON}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE dmvcframework}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
 {$RUNONLY}
 {$IMPLICITBUILD ON}
 
 requires
-  vcl,
   IndySystem,
   IndyProtocols,
   IndyCore,
+  vcl,
   RESTComponents,
-  Jcl,
-  inet;
+  Jcl;
 
 contains
-  ElasticAPM4D.Auto in 'source\ElasticAPM4D.Auto.pas',
   ElasticAPM4D.Config in 'source\ElasticAPM4D.Config.pas',
   ElasticAPM4D.Context in 'source\ElasticAPM4D.Context.pas',
   ElasticAPM4D.Error in 'source\ElasticAPM4D.Error.pas',
-  ElasticAPM4D.IdHTTP in 'source\ElasticAPM4D.IdHTTP.pas',
   ElasticAPM4D.Jcl in 'source\ElasticAPM4D.Jcl.pas',
   ElasticAPM4D.Metadata in 'source\ElasticAPM4D.Metadata.pas',
   ElasticAPM4D.MetricSet.Defaults in 'source\ElasticAPM4D.MetricSet.Defaults.pas',
@@ -65,5 +61,6 @@ contains
   ElasticAPM4D.UUid in 'source\ElasticAPM4D.UUid.pas';
 
 end.
+
 
 

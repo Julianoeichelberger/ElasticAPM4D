@@ -26,7 +26,7 @@ Uses
   JclDebug,
   System.IOUtils,
   System.SysUtils,
-  RegularExpressions,
+  System.RegularExpressions,
   ElasticAPM4D.Resources;
 
 { TElasticAPM4DStacktraceJCL }

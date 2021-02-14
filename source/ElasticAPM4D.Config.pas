@@ -3,7 +3,7 @@ unit ElasticAPM4D.Config;
 interface
 
 Uses
-  IniFiles;
+  System.IniFiles;
 
 type
   TElasticAPM4DConfigProperties = Record
@@ -40,9 +40,8 @@ type
 implementation
 
 Uses
-  Windows,
-  SysUtils,
-  IOUtils;
+  System.SysUtils,
+  System.IOUtils;
 
 { TElasticAPM4DConfig }
 

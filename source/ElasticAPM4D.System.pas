@@ -22,11 +22,10 @@ type
 implementation
 
 Uses
-  JclSysInfo,
-{$IFDEF MSWINDOWS}
-  Windows,
-{$ENDIF}
-  SysUtils;
+  // JclSysInfo,
+{$IFDEF MSWINDOWS} Windows, {$ENDIF}
+ {$IFDEF UNIX} unix, {$ENDIF}
+  System.SysUtils;
 
 { TElasticAPM4DSystem }
 
@@ -36,8 +35,8 @@ var
   l: DWORD;
 {$ENDIF}
 begin
-{$IFDEF LINUX}
-  Result := GetHostName;
+{$IFDEF UNIX}
+  Result := unix.GetHostName;
 {$ENDIF}
 {$IFDEF MSWINDOWS}
   l := 255;
@@ -49,7 +48,7 @@ end;
 
 function TElasticAPM4DSystem.GetPlatform: String;
 begin
-  Result := GetOSVersionString
+  // Result := GetOSVersionString
 end;
 
 function TElasticAPM4DSystem.GetWindowsArquitecture: string;
@@ -57,8 +56,8 @@ begin
   Result := '';
 {$IFDEF MSWINDOWS}
   Result := 'x86';
-  if IsWindows64 then
-    Result := 'x64';
+  // if IsWindows64 then
+  // Result := 'x64';
 {$ENDIF}
 end;
 

@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils,
   System.Classes,
-  Generics.Collections,
+  System.Generics.Collections,
   ElasticAPM4D.Transaction,
   ElasticAPM4D.Metadata,
   ElasticAPM4D.User,

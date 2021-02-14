@@ -125,12 +125,15 @@ end;
 { TElasticAPM4DServiceRuntime }
 
 constructor TElasticAPM4DServiceRuntime.Create;
+{$IFDEF MSWINDOWS}
 var
   Exe: string;
   Size, Handle: DWORD;
   Buffer: TBytes;
   FixedPtr: PVSFixedFileInfo;
+{$ENDIF}
 begin
+{$IFDEF MSWINDOWS}
   FName := TPath.GetFileNameWithoutExtension(Application.ExeName);
 
   Exe := ParamStr(0);
@@ -147,6 +150,7 @@ begin
   FVersion := Format('%d.%d.%d.%d',
     [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
     LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
+{$ENDIF}
 end;
 
 { TElasticAPM4DService }

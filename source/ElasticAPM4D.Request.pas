@@ -62,8 +62,8 @@ type
 implementation
 
 Uses
-  StrUtils,
-  SysUtils;
+  System.StrUtils,
+  System.SysUtils;
 
 { TElasticAPM4DRequest }
 

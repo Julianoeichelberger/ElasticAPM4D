@@ -43,7 +43,10 @@ begin
   if not Assigned(ASpans) then
     exit;
   for LSpan in ASpans.List do
-    FJson := FJson + sNDJsonSeparator + LSpan.ToJsonString;
+  begin
+    if LSpan <> nil then                  
+      FJson := FJson + sNDJsonSeparator + LSpan.ToJsonString;
+  end;
 end;
 
 procedure TElasticAPM4DndJson.Add(AErro: TList<TElasticAPM4DError>);
