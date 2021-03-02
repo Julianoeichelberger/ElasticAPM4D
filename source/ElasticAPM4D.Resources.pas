@@ -17,7 +17,7 @@ const
 
   sHEADER_KEY = 'elastic-apm-traceparent';
   sSpanJsonId = '{"span": %s}';
-  sTransactionJsonId = '{"transaction": %s}}';
+  sTransactionJsonId = '{"transaction": %s}';
   sMetadataJsonId = '{"metadata": %s}';
   sErrorJsonId = '{"error": %s}';
   smetricSetJsonId = '{"metricset": %s}';

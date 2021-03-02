@@ -100,7 +100,6 @@ begin
     else
       Result := Format(sHEADER, [FTransaction.trace_id, FTransaction.id]);
   end
-
 end;
 
 procedure TElasticAPM4DSendPackage.Send;

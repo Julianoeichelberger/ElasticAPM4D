@@ -115,7 +115,8 @@ end;
 class function TElasticAPM4D.StartTransaction(const AType, AName, ATraceId: string): TElasticAPM4DTransaction;
 begin
   if Assigned(FPackage) then
-    raise EElasticAPM4DException.Create(sDuplicateTransaction);
+    FPackage.Free;
+//    raise EElasticAPM4DException.Create(sDuplicateTransaction);
 
   FPackage := TElasticAPM4DSendPackage.Create;
   FPackage.Transaction.Start(AType, AName);
@@ -155,10 +156,12 @@ begin
   FPackage.Transaction.Result := AResult;
   if (AResult = sDEFAULT_RESULT) and (FPackage.ErrorList.Count > 0) then
     FPackage.Transaction.Result := 'Error';
-
-  FPackage.Transaction.&End;
-  FPackage.Send;
-  FreeAndNil(FPackage);
+  try
+    FPackage.Transaction.&End;
+    FPackage.Send;
+  finally
+    FreeAndNil(FPackage);
+  end;
 end;
 
 class function TElasticAPM4D.ExistsTransaction: Boolean;
@@ -201,6 +204,9 @@ end;
 
 class procedure TElasticAPM4D.EndSpan(const AIdHttp: TIdCustomHTTP);
 begin
+  if not ExistsTransaction then
+    exit;
+
   if not FPackage.SpanIsOpen then
     exit;
 
@@ -211,8 +217,14 @@ end;
 
 class procedure TElasticAPM4D.EndSpan;
 begin
-  if not FPackage.SpanIsOpen then
+  if not ExistsTransaction then
     exit;
+
+  if not FPackage.SpanIsOpen then
+  begin
+    EndTransaction;
+    exit;
+  end;
 
   CurrentSpan.&End;
   FPackage.OpenSpanStack.Delete(Pred(FPackage.OpenSpanStack.Count));
