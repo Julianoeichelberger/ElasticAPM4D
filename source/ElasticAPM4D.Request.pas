@@ -6,7 +6,7 @@ Uses
   IdHTTP;
 
 type
-  TElasticAPM4DRequestSocket = class
+  TRequestSocket = class
   private
     FEncrypted: Boolean;
     FRemote_address: String;
@@ -15,7 +15,7 @@ type
     property remote_address: String read FRemote_address write FRemote_address;
   end;
 
-  TElasticAPM4DRequestURL = class
+  TRequestURL = class
   private
     FFull: String;
     FHash: String;
@@ -36,15 +36,15 @@ type
     property search: String read FSearch write FSearch;
   end;
 
-  TElasticAPM4DRequest = class
+  TRequest = class
   private
     FBody: String;
     Fcookies: TObject;
     Fheaders: string;
     FHttp_version: String;
     FMethod: String;
-    FSocket: TElasticAPM4DRequestSocket;
-    FUrl: TElasticAPM4DRequestURL;
+    FSocket: TRequestSocket;
+    FUrl: TRequestURL;
   public
     constructor Create; overload;
     constructor Create(AIdHTTP: TIdCustomHTTP); overload;
@@ -55,8 +55,8 @@ type
     property headers: string read Fheaders write Fheaders;
     property http_version: String read FHttp_version write FHttp_version;
     property method: String read FMethod write FMethod;
-    property socket: TElasticAPM4DRequestSocket read FSocket;
-    property url: TElasticAPM4DRequestURL read FUrl;
+    property socket: TRequestSocket read FSocket;
+    property url: TRequestURL read FUrl;
   end;
 
 implementation
@@ -65,15 +65,15 @@ Uses
   System.StrUtils,
   System.SysUtils;
 
-{ TElasticAPM4DRequest }
+{ TRequest }
 
-constructor TElasticAPM4DRequest.Create;
+constructor TRequest.Create;
 begin
-  FSocket := TElasticAPM4DRequestSocket.Create;
-  FUrl := TElasticAPM4DRequestURL.Create;
+  FSocket := TRequestSocket.Create;
+  FUrl := TRequestURL.Create;
 end;
 
-constructor TElasticAPM4DRequest.Create(AIdHTTP: TIdCustomHTTP);
+constructor TRequest.Create(AIdHTTP: TIdCustomHTTP);
 var
   I: Integer;
 begin
@@ -97,7 +97,7 @@ begin
     Fheaders := Fheaders.Remove(1, 1);
 end;
 
-destructor TElasticAPM4DRequest.Destroy;
+destructor TRequest.Destroy;
 begin
   FUrl.Free;
   FSocket.Free;

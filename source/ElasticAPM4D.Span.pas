@@ -10,7 +10,7 @@ Uses
   ElasticAPM4D.Transaction;
 
 type
-  TElasticAPM4DSpanContextDB = class
+  TSpanContextDB = class
   private
     FInstance: String;
     FStatement: String;
@@ -25,7 +25,7 @@ type
     property User: String read FUser write FUser;
   end;
 
-  TElasticAPM4DSpanContextHttp = class
+  TSpanContextHttp = class
   private
     FMethod: String;
     FStatus_code: Integer;
@@ -36,44 +36,44 @@ type
     property url: String read FUrl write FUrl;
   end;
 
-  TElasticAPM4DSpanService = class
+  TSpanService = class
   private
-    FAgent: TElasticAPM4DServiceAgent;
+    FAgent: TServiceAgent;
     FName: String;
   public
     constructor Create;
     destructor Destroy; override;
 
-    property Agent: TElasticAPM4DServiceAgent read FAgent;
+    property Agent: TServiceAgent read FAgent;
     property name: String read FName;
   end;
 
-  TElasticAPM4DSpanContext = class
+  TSpanContext = class
   private
-    FService: TElasticAPM4DSpanService;
-    FHttp: TElasticAPM4DSpanContextHttp;
-    FDb: TElasticAPM4DSpanContextDB;
+    FService: TSpanService;
+    FHttp: TSpanContextHttp;
+    FDb: TSpanContextDB;
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
     procedure AutoCreateHttp(AIdHttp: TIdCustomHTTP);
 
-    property Service: TElasticAPM4DSpanService read FService write FService;
-    property db: TElasticAPM4DSpanContextDB read FDb write FDb;
-    property http: TElasticAPM4DSpanContextHttp read FHttp write FHttp;
+    property Service: TSpanService read FService write FService;
+    property db: TSpanContextDB read FDb write FDb;
+    property http: TSpanContextHttp read FHttp write FHttp;
   end;
 
-  TElasticAPM4DSpan = class
+  TSpan = class
   private
     FStartDate: TDateTime;
     FAction: String;
-    FContext: TElasticAPM4DSpanContext;
+    FContext: TSpanContext;
     FDuration: Int64;
     FId: String;
     FName: String;
     FParent_id: String;
-    FStacktrace: TArray<TElasticAPM4DStacktrace>;
+    FStacktrace: TArray<TStacktrace>;
     FSubtype: String;
     FSync: Boolean;
     FTrace_id: String;
@@ -81,8 +81,8 @@ type
     FType: String;
     Ftimestamp: Int64;
   public
-    constructor Create(AParent: TElasticAPM4DSpan); overload;
-    constructor Create(AParent: TElasticAPM4DTransaction); overload;
+    constructor Create(AParent: TSpan); overload;
+    constructor Create(AParent: TTransaction); overload;
     destructor Destroy; override;
 
     function ToJsonString: string;
@@ -99,8 +99,8 @@ type
     property subtype: String read FSubtype write FSubtype;
     property action: String read FAction write FAction;
     property duration: Int64 read FDuration write FDuration;
-    property Context: TElasticAPM4DSpanContext read FContext;
-    property Stacktrace: TArray<TElasticAPM4DStacktrace> read FStacktrace write FStacktrace;
+    property Context: TSpanContext read FContext;
+    property Stacktrace: TArray<TStacktrace> read FStacktrace write FStacktrace;
     property sync: Boolean read FSync write FSync default true;
     property Timestamp: Int64 read Ftimestamp;
   end;
@@ -114,36 +114,36 @@ Uses
   ElasticAPM4D.Uuid,
   ElasticAPM4D.Resources;
 
-{ TElasticAPM4DSpanService }
+{ TSpanService }
 
-constructor TElasticAPM4DSpanService.Create;
+constructor TSpanService.Create;
 begin
-  FAgent := TElasticAPM4DServiceAgent.Create;
+  FAgent := TServiceAgent.Create;
 end;
 
-destructor TElasticAPM4DSpanService.Destroy;
+destructor TSpanService.Destroy;
 begin
   FAgent.Free;
   inherited;
 end;
 
-{ TElasticAPM4DSpanContext }
+{ TSpanContext }
 
-procedure TElasticAPM4DSpanContext.AutoCreateHttp(AIdHttp: TIdCustomHTTP);
+procedure TSpanContext.AutoCreateHttp(AIdHttp: TIdCustomHTTP);
 begin
-  FHttp := TElasticAPM4DSpanContextHttp.Create;
+  FHttp := TSpanContextHttp.Create;
   FHttp.method := AIdHttp.Request.method;
   FHttp.url := AIdHttp.Request.url;
   FHttp.status_code := AIdHttp.ResponseCode;
 end;
 
-constructor TElasticAPM4DSpanContext.Create;
+constructor TSpanContext.Create;
 begin
-  FService := TElasticAPM4DSpanService.Create;
-  FDb := TElasticAPM4DSpanContextDB.Create;
+  FService := TSpanService.Create;
+  FDb := TSpanContextDB.Create;
 end;
 
-destructor TElasticAPM4DSpanContext.Destroy;
+destructor TSpanContext.Destroy;
 begin
   FService.Free;
   FDb.Free;
@@ -152,9 +152,9 @@ begin
   inherited;
 end;
 
-{ TElasticAPM4DSpan }
+{ TSpan }
 
-constructor TElasticAPM4DSpan.Create(AParent: TElasticAPM4DSpan);
+constructor TSpan.Create(AParent: TSpan);
 begin
   FId := TElasticAPM4DUUid.GetUUid64b;
   FTrace_id := AParent.trace_id;
@@ -163,10 +163,10 @@ begin
   FAction := '';
   FSubtype := '';
   FSync := true;
-  FContext := TElasticAPM4DSpanContext.Create;
+  FContext := TSpanContext.Create;
 end;
 
-constructor TElasticAPM4DSpan.Create(AParent: TElasticAPM4DTransaction);
+constructor TSpan.Create(AParent: TTransaction);
 begin
   FId := TElasticAPM4DUUid.GetUUid64b;
   FTrace_id := AParent.trace_id;
@@ -175,12 +175,12 @@ begin
   FAction := '';
   FSubtype := '';
   FSync := true;
-  FContext := TElasticAPM4DSpanContext.Create;
+  FContext := TSpanContext.Create;
 end;
 
-destructor TElasticAPM4DSpan.Destroy;
+destructor TSpan.Destroy;
 var
-  LStack: TElasticAPM4DStacktrace;
+  LStack: TStacktrace;
 begin
   for LStack in FStacktrace do
     LStack.Free;
@@ -188,18 +188,18 @@ begin
   inherited;
 end;
 
-procedure TElasticAPM4DSpan.&End;
+procedure TSpan.&End;
 begin
   FDuration := MilliSecondsBetween(now, FStartDate);
 end;
 
-procedure TElasticAPM4DSpan.Start;
+procedure TSpan.Start;
 begin
   FStartDate := now;
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Get(FStartDate);
+  Ftimestamp := TTimestampEpoch.Get(FStartDate);
 end;
 
-function TElasticAPM4DSpan.ToJsonString: string;
+function TSpan.ToJsonString: string;
 begin
   Result := format(sSpanJsonId, [TJson.ObjectToJsonString(self, [joDateIsUTC, joIgnoreEmptyStrings])]);
 end;

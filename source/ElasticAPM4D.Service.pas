@@ -3,7 +3,7 @@ unit ElasticAPM4D.Service;
 interface
 
 type
-  TElasticAPM4DServiceAgent = class
+  TServiceAgent = class
   private
     FName: String;
     FVersion: String;
@@ -16,7 +16,7 @@ type
     property ephemeral_id: string read Fephemeral_id write Fephemeral_id;
   end;
 
-  TElasticAPM4DServiceLanguage = class
+  TServiceLanguage = class
   private
     FName: String;
     FVersion: String;
@@ -27,7 +27,7 @@ type
     property version: String read FVersion write FVersion;
   end;
 
-  TElasticAPM4DServiceFramework = class
+  TServiceFramework = class
   private
     FName: String;
     FVersion: String;
@@ -37,7 +37,7 @@ type
     property version: String read FVersion write FVersion;
   end;
 
-  TElasticAPM4DServiceRuntime = class
+  TServiceRuntime = class
   private
     FName: String;
     FVersion: String;
@@ -48,14 +48,14 @@ type
     property version: String read FVersion write FVersion;
   end;
 
-  TElasticAPM4DService = class
+  TService = class
   private
     FEnvironment: string;
-    FFramework: TElasticAPM4DServiceFramework;
-    FLanguage: TElasticAPM4DServiceLanguage;
-    FRuntime: TElasticAPM4DServiceRuntime;
+    FFramework: TServiceFramework;
+    FLanguage: TServiceLanguage;
+    FRuntime: TServiceRuntime;
     FVersion: String;
-    FAgent: TElasticAPM4DServiceAgent;
+    FAgent: TServiceAgent;
     FName: String;
   public
     constructor Create;
@@ -63,11 +63,11 @@ type
 
     property name: String read FName;
     property version: string read FVersion write FVersion;
-    property Agent: TElasticAPM4DServiceAgent read FAgent;
+    property Agent: TServiceAgent read FAgent;
     property environment: string read FEnvironment write FEnvironment;
-    property Framework: TElasticAPM4DServiceFramework read FFramework;
-    property Language: TElasticAPM4DServiceLanguage read FLanguage;
-    property Runtime: TElasticAPM4DServiceRuntime read FRuntime;
+    property Framework: TServiceFramework read FFramework;
+    property Language: TServiceLanguage read FLanguage;
+    property Runtime: TServiceRuntime read FRuntime;
   end;
 
 implementation
@@ -80,18 +80,18 @@ uses
   System.IOUtils,
   System.SysUtils;
 
-{ TElasticAPM4DServiceAgent }
+{ TServiceAgent }
 
-constructor TElasticAPM4DServiceAgent.Create;
+constructor TServiceAgent.Create;
 begin
   FVersion := '1.0.0';
   FName := 'ElasticAPM4D';
   Fephemeral_id := '';
 end;
 
-{ TElasticAPM4DServiceLanguage }
+{ TServiceLanguage }
 
-constructor TElasticAPM4DServiceLanguage.Create;
+constructor TServiceLanguage.Create;
 begin
   FName := 'Delphi/Object Pascal';
   FVersion :=
@@ -122,9 +122,9 @@ begin
 {$IFDEF VER330} 'Delphi 10.3 Rio'; {$ENDIF}
 end;
 
-{ TElasticAPM4DServiceRuntime }
+{ TServiceRuntime }
 
-constructor TElasticAPM4DServiceRuntime.Create;
+constructor TServiceRuntime.Create;
 {$IFDEF MSWINDOWS}
 var
   Exe: string;
@@ -153,19 +153,19 @@ begin
 {$ENDIF}
 end;
 
-{ TElasticAPM4DService }
+{ TService }
 
-constructor TElasticAPM4DService.Create;
+constructor TService.Create;
 begin
-  FAgent := TElasticAPM4DServiceAgent.Create;
-  FLanguage := TElasticAPM4DServiceLanguage.Create;
-  FRuntime := TElasticAPM4DServiceRuntime.Create;
-  FFramework := TElasticAPM4DServiceFramework.Create;
+  FAgent := TServiceAgent.Create;
+  FLanguage := TServiceLanguage.Create;
+  FRuntime := TServiceRuntime.Create;
+  FFramework := TServiceFramework.Create;
   FVersion := '';
   FName := FRuntime.name;
 end;
 
-destructor TElasticAPM4DService.Destroy;
+destructor TService.Destroy;
 begin
   FAgent.Free;
   FLanguage.Free;
@@ -176,7 +176,7 @@ end;
 
 { TElasticAPM4DServiceFramework }
 
-constructor TElasticAPM4DServiceFramework.Create;
+constructor TServiceFramework.Create;
 begin
 {$IFDEF dmvcframework}
   FName := 'dmvcframework';

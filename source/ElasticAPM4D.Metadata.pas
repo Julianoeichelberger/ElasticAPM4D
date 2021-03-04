@@ -9,22 +9,22 @@ uses
   ElasticAPM4D.System;
 
 type
-  TElasticAPM4DMetadata = class
+  TMetadata = class
   private
-    FProcess: TElasticAPM4DProcess;
-    FService: TElasticAPM4DService;
-    FSystem: TElasticAPM4DSystem;
-    FUser: TElasticAPM4DUser;
+    FProcess: TProcess;
+    FService: TService;
+    FSystem: TSystem;
+    FUser: TUser;
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
     function ToJsonString: string;
 
-    property Process: TElasticAPM4DProcess read FProcess;
-    property Service: TElasticAPM4DService read FService;
-    property System: TElasticAPM4DSystem read FSystem;
-    property User: TElasticAPM4DUser read FUser write FUser;
+    property Process: TProcess read FProcess;
+    property Service: TService read FService;
+    property System: TSystem read FSystem;
+    property User: TUser read FUser write FUser;
   end;
 
 implementation
@@ -34,17 +34,17 @@ Uses
   Rest.Json,
   ElasticAPM4D.Resources;
 
-{ TElasticAPM4DMetadata }
+{ TMetadata }
 
-constructor TElasticAPM4DMetadata.Create;
+constructor TMetadata.Create;
 begin
-  FService := TElasticAPM4DService.Create;
-  FSystem := TElasticAPM4DSystem.Create;
-  FUser := TElasticAPM4DUser.Create;
-  FProcess := TElasticAPM4DProcess.Create;
+  FService := TService.Create;
+  FSystem := TSystem.Create;
+  FUser := TUser.Create;
+  FProcess := TProcess.Create;
 end;
 
-destructor TElasticAPM4DMetadata.Destroy;
+destructor TMetadata.Destroy;
 begin
   FService.Free;
   FSystem.Free;
@@ -53,7 +53,7 @@ begin
   inherited;
 end;
 
-function TElasticAPM4DMetadata.ToJsonString: string;
+function TMetadata.ToJsonString: string;
 begin
   result := format(sMetadataJsonId, [TJson.ObjectToJsonString(self)]);
 end;

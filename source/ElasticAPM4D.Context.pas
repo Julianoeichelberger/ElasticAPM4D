@@ -14,7 +14,7 @@ uses
   ElasticAPM4D.Service;
 
 type
-  TElasticAPM4DContextPage = class
+  TContextPage = class
   private
     FReferer: String;
     FUrl: String;
@@ -23,7 +23,7 @@ type
     property url: String read FUrl write FUrl;
   end;
 
-  TElasticAPM4DContextResponse = class
+  TContextResponse = class
   private
     FFinished: Boolean;
     FHeaders_sent: Boolean;
@@ -36,13 +36,13 @@ type
     property headers: TObject read Fheaders write Fheaders;
   end;
 
-  TElasticAPM4DContext = class
+  TContext = class
   private
-    FPage: TElasticAPM4DContextPage;
-    FResponse: TElasticAPM4DContextResponse;
-    FRequest: TElasticAPM4DRequest;
-    FService: TElasticAPM4DService;
-    FUser: TElasticAPM4DUser;
+    FPage: TContextPage;
+    FResponse: TContextResponse;
+    FRequest: TRequest;
+    FService: TService;
+    FUser: TUser;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -55,32 +55,32 @@ type
     procedure AutoConfigureContext(const AResponse: IRESTResponse); overload;
     procedure AutoConfigureContext(const AContext: TWebContext); overload;
 {$ENDIF}
-    property User: TElasticAPM4DUser read FUser write FUser;
-    property Service: TElasticAPM4DService read FService write FService;
-    property Request: TElasticAPM4DRequest read FRequest write FRequest;
-    property Page: TElasticAPM4DContextPage read FPage write FPage;
-    property Response: TElasticAPM4DContextResponse read FResponse write FResponse;
+    property User: TUser read FUser write FUser;
+    property Service: TService read FService write FService;
+    property Request: TRequest read FRequest write FRequest;
+    property Page: TContextPage read FPage write FPage;
+    property Response: TContextResponse read FResponse write FResponse;
   end;
 
 implementation
 
 { TElasticAPM4DContext }
 
-procedure TElasticAPM4DContext.AutoCreatePage(AIdHTTP: TIdCustomHTTP);
+procedure TContext.AutoCreatePage(AIdHTTP: TIdCustomHTTP);
 begin
-  FPage := TElasticAPM4DContextPage.Create;
+  FPage := TContextPage.Create;
   FPage.referer := AIdHTTP.Request.referer;
   FPage.url := AIdHTTP.Request.url;
 end;
 
-procedure TElasticAPM4DContext.AutoCreateRequest(AIdHTTP: TIdCustomHTTP);
+procedure TContext.AutoCreateRequest(AIdHTTP: TIdCustomHTTP);
 begin
-  FRequest := TElasticAPM4DRequest.Create(AIdHTTP);
+  FRequest := TRequest.Create(AIdHTTP);
 end;
 
-procedure TElasticAPM4DContext.AutoCreateResponse(AIdHTTP: TIdCustomHTTP);
+procedure TContext.AutoCreateResponse(AIdHTTP: TIdCustomHTTP);
 begin
-  FResponse := TElasticAPM4DContextResponse.Create;
+  FResponse := TContextResponse.Create;
   FResponse.finished := AIdHTTP.ResponseCode < 300;
   FResponse.headers_sent := AIdHTTP.Response.CustomHeaders.Count > 0;
   FResponse.status_code := AIdHTTP.ResponseCode;
@@ -88,45 +88,45 @@ end;
 
 {$IFDEF dmvcframework}
 
-procedure TElasticAPM4DContext.AutoConfigureContext(const AResponse: IRESTResponse);
+procedure TContext.AutoConfigureContext(const AResponse: IRESTResponse);
 begin
-  FResponse := TElasticAPM4DContextResponse.Create;
+  FResponse := TContextResponse.Create;
   FResponse.status_code := AResponse.ResponseCode;
   FResponse.finished := AResponse.ResponseCode < 300;
   FResponse.headers_sent := AResponse.headers.Count > 0;
 
-  FRequest := TElasticAPM4DRequest.Create;
+  FRequest := TRequest.Create;
   FRequest.body := AResponse.BodyAsString;
 end;
 
-procedure TElasticAPM4DContext.AutoConfigureContext(const AContext: TWebContext);
+procedure TContext.AutoConfigureContext(const AContext: TWebContext);
 begin
-  FResponse := TElasticAPM4DContextResponse.Create;
+  FResponse := TContextResponse.Create;
   FResponse.status_code := AContext.Response.StatusCode;
   FResponse.finished := AContext.Response.StatusCode < 300;
   FResponse.headers_sent := AContext.Response.CustomHeaders.Count > 0;
 
-  FRequest := TElasticAPM4DRequest.Create;
+  FRequest := TRequest.Create;
   FRequest.body := AContext.Request.body;
   FRequest.method := AContext.Request.HTTPMethodAsString;
 
   if not AContext.LoggedUser.username.IsEmpty then
   begin
     if not Assigned(FUser) then
-      FUser := TElasticAPM4DUser.Create;
+      FUser := TUser.Create;
     FUser.username := AContext.LoggedUser.username;
   end;
 end;
 
 {$ENDIF}
 
-constructor TElasticAPM4DContext.Create;
+constructor TContext.Create;
 begin
-  FService := TElasticAPM4DService.Create;
-  FUser := TElasticAPM4DUser.Create;
+  FService := TService.Create;
+  FUser := TUser.Create;
 end;
 
-destructor TElasticAPM4DContext.Destroy;
+destructor TContext.Destroy;
 begin
   FService.Free;
   FUser.Free;

@@ -3,14 +3,14 @@ unit ElasticAPM4D.MetricSet;
 interface
 
 type
-  TElasticAPM4DSamples = class
+  TSamples = class
   private
     Fvalue: Double;
   public
     property value: Double read Fvalue write Fvalue;
   end;
 
-  TElasticAPM4DMetricSet<T: TElasticAPM4DSamples, constructor> = class
+  TMetricSet<T: TSamples, constructor> = class
   private
     Fsamples: T;
     Ftimestamp: Int64;
@@ -34,19 +34,19 @@ Uses
 
 { TElasticAPM4DMetricSet<T> }
 
-constructor TElasticAPM4DMetricSet<T>.Create;
+constructor TMetricSet<T>.Create;
 begin
   Fsamples := T.Create;
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Get(now);
+  Ftimestamp := TTimestampEpoch.Get(now);
 end;
 
-destructor TElasticAPM4DMetricSet<T>.Destroy;
+destructor TMetricSet<T>.Destroy;
 begin
   Fsamples.Free;
   inherited;
 end;
 
-function TElasticAPM4DMetricSet<T>.ToJsonString: string;
+function TMetricSet<T>.ToJsonString: string;
 begin
   result := format(smetricSetJsonId, [TJson.ObjectToJsonString(self)]);
 end;

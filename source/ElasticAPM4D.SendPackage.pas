@@ -15,14 +15,14 @@ uses
 type
   EElasticAPM4DException = Exception;
 
-  TElasticAPM4DSendPackage = class
+  TSendPackage = class
   private
-    FMetadata: TElasticAPM4DMetadata;
-    FTransaction: TElasticAPM4DTransaction;
-    FSpanList: TObjectList<TElasticAPM4DSpan>;
-    FErrorList: TObjectList<TElasticAPM4DError>;
+    FMetadata: TMetadata;
+    FTransaction: TTransaction;
+    FSpanList: TObjectList<TSpan>;
+    FErrorList: TObjectList<TError>;
     FOpenSpanStack: TList;
-    FUser: TElasticAPM4DUser;
+    FUser: TUser;
     FHeader: string;
     procedure SetHeader(const Value: string);
     function ExtractTraceId: string;
@@ -34,14 +34,14 @@ type
 
     procedure Send;
     function SpanIsOpen: Boolean;
-    function CurrentSpan: TElasticAPM4DSpan;
+    function CurrentSpan: TSpan;
 
-    property Metadata: TElasticAPM4DMetadata read FMetadata write FMetadata;
-    property Transaction: TElasticAPM4DTransaction read FTransaction write FTransaction;
-    property SpanList: TObjectList<TElasticAPM4DSpan> read FSpanList write FSpanList;
-    property ErrorList: TObjectList<TElasticAPM4DError> read FErrorList write FErrorList;
+    property Metadata: TMetadata read FMetadata write FMetadata;
+    property Transaction: TTransaction read FTransaction write FTransaction;
+    property SpanList: TObjectList<TSpan> read FSpanList write FSpanList;
+    property ErrorList: TObjectList<TError> read FErrorList write FErrorList;
     property OpenSpanStack: TList read FOpenSpanStack write FOpenSpanStack;
-    property User: TElasticAPM4DUser read FUser write FUser;
+    property User: TUser read FUser write FUser;
     property Header: string read GetHeader write SetHeader;
   end;
 
@@ -53,20 +53,20 @@ Uses
   ElasticAPM4D.Config,
   ElasticAPM4D.Resources;
 
-{ TElasticAPM4DSendPackage }
+{ TSendPackage }
 
-constructor TElasticAPM4DSendPackage.Create;
+constructor TSendPackage.Create;
 begin
-  FTransaction := TElasticAPM4DTransaction.Create;
-  FMetadata := TElasticAPM4DMetadata.Create;
-  FSpanList := TObjectList<TElasticAPM4DSpan>.Create;
+  FTransaction := TTransaction.Create;
+  FMetadata := TMetadata.Create;
+  FSpanList := TObjectList<TSpan>.Create;
   FOpenSpanStack := TList.Create;
-  FErrorList := TObjectList<TElasticAPM4DError>.Create;
-  FUser := TElasticAPM4DUser.Create;
+  FErrorList := TObjectList<TError>.Create;
+  FUser := TUser.Create;
   FHeader := '';
 end;
 
-function TElasticAPM4DSendPackage.CurrentSpan: TElasticAPM4DSpan;
+function TSendPackage.CurrentSpan: TSpan;
 begin
   if not SpanIsOpen then
     raise EElasticAPM4DException.Create('Current span not found');
@@ -74,7 +74,7 @@ begin
   Result := FOpenSpanStack.Items[Pred(FOpenSpanStack.Count)];
 end;
 
-destructor TElasticAPM4DSendPackage.Destroy;
+destructor TSendPackage.Destroy;
 begin
   FTransaction.Free;
   FMetadata.Free;
@@ -85,12 +85,12 @@ begin
   inherited;
 end;
 
-function TElasticAPM4DSendPackage.SpanIsOpen: Boolean;
+function TSendPackage.SpanIsOpen: Boolean;
 begin
   Result := FOpenSpanStack.Count > 0;
 end;
 
-function TElasticAPM4DSendPackage.GetHeader: string;
+function TSendPackage.GetHeader: string;
 begin
   Result := FHeader;
   if Result.IsEmpty then
@@ -102,21 +102,21 @@ begin
   end
 end;
 
-procedure TElasticAPM4DSendPackage.Send;
+procedure TSendPackage.Send;
 var
-  LndJson: TElasticAPM4DndJson;
-  LThread: TElasticAPM4DSendThread;
+  LndJson: TndJson;
+  LThread: TSendThread;
 begin
-  if not TElasticAPM4DConfig.Enabled then
+  if not TConfig.Enabled then
     exit;
-  LndJson := TElasticAPM4DndJson.Create;
+  LndJson := TndJson.Create;
   try
     LndJson.Add(FMetadata);
     LndJson.Add(FTransaction);
     LndJson.Add(FSpanList);
     LndJson.Add(FErrorList);
 
-    LThread := TElasticAPM4DSendThread.Create(TElasticAPM4DConfig.URL);
+    LThread := TSendThread.Create(TConfig.URL);
     LThread.Send(GetHeader, LndJson.Get);
   finally
     FHeader := '';
@@ -124,17 +124,17 @@ begin
   end;
 end;
 
-function TElasticAPM4DSendPackage.ExtractParentID: string;
+function TSendPackage.ExtractParentID: string;
 begin
   Result := Copy(FHeader, 37, 16);
 end;
 
-function TElasticAPM4DSendPackage.ExtractTraceId: string;
+function TSendPackage.ExtractTraceId: string;
 begin
   Result := Copy(FHeader, 4, 32);
 end;
 
-procedure TElasticAPM4DSendPackage.SetHeader(const Value: string);
+procedure TSendPackage.SetHeader(const Value: string);
 begin
   FHeader := Value;
   if not FHeader.IsEmpty then

@@ -20,17 +20,17 @@ uses
   ElasticAPM4D.SendPackage;
 
 type
-  TElasticAPM4DTransaction = ElasticAPM4D.Transaction.TElasticAPM4DTransaction;
+  TTransaction = ElasticAPM4D.Transaction.TTransaction;
 
   TElasticAPM4D = class
   strict private
-    class threadvar FPackage: TElasticAPM4DSendPackage;
+    class threadvar FPackage: TSendPackage;
   private
     class procedure Finalize;
   protected
-    class var FUser: TElasticAPM4DUser;
-    class var FDataBase: TElasticAPM4DSpanContextDB;
-    class function GetError: TElasticAPM4DError;
+    class var FUser: TUser;
+    class var FDataBase: TSpanContextDB;
+    class function GetError: TError;
   public
     class procedure AddUser(AUserId, AUsername: string; AUserMail: string = ''); overload;
     class procedure AddDataBase(ADbType, ADbUser: string);
@@ -38,27 +38,27 @@ type
     class function HeaderValue: string;
     class function HeaderKey: string;
 
-    class function StartTransaction(const AType, AName: string; const ATraceId: string = ''): TElasticAPM4DTransaction;
+    class function StartTransaction(const AType, AName: string; const ATraceId: string = ''): TTransaction;
 
     class function ExistsTransaction: Boolean;
 
-    class function CurrentTransaction: TElasticAPM4DTransaction;
+    class function CurrentTransaction: TTransaction;
     class procedure EndTransaction(const AResult: string = sDEFAULT_RESULT); overload;
 
-    class function StartCustomSpan(const AName: string; const AType: string = 'Method'): TElasticAPM4DSpan; overload;
-    class function StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TElasticAPM4DSpan; overload;
-    class function StartSpan(const AName, ASQL: string): TElasticAPM4DSpan; overload;
+    class function StartCustomSpan(const AName: string; const AType: string = 'Method'): TSpan; overload;
+    class function StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TSpan; overload;
+    class function StartSpan(const AName, ASQL: string): TSpan; overload;
 
-    class function CurrentSpan: TElasticAPM4DSpan;
+    class function CurrentSpan: TSpan;
     class procedure EndSpan; overload;
     class procedure EndSpan(const AIdHttp: TIdCustomHTTP); overload;
 
-    class procedure AddError(AError: TElasticAPM4DError); overload;
+    class procedure AddError(AError: TError); overload;
     class procedure AddError(E: Exception); overload;
     class procedure AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException); overload;
 
 {$IFDEF dmvcframework}
-    class function StartTransaction(AActionName: string; AContext: TWebContext): TElasticAPM4DTransaction; overload;
+    class function StartTransaction(AActionName: string; AContext: TWebContext): TTransaction; overload;
     class procedure EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient; const AResponse: IRESTResponse;
       const AHttpMethod: string); overload;
     class procedure EndTransaction(const AContext: TWebContext); overload;
@@ -76,7 +76,7 @@ uses
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin
   if not Assigned(FUser) then
-    FUser := TElasticAPM4DUser.Create;
+    FUser := TUser.Create;
   FUser.username := AUsername;
   FUser.id := AUserId;
   FUser.email := AUserMail;
@@ -85,7 +85,7 @@ end;
 class procedure TElasticAPM4D.AddDataBase(ADbType, ADbUser: string);
 begin
   if not Assigned(FDataBase) then
-    FDataBase := TElasticAPM4DSpanContextDB.Create;
+    FDataBase := TSpanContextDB.Create;
 
   FDataBase.&type := ADbType;
   FDataBase.User := ADbUser;
@@ -112,13 +112,13 @@ begin
   Result := sHEADER_KEY;
 end;
 
-class function TElasticAPM4D.StartTransaction(const AType, AName, ATraceId: string): TElasticAPM4DTransaction;
+class function TElasticAPM4D.StartTransaction(const AType, AName, ATraceId: string): TTransaction;
 begin
   if Assigned(FPackage) then
     FPackage.Free;
 //    raise EElasticAPM4DException.Create(sDuplicateTransaction);
 
-  FPackage := TElasticAPM4DSendPackage.Create;
+  FPackage := TSendPackage.Create;
   FPackage.Transaction.Start(AType, AName);
 
   if Assigned(FUser) then
@@ -134,13 +134,13 @@ begin
   Result := FPackage.Transaction;
 end;
 
-class function TElasticAPM4D.StartSpan(const AName, ASQL: string): TElasticAPM4DSpan;
+class function TElasticAPM4D.StartSpan(const AName, ASQL: string): TSpan;
 begin
   Result := StartCustomSpan(AName, 'Sql');
   Result.Context.db.statement := ASQL;
 end;
 
-class function TElasticAPM4D.CurrentTransaction: TElasticAPM4DTransaction;
+class function TElasticAPM4D.CurrentTransaction: TTransaction;
 begin
   if not Assigned(FPackage) then
     raise EElasticAPM4DException.Create(sTransactionNotFount);
@@ -169,12 +169,12 @@ begin
   Result := Assigned(FPackage);
 end;
 
-class function TElasticAPM4D.StartCustomSpan(const AName, AType: string): TElasticAPM4DSpan;
+class function TElasticAPM4D.StartCustomSpan(const AName, AType: string): TSpan;
 begin
   if FPackage.SpanIsOpen then
-    Result := TElasticAPM4DSpan.Create(CurrentSpan)
+    Result := TSpan.Create(CurrentSpan)
   else
-    Result := TElasticAPM4DSpan.Create(CurrentTransaction);
+    Result := TSpan.Create(CurrentTransaction);
   Result.Start;
   Result.name := AName;
   Result.&type := AType;
@@ -191,13 +191,13 @@ begin
   CurrentTransaction.span_count.Inc;
 end;
 
-class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TElasticAPM4DSpan;
+class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TSpan;
 begin
   Result := StartCustomSpan(AName, 'Request');
   AIdHttp.Request.CustomHeaders.AddValue(HeaderKey, HeaderValue);
 end;
 
-class function TElasticAPM4D.CurrentSpan: TElasticAPM4DSpan;
+class function TElasticAPM4D.CurrentSpan: TSpan;
 begin
   Result := FPackage.CurrentSpan;
 end;
@@ -231,17 +231,17 @@ begin
   FPackage.Transaction.span_count.Dec;
 end;
 
-class function TElasticAPM4D.GetError: TElasticAPM4DError;
+class function TElasticAPM4D.GetError: TError;
 begin
   if FPackage.SpanIsOpen then
-    Result := TElasticAPM4DError.Create(CurrentSpan)
+    Result := TError.Create(CurrentSpan)
   else
-    Result := TElasticAPM4DError.Create(CurrentTransaction);
+    Result := TError.Create(CurrentTransaction);
 end;
 
 class procedure TElasticAPM4D.AddError(E: Exception);
 var
-  LError: TElasticAPM4DError;
+  LError: TError;
 begin
   if not Assigned(FPackage) then
     exit;
@@ -254,7 +254,7 @@ begin
   FPackage.ErrorList.Add(LError)
 end;
 
-class procedure TElasticAPM4D.AddError(AError: TElasticAPM4DError);
+class procedure TElasticAPM4D.AddError(AError: TError);
 begin
   if not Assigned(FPackage) then
     exit;
@@ -264,7 +264,7 @@ end;
 
 class procedure TElasticAPM4D.AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException);
 var
-  LError: TElasticAPM4DError;
+  LError: TError;
 begin
   if not Assigned(FPackage) then
     exit;
@@ -283,7 +283,7 @@ end;
 {$IFDEF dmvcframework}
 
 
-class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWebContext): TElasticAPM4DTransaction;
+class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWebContext): TTransaction;
 begin
   Result := StartCustomTransaction('DMVCFramework', AActionName);
   FPackage.Header := AContext.Request.Headers[HeaderKey];
@@ -296,7 +296,7 @@ end;
 class procedure TElasticAPM4D.EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient;
   const AResponse: IRESTResponse; const AHttpMethod: string);
 var
-  LError: TElasticAPM4DError;
+  LError: TError;
 begin
   CurrentTransaction.Context.AutoConfigureContext(AResponse);
   CurrentTransaction.Context.Request.url.full := ARESTClient.url;
@@ -334,6 +334,6 @@ initialization
 finalization
 
 TElasticAPM4D.Finalize;
-TElasticAPM4DConfig.RealeseFile;
+TConfig.RealeseFile;
 
 end.

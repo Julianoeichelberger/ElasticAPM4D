@@ -3,7 +3,7 @@ unit ElasticAPM4D.Process;
 interface
 
 type
-  TElasticAPM4DProcess = class
+  TProcess = class
   private
     FArgv: TArray<String>;
     FPid: Cardinal;
@@ -27,6 +27,7 @@ implementation
 
 {$IFDEF MSWINDOWS}
 
+
 Uses
   TLHelp32,
   psAPI,
@@ -34,7 +35,8 @@ Uses
   Vcl.Forms;
 {$ENDIF}
 
-constructor TElasticAPM4DProcess.Create;
+
+constructor TProcess.Create;
 begin
 {$IFDEF MSWINDOWS}
   Ftitle := GetProcessName;
@@ -44,7 +46,8 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
-function TElasticAPM4DProcess.GetProcessId: longint;
+
+function TProcess.GetProcessId: longint;
 var
   LHandle: THandle;
   LEntry: TProcessEntry32;
@@ -64,7 +67,7 @@ begin
   end;
 end;
 
-function TElasticAPM4DProcess.GetProcessName: string;
+function TProcess.GetProcessName: string;
 var
   LProcess: THandle;
   LModName: Array [0 .. MAX_PATH + 1] of Char;
@@ -80,7 +83,7 @@ begin
   end;
 end;
 
-function TElasticAPM4DProcess.GetParentProcessId: longint;
+function TProcess.GetParentProcessId: longint;
 var
   LSnapshot: THandle;
   LEntry: TProcessEntry32;

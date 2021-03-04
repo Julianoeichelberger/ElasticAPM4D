@@ -3,7 +3,7 @@ unit ElasticAPM4D.System;
 interface
 
 type
-  TElasticAPM4DSystem = class
+  TSystem = class
   private
     FArchitecture: String;
     FHostname: String;
@@ -24,12 +24,12 @@ implementation
 Uses
   // JclSysInfo,
 {$IFDEF MSWINDOWS} Windows, {$ENDIF}
- {$IFDEF UNIX} unix, {$ENDIF}
+{$IFDEF UNIX} unix, {$ENDIF}
   System.SysUtils;
 
 { TElasticAPM4DSystem }
 
-function TElasticAPM4DSystem.GetHostNameInOS: string;
+function TSystem.GetHostNameInOS: string;
 {$IFDEF MSWINDOWS}
 var
   l: DWORD;
@@ -46,12 +46,12 @@ begin
 {$ENDIF}
 end;
 
-function TElasticAPM4DSystem.GetPlatform: String;
+function TSystem.GetPlatform: String;
 begin
   // Result := GetOSVersionString
 end;
 
-function TElasticAPM4DSystem.GetWindowsArquitecture: string;
+function TSystem.GetWindowsArquitecture: string;
 begin
   Result := '';
 {$IFDEF MSWINDOWS}
@@ -61,7 +61,7 @@ begin
 {$ENDIF}
 end;
 
-constructor TElasticAPM4DSystem.Create;
+constructor TSystem.Create;
 begin
   FArchitecture := GetWindowsArquitecture;
   FHostname := GetHostNameInOS;

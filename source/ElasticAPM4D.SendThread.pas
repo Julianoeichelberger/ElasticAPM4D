@@ -6,7 +6,7 @@ Uses
   System.Classes;
 
 type
-  TElasticAPM4DSendThread = class(TThread)
+  TSendThread = class(TThread)
   private
     FJson: WideString;
     FHeader: string;
@@ -27,9 +27,9 @@ Uses
   IdHTTP,
   ElasticAPM4D.Resources;
 
-{ TElasticAPM4DSendThread }
+{ TSendThread }
 
-constructor TElasticAPM4DSendThread.Create(const AURL: string);
+constructor TSendThread.Create(const AURL: string);
 begin
   inherited Create(True);
   FCouldSend := True;
@@ -38,7 +38,7 @@ begin
   FHeader := '';
 end;
 
-procedure TElasticAPM4DSendThread.Execute;
+procedure TSendThread.Execute;
 var
   LHttp: TIdHTTP;
   LDataSend, LResult: TStringStream;
@@ -67,7 +67,7 @@ begin
   end;
 end;
 
-procedure TElasticAPM4DSendThread.Send(const AHeader: string; const AJson: WideString);
+procedure TSendThread.Send(const AHeader: string; const AJson: WideString);
 begin
   FJson := AJson;
   FHeader := AHeader;

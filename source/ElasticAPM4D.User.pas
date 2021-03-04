@@ -3,7 +3,7 @@ unit ElasticAPM4D.User;
 interface
 
 type
-  TElasticAPM4DUser = class
+  TUser = class
   private
     FEmail: String;
     FId: String;

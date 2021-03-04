@@ -8,7 +8,7 @@ uses
   ElasticAPM4D.Context;
 
 type
-  TElasticAPM4DSpanCount = class
+  TSpanCount = class
   private
     FDropped: Integer;
     FStarted: Integer;
@@ -23,7 +23,7 @@ type
     property started: Integer read FStarted;
   end;
 
-  TElasticAPM4DTransaction = class
+  TTransaction = class
   private
     FStartDate: TDateTime;
     Fid: string;
@@ -32,8 +32,8 @@ type
     Ftype: string;
     Fresult: string;
     Fduration: int64;
-    Fcontext: TElasticAPM4DContext;
-    Fspan_count: TElasticAPM4DSpanCount;
+    Fcontext: TContext;
+    Fspan_count: TSpanCount;
     Fsampled: boolean;
     Fparent_id: string;
     Ftimestamp: int64;
@@ -51,8 +51,8 @@ type
     property parent_id: string read Fparent_id write Fparent_id;
     property name: string read Fname write Fname;
     property &type: string read Ftype;
-    property span_count: TElasticAPM4DSpanCount read Fspan_count;
-    property Context: TElasticAPM4DContext read Fcontext;
+    property span_count: TSpanCount read Fspan_count;
+    property Context: TContext read Fcontext;
     property duration: int64 read Fduration write Fduration;
     property &result: string read Fresult write Fresult;
     property sampled: boolean read Fsampled write Fsampled;
@@ -70,60 +70,60 @@ Uses
 
 { TElasticAPM4DSpanCount }
 
-constructor TElasticAPM4DSpanCount.Create;
+constructor TSpanCount.Create;
 begin
   Reset;
 end;
 
-procedure TElasticAPM4DSpanCount.Dec;
+procedure TSpanCount.Dec;
 begin
   FDropped := FDropped - 1;
 end;
 
-procedure TElasticAPM4DSpanCount.Inc;
+procedure TSpanCount.Inc;
 begin
   FStarted := FStarted + 1;
   FDropped := FDropped + 1;
 end;
 
-procedure TElasticAPM4DSpanCount.Reset;
+procedure TSpanCount.Reset;
 begin
   FDropped := 0;
   FStarted := 0;
 end;
 
-{ TElasticAPM4DTransaction }
+{ TTransaction }
 
-constructor TElasticAPM4DTransaction.Create;
+constructor TTransaction.Create;
 begin
-  Fcontext := TElasticAPM4DContext.Create;
-  Fspan_count := TElasticAPM4DSpanCount.Create;
+  Fcontext := TContext.Create;
+  Fspan_count := TSpanCount.Create;
 end;
 
-destructor TElasticAPM4DTransaction.Destroy;
+destructor TTransaction.Destroy;
 begin
   Fcontext.Free;
   Fspan_count.Free;
   inherited;
 end;
 
-procedure TElasticAPM4DTransaction.Start(AType, AName: string);
+procedure TTransaction.Start(AType, AName: string);
 begin
   FStartDate := now;
   Fid := TElasticAPM4DUUid.GetUUid64b;
   Ftrace_id := TElasticAPM4DUUid.GetUUid128b;
-  Ftimestamp := TElasticAPM4DTimestampEpoch.Get(FStartDate);
+  Ftimestamp := TTimestampEpoch.Get(FStartDate);
   Fsampled := true;
   Ftype := AType;
   Fname := AName;
 end;
 
-procedure TElasticAPM4DTransaction.&End;
+procedure TTransaction.&End;
 begin
   Fduration := MilliSecondsBetween(now, FStartDate);
 end;
 
-function TElasticAPM4DTransaction.toJsonString: string;
+function TTransaction.toJsonString: string;
 begin
   Result := format(sTransactionJsonId, [TJson.ObjectToJsonString(Self, [joIgnoreEmptyStrings])]);
 end;

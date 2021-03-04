@@ -8,7 +8,7 @@ type
     FreeSpace: Int64;
   End;
 
-  TElasticAPM4DMetricsetDefaults = class
+  TMetricsetDefaults = class
 {$IFDEF MSWINDOWS}
     class function MemoryUsage: Int64;
     class function DiskInfo: TDiskInfo;
@@ -23,10 +23,10 @@ uses
   TLHelp32, psAPI, Winapi.Windows, System.SysUtils;
 {$ENDIF}
 
-{ TElasticAPM4DMetricsetDefaults }
+{ TMetricsetDefaults }
 
 {$IFDEF MSWINDOWS}
-class function TElasticAPM4DMetricsetDefaults.MemoryUsage: Int64;
+class function TMetricsetDefaults.MemoryUsage: Int64;
 var
   pmc: PPROCESS_MEMORY_COUNTERS;
   cb: Integer;
@@ -40,7 +40,7 @@ begin
   FreeMem(pmc);
 end;
 
-class function TElasticAPM4DMetricsetDefaults.DiskInfo: TDiskInfo;
+class function TMetricsetDefaults.DiskInfo: TDiskInfo;
 const
   WbemUser = '';
   WbemPassword = '';

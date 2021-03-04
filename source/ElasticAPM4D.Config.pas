@@ -6,7 +6,7 @@ Uses
   System.IniFiles;
 
 type
-  TElasticAPM4DConfigProperties = Record
+  TConfigProperties = Record
   private
     FEnabled: Boolean;
     FServiceName: string;
@@ -21,10 +21,10 @@ type
     property Database: string read FDatabase write FDatabase;
   end;
 
-  TElasticAPM4DConfig = class
+  TConfig = class
   strict private
     class var FFile: TIniFile;
-    class var FConfigs: TElasticAPM4DConfigProperties;
+    class var FConfigs: TConfigProperties;
     class function GetFileName: string;
   public
     class procedure InitializeFile;
@@ -43,39 +43,39 @@ Uses
   System.SysUtils,
   System.IOUtils;
 
-{ TElasticAPM4DConfig }
+{ TConfig }
 
-class function TElasticAPM4DConfig.AppVersion: string;
+class function TConfig.AppVersion: string;
 begin
   Result := FConfigs.AppVersion;
 end;
 
-class function TElasticAPM4DConfig.Database: string;
+class function TConfig.Database: string;
 begin
   Result := FConfigs.Database;
 end;
 
-class function TElasticAPM4DConfig.Enabled: Boolean;
+class function TConfig.Enabled: Boolean;
 begin
   Result := FConfigs.Enabled;
 end;
 
-class function TElasticAPM4DConfig.ServiceName: string;
+class function TConfig.ServiceName: string;
 begin
   Result := FConfigs.ServiceName;
 end;
 
-class function TElasticAPM4DConfig.URL: string;
+class function TConfig.URL: string;
 begin
   Result := FConfigs.URL;
 end;
 
-class function TElasticAPM4DConfig.GetFileName: string;
+class function TConfig.GetFileName: string;
 begin
   Result := IncludeTrailingPathDelimiter(TDirectory.GetCurrentDirectory) + 'ElasticAPM4D.ini';
 end;
 
-class procedure TElasticAPM4DConfig.InitializeFile;
+class procedure TConfig.InitializeFile;
 begin
   if GetFileName.Contains('Windows') then
     Exit;
@@ -109,7 +109,7 @@ begin
   FConfigs.ServiceName := FFile.ReadString('service', 'appversion', '');
 end;
 
-class procedure TElasticAPM4DConfig.RealeseFile;
+class procedure TConfig.RealeseFile;
 begin
   if Assigned(FFile) then
     FFile.Free;

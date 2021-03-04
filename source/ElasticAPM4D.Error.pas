@@ -11,13 +11,13 @@ uses
   ElasticAPM4D.Span;
 
 type
-  TElasticAPM4DErrorException = class
+  TErrorException = class
   private
     FCode: String;
     FHandled: Boolean;
     FMessage: String;
     FModule: String;
-    FStacktrace: TArray<TElasticAPM4DStacktrace>;
+    FStacktrace: TArray<TStacktrace>;
     FType: String;
     Fattributes: TObject;
     Fparent: Integer;
@@ -25,31 +25,31 @@ type
   public
     destructor Destroy; override;
 
-    property attributes: TObject read Fattributes write Fattributes;
-    property cause: TArray<TObject> read Fcause write Fcause;
-    property code: String read FCode write FCode;
-    property handled: Boolean read FHandled write FHandled;
-    property &message: String read FMessage write FMessage;
-    property module: String read FModule write FModule;
-    property parent: Integer read Fparent write Fparent;
-    property Stacktrace: TArray<TElasticAPM4DStacktrace> read FStacktrace write FStacktrace;
-    property &type: String read FType write FType;
+    property Attributes: TObject read Fattributes write Fattributes;
+    property Cause: TArray<TObject> read Fcause write Fcause;
+    property Code: String read FCode write FCode;
+    property Handled: Boolean read FHandled write FHandled;
+    property &Message: String read FMessage write FMessage;
+    property Module: String read FModule write FModule;
+    property Parent: Integer read Fparent write Fparent;
+    property Stacktrace: TArray<TStacktrace> read FStacktrace write FStacktrace;
+    property &Type: String read FType write FType;
   end;
 
-  TElasticAPM4DError = class
+  TError = class
   private
     FCulprit: String;
-    FException: TElasticAPM4DErrorException;
+    FException: TErrorException;
     FId: String;
     FParent_id: String;
     FTrace_id: String;
     FTransaction_id: String;
     FTimestamp: Int64;
-    Fcontext: TElasticAPM4DContext;
+    Fcontext: TContext;
     procedure InternalCreate;
   public
-    constructor Create(ASpan: TElasticAPM4DSpan); overload;
-    constructor Create(ATransaction: TElasticAPM4DTransaction); overload;
+    constructor Create(ASpan: TSpan); overload;
+    constructor Create(ATransaction: TTransaction); overload;
     destructor Destroy; override;
 
     procedure AutoConfigureError(const AIdHttp: TIdCustomHTTP);
@@ -61,8 +61,8 @@ type
     property Trace_id: String read FTrace_id;
     property Transaction_id: String read FTransaction_id;
     property Culprit: String read FCulprit write FCulprit;
-    property Context: TElasticAPM4DContext read Fcontext write Fcontext;
-    property Exception: TElasticAPM4DErrorException read FException write FException;
+    property Context: TContext read Fcontext write Fcontext;
+    property Exception: TErrorException read FException write FException;
   end;
 
 implementation
@@ -74,9 +74,9 @@ uses
   ElasticAPM4D.Jcl,
   ElasticAPM4D.Resources;
 
-{ TElasticAPM4DErrorException }
+{ TErrorException }
 
-destructor TElasticAPM4DErrorException.Destroy;
+destructor TErrorException.Destroy;
 var
   LCause: TObject;
 begin
@@ -87,26 +87,26 @@ begin
   inherited;
 end;
 
-{ TElasticAPM4DError }
+{ TError }
 
-procedure TElasticAPM4DError.InternalCreate;
+procedure TError.InternalCreate;
 begin
   FId := TElasticAPM4DUUid.GetUUid128b;
-  FException := TElasticAPM4DErrorException.Create;
-  FException.Stacktrace := TElasticAPM4DStacktraceJCL.Get;
-  Fcontext := TElasticAPM4DContext.Create;
+  FException := TErrorException.Create;
+  FException.Stacktrace := TStacktraceJCL.Get;
+  Fcontext := TContext.Create;
   FCulprit := '';
-  FTimestamp := TElasticAPM4DTimestampEpoch.Get(now);
+  FTimestamp := TTimestampEpoch.Get(now);
 end;
 
-procedure TElasticAPM4DError.AutoConfigureError(const AIdHttp: TIdCustomHTTP);
+procedure TError.AutoConfigureError(const AIdHttp: TIdCustomHTTP);
 begin
   Fcontext.AutoCreatePage(AIdHttp);
   Fcontext.AutoCreateResponse(AIdHttp);
   Fcontext.AutoCreateRequest(AIdHttp);
 end;
 
-constructor TElasticAPM4DError.Create(ATransaction: TElasticAPM4DTransaction);
+constructor TError.Create(ATransaction: TTransaction);
 begin
   InternalCreate;
   FTrace_id := ATransaction.Trace_id;
@@ -114,7 +114,7 @@ begin
   FParent_id := ATransaction.id;
 end;
 
-constructor TElasticAPM4DError.Create(ASpan: TElasticAPM4DSpan);
+constructor TError.Create(ASpan: TSpan);
 begin
   InternalCreate;
   FTrace_id := ASpan.Trace_id;
@@ -122,14 +122,14 @@ begin
   FParent_id := ASpan.id;
 end;
 
-destructor TElasticAPM4DError.Destroy;
+destructor TError.Destroy;
 begin
   FException.Free;
   Fcontext.Free;
   inherited;
 end;
 
-function TElasticAPM4DError.ToJsonString: string;
+function TError.ToJsonString: string;
 begin
   Result := format(sErrorJsonId, [TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings,
     joIgnoreEmptyArrays])]);

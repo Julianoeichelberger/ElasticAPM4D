@@ -3,7 +3,7 @@ unit ElasticAPM4D.StacktraceFrame;
 interface
 
 type
-  TElasticAPM4DStacktrace = class
+  TStacktrace = class
   private
     FAbs_path: String;
     FColno: integer;
