@@ -1,30 +1,33 @@
-unit ElasticAPM4D.Config;
+unit ElasticAPM4D.Utils;
 
 interface
 
 Uses
-  System.IniFiles;
+  System.SysUtils, System.IniFiles;
 
 type
-  TConfigProperties = Record
-  private
-    FEnabled: Boolean;
-    FServiceName: string;
-    FDatabase: string;
-    FURL: string;
-    FAppVersion: string;
-  public
-    property Enabled: Boolean read FEnabled write FEnabled;
-    property URL: string read FURL write FURL;
-    property ServiceName: string read FServiceName write FServiceName;
-    property AppVersion: string read FAppVersion write FAppVersion;
-    property Database: string read FDatabase write FDatabase;
-  end;
+  EElasticAPM4DException = Exception;
 
   TConfig = class
   strict private
+  type
+    TProperties = Record
+    private
+      FEnabled: Boolean;
+      FServiceName: string;
+      FDatabase: string;
+      FURL: string;
+      FAppVersion: string;
+    public
+      property Enabled: Boolean read FEnabled write FEnabled;
+      property URL: string read FURL write FURL;
+      property ServiceName: string read FServiceName write FServiceName;
+      property AppVersion: string read FAppVersion write FAppVersion;
+      property Database: string read FDatabase write FDatabase;
+    end;
+  strict private
     class var FFile: TIniFile;
-    class var FConfigs: TConfigProperties;
+    class var FConfigs: TProperties;
     class function GetFileName: string;
   public
     class procedure InitializeFile;
@@ -37,11 +40,22 @@ type
     class function AppVersion: string;
   end;
 
+  TUUid = class
+  private
+    class procedure RemoveChars(var AStr: string);
+  public
+    class function Get64b: string;
+    class function Get128b: string;
+  end;
+
+  TTimestampEpoch = class
+    class function Get(ADate: TDatetime): Int64;
+  end;
+
 implementation
 
 Uses
-  System.SysUtils,
-  System.IOUtils;
+  System.DateUtils, System.IOUtils;
 
 { TConfig }
 
@@ -113,6 +127,42 @@ class procedure TConfig.RealeseFile;
 begin
   if Assigned(FFile) then
     FFile.Free;
+end;
+
+{ TUUid }
+
+class function TUUid.Get64b: string;
+begin
+  Result := Copy(Get128b, 1, 16);
+end;
+
+class procedure TUUid.RemoveChars(var AStr: string);
+begin
+  AStr := AStr.Replace('-', '', [rfReplaceAll]);
+  AStr := AStr.Replace('{', '');
+  AStr := AStr.Replace('}', '');
+end;
+
+class function TUUid.Get128b: string;
+var
+  Uid: TGuid;
+  nResult: HResult;
+begin
+  Result := '';
+  nResult := CreateGuid(Uid);
+  if nResult = S_OK then
+  begin
+    Result := GuidToString(Uid).ToLower;
+    RemoveChars(Result);
+    Exit;
+  end;
+end;
+
+{ TTimestampEpoch }
+
+class function TTimestampEpoch.Get(ADate: TDatetime): Int64;
+begin
+  Result := StrToInt64(FormatFloat('0', DateTimeToUnix(ADate, False)) + FormatDateTime('zzz', ADate) + '000');
 end;
 
 end.

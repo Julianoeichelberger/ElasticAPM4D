@@ -6,7 +6,7 @@ Uses
   IdHTTP;
 
 type
-  TRequestSocket = class
+  TSocket = class
   private
     FEncrypted: Boolean;
     FRemote_address: String;
@@ -15,7 +15,7 @@ type
     property remote_address: String read FRemote_address write FRemote_address;
   end;
 
-  TRequestURL = class
+  TURL = class
   private
     FFull: String;
     FHash: String;
@@ -43,8 +43,8 @@ type
     Fheaders: string;
     FHttp_version: String;
     FMethod: String;
-    FSocket: TRequestSocket;
-    FUrl: TRequestURL;
+    FSocket: TSocket;
+    FUrl: TURL;
   public
     constructor Create; overload;
     constructor Create(AIdHTTP: TIdCustomHTTP); overload;
@@ -55,22 +55,21 @@ type
     property headers: string read Fheaders write Fheaders;
     property http_version: String read FHttp_version write FHttp_version;
     property method: String read FMethod write FMethod;
-    property socket: TRequestSocket read FSocket;
-    property url: TRequestURL read FUrl;
+    property socket: TSocket read FSocket;
+    property url: TURL read FUrl;
   end;
 
 implementation
 
 Uses
-  System.StrUtils,
-  System.SysUtils;
+  System.StrUtils, System.SysUtils;
 
 { TRequest }
 
 constructor TRequest.Create;
 begin
-  FSocket := TRequestSocket.Create;
-  FUrl := TRequestURL.Create;
+  FSocket := TSocket.Create;
+  FUrl := TURL.Create;
 end;
 
 constructor TRequest.Create(AIdHTTP: TIdCustomHTTP);

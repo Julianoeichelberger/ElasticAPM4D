@@ -32,7 +32,6 @@ type
     FName: String;
     FVersion: String;
   public
-    constructor Create;
     property name: String read FName write FName;
     property version: String read FVersion write FVersion;
   end;
@@ -50,12 +49,12 @@ type
 
   TService = class
   private
-    FEnvironment: string;
     FFramework: TServiceFramework;
     FLanguage: TServiceLanguage;
     FRuntime: TServiceRuntime;
-    FVersion: String;
     FAgent: TServiceAgent;
+    FVersion: String;
+    FEnvironment: string;
     FName: String;
   public
     constructor Create;
@@ -73,18 +72,13 @@ type
 implementation
 
 uses
-{$IFDEF MSWINDOWS}
-  Windows,
-  Vcl.Forms,
-{$ENDIF}
-  System.IOUtils,
-  System.SysUtils;
+{$IFDEF MSWINDOWS} Windows, Vcl.Forms, {$ENDIF} System.IOUtils, System.SysUtils;
 
 { TServiceAgent }
 
 constructor TServiceAgent.Create;
 begin
-  FVersion := '1.0.0';
+  FVersion := '1.1.0';
   FName := 'ElasticAPM4D';
   Fephemeral_id := '';
 end;
@@ -120,6 +114,7 @@ begin
 {$IFDEF VER310} 'Delphi 10.1 Berlin'; {$ENDIF}
 {$IFDEF VER320} 'Delphi 10.2 Tokyo'; {$ENDIF}
 {$IFDEF VER330} 'Delphi 10.3 Rio'; {$ENDIF}
+{$IFDEF VER331} 'Delphi 10.4 Sidney'; {$ENDIF}
 end;
 
 { TServiceRuntime }
@@ -161,7 +156,7 @@ begin
   FLanguage := TServiceLanguage.Create;
   FRuntime := TServiceRuntime.Create;
   FFramework := TServiceFramework.Create;
-  FVersion := '';
+  FVersion := FRuntime.version;
   FName := FRuntime.name;
 end;
 
@@ -172,16 +167,6 @@ begin
   FRuntime.Free;
   FFramework.Free;
   inherited;
-end;
-
-{ TElasticAPM4DServiceFramework }
-
-constructor TServiceFramework.Create;
-begin
-{$IFDEF dmvcframework}
-  FName := 'dmvcframework';
-  FVersion := '3.1.0';
-{$ENDIF}
 end;
 
 end.

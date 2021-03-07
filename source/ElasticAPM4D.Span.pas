@@ -3,11 +3,7 @@ unit ElasticAPM4D.Span;
 interface
 
 Uses
-  IdHttp,
-  System.SysUtils,
-  ElasticAPM4D.Service,
-  ElasticAPM4D.StacktraceFrame,
-  ElasticAPM4D.Transaction;
+  IdHttp, System.SysUtils, ElasticAPM4D.Service, ElasticAPM4D.Stacktrace, ElasticAPM4D.Transaction;
 
 type
   TSpanContextDB = class
@@ -108,11 +104,7 @@ type
 implementation
 
 Uses
-  System.DateUtils,
-  REST.Json,
-  ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.Uuid,
-  ElasticAPM4D.Resources;
+  System.DateUtils, REST.Json, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
 
 { TSpanService }
 
@@ -156,7 +148,7 @@ end;
 
 constructor TSpan.Create(AParent: TSpan);
 begin
-  FId := TElasticAPM4DUUid.GetUUid64b;
+  FId := TUUid.Get64b;
   FTrace_id := AParent.trace_id;
   FTransaction_id := AParent.transaction_id;
   FParent_id := AParent.id;
@@ -168,7 +160,7 @@ end;
 
 constructor TSpan.Create(AParent: TTransaction);
 begin
-  FId := TElasticAPM4DUUid.GetUUid64b;
+  FId := TUUid.Get64b;
   FTrace_id := AParent.trace_id;
   FTransaction_id := AParent.id;
   FParent_id := AParent.id;

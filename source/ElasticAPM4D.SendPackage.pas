@@ -3,14 +3,8 @@ unit ElasticAPM4D.SendPackage;
 interface
 
 uses
-  System.SysUtils,
-  System.Classes,
-  System.Generics.Collections,
-  ElasticAPM4D.Transaction,
-  ElasticAPM4D.Metadata,
-  ElasticAPM4D.User,
-  ElasticAPM4D.Span,
-  ElasticAPM4D.Error;
+  System.SysUtils, System.Classes, System.Generics.Collections,
+  ElasticAPM4D.Transaction, ElasticAPM4D.Metadata, ElasticAPM4D.User, ElasticAPM4D.Span, ElasticAPM4D.Error;
 
 type
   EElasticAPM4DException = Exception;
@@ -48,10 +42,7 @@ type
 implementation
 
 Uses
-  ElasticAPM4D.SendThread,
-  ElasticAPM4D.ndJson,
-  ElasticAPM4D.Config,
-  ElasticAPM4D.Resources;
+  ElasticAPM4D.SendThread, ElasticAPM4D.ndJson, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
 
 { TSendPackage }
 

@@ -71,6 +71,7 @@
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <DCC_Define>jcl;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -114,10 +115,10 @@
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="RESTComponents.dcp"/>
         <DCCReference Include="Jcl.dcp"/>
-        <DCCReference Include="source\ElasticAPM4D.Config.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Utils.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Context.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Error.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Jcl.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.StackTraceJCL.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Metadata.pas"/>
         <DCCReference Include="source\ElasticAPM4D.MetricSet.Defaults.pas"/>
         <DCCReference Include="source\ElasticAPM4D.MetricSet.pas"/>
@@ -130,12 +131,11 @@
         <DCCReference Include="source\ElasticAPM4D.SendThread.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Span.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.StacktraceFrame.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Stacktrace.pas"/>
         <DCCReference Include="source\ElasticAPM4D.System.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.TimestampEpoch.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
         <DCCReference Include="source\ElasticAPM4D.User.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.UUid.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Helper.DMVCFramework.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -161,7 +161,10 @@
                     <Source Name="MainSource">ElasticAPM4Delphi.dpk</Source>
                 </Source>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSCustomControls.bpl">Zonesoft - Custom controls</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSControls.bpl">ZoneSoft - Controls</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSAccess.bpl">Zonesoft - Access Controls</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZDesignControls.bpl">Zonesoft - ZDesign controls</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSLookup.bpl">Zonesoft - Lookup controls</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>

@@ -27,12 +27,9 @@ type
 implementation
 
 Uses
-  System.SysUtils,
-  Rest.Json,
-  ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.Resources;
+  System.SysUtils, Rest.Json, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
 
-{ TElasticAPM4DMetricSet<T> }
+{ TMetricSet<T> }
 
 constructor TMetricSet<T>.Create;
 begin

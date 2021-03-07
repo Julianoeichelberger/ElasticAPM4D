@@ -3,10 +3,7 @@ unit ElasticAPM4D.Context;
 interface
 
 uses
-{$IFDEF dmvcframework}
-  MVCFramework.RESTClient,
-  MVCFramework,
-{$ENDIF}
+{$IFDEF dmvcframework} MVCFramework.RESTClient, MVCFramework, {$ENDIF}
   System.SysUtils,
   IdHTTP,
   ElasticAPM4D.User,
@@ -64,7 +61,7 @@ type
 
 implementation
 
-{ TElasticAPM4DContext }
+{ TContext }
 
 procedure TContext.AutoCreatePage(AIdHTTP: TIdCustomHTTP);
 begin
@@ -87,6 +84,7 @@ begin
 end;
 
 {$IFDEF dmvcframework}
+
 
 procedure TContext.AutoConfigureContext(const AResponse: IRESTResponse);
 begin
@@ -119,6 +117,7 @@ begin
 end;
 
 {$ENDIF}
+
 
 constructor TContext.Create;
 begin

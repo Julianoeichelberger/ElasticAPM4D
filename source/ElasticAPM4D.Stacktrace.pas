@@ -1,4 +1,4 @@
-unit ElasticAPM4D.StacktraceFrame;
+unit ElasticAPM4D.Stacktrace;
 
 interface
 

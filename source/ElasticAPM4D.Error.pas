@@ -3,12 +3,7 @@ unit ElasticAPM4D.Error;
 interface
 
 uses
-  IdHTTP,
-  System.SysUtils,
-  ElasticAPM4D.Context,
-  ElasticAPM4D.StacktraceFrame,
-  ElasticAPM4D.Transaction,
-  ElasticAPM4D.Span;
+  IdHTTP, System.SysUtils, ElasticAPM4D.Context, ElasticAPM4D.Stacktrace, ElasticAPM4D.Transaction, ElasticAPM4D.Span;
 
 type
   TErrorException = class
@@ -68,11 +63,7 @@ type
 implementation
 
 uses
-  Rest.Json,
-  ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.UUid,
-  ElasticAPM4D.Jcl,
-  ElasticAPM4D.Resources;
+  Rest.Json, ElasticAPM4D.Utils, ElasticAPM4D.StackTraceJCL, ElasticAPM4D.Resources;
 
 { TErrorException }
 
@@ -91,7 +82,7 @@ end;
 
 procedure TError.InternalCreate;
 begin
-  FId := TElasticAPM4DUUid.GetUUid128b;
+  FId := TUUid.Get128b;
   FException := TErrorException.Create;
   FException.Stacktrace := TStacktraceJCL.Get;
   Fcontext := TContext.Create;

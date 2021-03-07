@@ -29,10 +29,7 @@ implementation
 
 
 Uses
-  TLHelp32,
-  psAPI,
-  Winapi.Windows,
-  Vcl.Forms;
+  TLHelp32, psAPI, Winapi.Windows, Vcl.Forms;
 {$ENDIF}
 
 
@@ -46,6 +43,7 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
+
 
 function TProcess.GetProcessId: longint;
 var
@@ -85,28 +83,28 @@ end;
 
 function TProcess.GetParentProcessId: longint;
 var
-  LSnapshot: THandle;
-  LEntry: TProcessEntry32;
-  LNotFound: Boolean;
+  Snapshot: THandle;
+  Entry: TProcessEntry32;
+  NotFound: Boolean;
 begin
   Result := 0;
 
-  LSnapshot := CreateToolHelp32SnapShot(TH32CS_SNAPPROCESS, 0);
-  if LSnapshot <> 0 then
+  Snapshot := CreateToolHelp32SnapShot(TH32CS_SNAPPROCESS, 0);
+  if Snapshot <> 0 then
   begin
-    FillChar(LEntry, SizeOf(LEntry), 0);
-    LEntry.dwSize := SizeOf(LEntry);
-    LNotFound := Process32First(LSnapshot, LEntry);
-    while LNotFound do
+    FillChar(Entry, SizeOf(Entry), 0);
+    Entry.dwSize := SizeOf(Entry);
+    NotFound := Process32First(Snapshot, Entry);
+    while NotFound do
     begin
-      if LEntry.th32ProcessID = FPid then
+      if Entry.th32ProcessID = FPid then
       begin
-        Result := LEntry.th32ParentProcessID;
+        Result := Entry.th32ParentProcessID;
         Break;
       end;
-      LNotFound := Process32Next(LSnapshot, LEntry);
+      NotFound := Process32Next(Snapshot, Entry);
     end;
-    CloseHandle(LSnapshot);
+    CloseHandle(Snapshot);
   end;
 end;
 {$ENDIF}

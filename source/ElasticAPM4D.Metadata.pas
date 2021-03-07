@@ -3,10 +3,7 @@ unit ElasticAPM4D.Metadata;
 interface
 
 uses
-  ElasticAPM4D.Process,
-  ElasticAPM4D.Service,
-  ElasticAPM4D.User,
-  ElasticAPM4D.System;
+  ElasticAPM4D.Process, ElasticAPM4D.Service, ElasticAPM4D.User, ElasticAPM4D.System;
 
 type
   TMetadata = class
@@ -30,9 +27,7 @@ type
 implementation
 
 Uses
-  System.SysUtils,
-  Rest.Json,
-  ElasticAPM4D.Resources;
+  System.SysUtils, Rest.Json, ElasticAPM4D.Resources;
 
 { TMetadata }
 

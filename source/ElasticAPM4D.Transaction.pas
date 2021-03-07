@@ -3,9 +3,7 @@ unit ElasticAPM4D.Transaction;
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
-  ElasticAPM4D.Context;
+  System.Classes, System.SysUtils, ElasticAPM4D.Context;
 
 type
   TSpanCount = class
@@ -62,13 +60,9 @@ type
 implementation
 
 Uses
-  System.DateUtils,
-  REST.Json,
-  ElasticAPM4D.UUid,
-  ElasticAPM4D.TimestampEpoch,
-  ElasticAPM4D.Resources;
+  System.DateUtils, REST.Json, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
 
-{ TElasticAPM4DSpanCount }
+{ TSpanCount }
 
 constructor TSpanCount.Create;
 begin
@@ -110,8 +104,8 @@ end;
 procedure TTransaction.Start(AType, AName: string);
 begin
   FStartDate := now;
-  Fid := TElasticAPM4DUUid.GetUUid64b;
-  Ftrace_id := TElasticAPM4DUUid.GetUUid128b;
+  Fid := TUUid.Get64b;
+  Ftrace_id := TUUid.Get128b;
   Ftimestamp := TTimestampEpoch.Get(FStartDate);
   Fsampled := true;
   Ftype := AType;

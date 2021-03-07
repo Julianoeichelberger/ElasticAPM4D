@@ -9,8 +9,6 @@ type
     FHostname: String;
     FPlatform: String;
     function GetHostNameInOS: string;
-    function GetWindowsArquitecture: string;
-    function GetPlatform: String;
   public
     constructor Create;
 
@@ -22,12 +20,9 @@ type
 implementation
 
 Uses
-  // JclSysInfo,
-{$IFDEF MSWINDOWS} Windows, {$ENDIF}
-{$IFDEF UNIX} unix, {$ENDIF}
-  System.SysUtils;
+{$IFDEF MSWINDOWS} Windows, {$ENDIF} {$IFDEF UNIX} unix, {$ENDIF} System.SysUtils;
 
-{ TElasticAPM4DSystem }
+{ TSystem }
 
 function TSystem.GetHostNameInOS: string;
 {$IFDEF MSWINDOWS}
@@ -46,26 +41,13 @@ begin
 {$ENDIF}
 end;
 
-function TSystem.GetPlatform: String;
-begin
-  // Result := GetOSVersionString
-end;
-
-function TSystem.GetWindowsArquitecture: string;
-begin
-  Result := '';
-{$IFDEF MSWINDOWS}
-  Result := 'x86';
-  // if IsWindows64 then
-  // Result := 'x64';
-{$ENDIF}
-end;
-
 constructor TSystem.Create;
+const
+  ARQHITECTURE: array [TOSVersion.TArchitecture] of string = ('IntelX86', 'IntelX64', 'ARM32', 'ARM64');
 begin
-  FArchitecture := GetWindowsArquitecture;
+  FArchitecture := ARQHITECTURE[TOSVersion.Architecture];
   FHostname := GetHostNameInOS;
-  FPlatform := GetPlatform;
+  FPlatform := TOSVersion.ToString;
 end;
 
 end.

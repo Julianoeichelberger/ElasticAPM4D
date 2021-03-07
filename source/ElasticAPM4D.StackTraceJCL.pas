@@ -1,16 +1,16 @@
-unit ElasticAPM4D.Jcl;
+unit ElasticAPM4D.StackTraceJCL;
 
 interface
 
 Uses
   System.Classes,
-  ElasticAPM4D.StacktraceFrame;
+  ElasticAPM4D.Stacktrace;
 
 type
   TStacktraceJCL = class
   private
     function ExtractValue(const AStr, ARegEX: string): string;
-    function GetLine(const AStr: string): integer;
+    function GetLine(const AStr: string): Integer;
     function GetUnitName(const AStr: string): string;
     function GetClassName(const AStr: string): string;
     function GetContextLine(const AStr: string): string;
@@ -23,11 +23,11 @@ type
 implementation
 
 Uses
+{$IFDEF MSWINDOWS}
+{$IFDEF jcl}
   JclDebug,
-  System.IOUtils,
-  System.SysUtils,
-  System.RegularExpressions,
-  ElasticAPM4D.Resources;
+{$ENDIF}
+{$ENDIF} System.IOUtils, System.SysUtils, System.RegularExpressions, ElasticAPM4D.Resources;
 
 { TStacktraceJCL }
 
@@ -59,7 +59,7 @@ begin
     Result := Result + ')';
 end;
 
-function TStacktraceJCL.GetLine(const AStr: string): integer;
+function TStacktraceJCL.GetLine(const AStr: string): Integer;
 begin
   Result := StrToIntDef(ExtractValue(AStr, REGEx_LINE), 0);
 end;
@@ -67,7 +67,11 @@ end;
 function TStacktraceJCL.GetStackList: TStringList;
 begin
   Result := TStringList.Create;
+{$IFDEF MSWINDOWS}
+{$IFDEF jcl}
   JclLastExceptStackListToStrings(Result, True);
+{$ENDIF}
+{$ENDIF}
 end;
 
 function TStacktraceJCL.GetUnitName(const AStr: string): string;
@@ -79,7 +83,7 @@ function TStacktraceJCL.GetUnitName(const AStr: string): string;
   end;
 
 var
-  I: integer;
+  I: Integer;
 begin
   for I := 0 to Pred(Length(LIST_REGEx_UNIT_NAME)) do
   begin
@@ -94,29 +98,29 @@ end;
 
 class function TStacktraceJCL.Get: TArray<TStacktrace>;
 var
-  LStack: TStringList;
-  LStacktrace: TStacktrace;
-  LLine: integer;
-  LClass: TStacktraceJCL;
+  StackList: TStringList;
+  Stacktrace: TStacktrace;
+  Line: Integer;
+  JclStackTrace: TStacktraceJCL;
 begin
-  LClass := TStacktraceJCL.Create;
-  LStack := LClass.GetStackList;
+  JclStackTrace := TStacktraceJCL.Create;
+  StackList := JclStackTrace.GetStackList;
   try
-    for LLine := 0 to Pred(LStack.Count) do
+    for Line := 0 to Pred(StackList.Count) do
     begin
-      if not LClass.IsValidStacktrace(LStack.Strings[LLine]) then
+      if not JclStackTrace.IsValidStacktrace(StackList.Strings[Line]) then
         Continue;
 
-      LStacktrace := TStacktrace.Create;
-      LStacktrace.lineno := LClass.GetLine(LStack.Strings[LLine]);
-      LStacktrace.module := LClass.GetClassName(LStack.Strings[LLine]);
-      LStacktrace.filename := LClass.GetUnitName(LStack.Strings[LLine]);
-      LStacktrace.context_line := LClass.GetContextLine(LStack.Strings[LLine]);
-      Result := Result + [LStacktrace];
+      Stacktrace := TStacktrace.Create;
+      Stacktrace.lineno := JclStackTrace.GetLine(StackList.Strings[Line]);
+      Stacktrace.module := JclStackTrace.GetClassName(StackList.Strings[Line]);
+      Stacktrace.filename := JclStackTrace.GetUnitName(StackList.Strings[Line]);
+      Stacktrace.context_line := JclStackTrace.GetContextLine(StackList.Strings[Line]);
+      Result := Result + [Stacktrace];
     end;
   finally
-    LStack.Free;
-    LClass.Free;
+    StackList.Free;
+    JclStackTrace.Free;
   end;
 end;
 

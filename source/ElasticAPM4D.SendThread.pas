@@ -22,10 +22,7 @@ type
 implementation
 
 Uses
-  System.IOUtils,
-  System.SysUtils,
-  IdHTTP,
-  ElasticAPM4D.Resources;
+  System.IOUtils, System.SysUtils, IdHTTP, ElasticAPM4D.Resources;
 
 { TSendThread }
 

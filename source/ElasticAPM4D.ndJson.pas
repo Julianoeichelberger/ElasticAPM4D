@@ -3,13 +3,8 @@ unit ElasticAPM4D.ndJson;
 interface
 
 uses
-  System.classes,
-  System.SysUtils,
-  System.Generics.Collections,
-  ElasticAPM4D.Metadata,
-  ElasticAPM4D.Transaction,
-  ElasticAPM4D.Span,
-  ElasticAPM4D.Error;
+  System.classes, System.SysUtils, System.Generics.Collections,
+  ElasticAPM4D.Metadata, ElasticAPM4D.Transaction, ElasticAPM4D.Span, ElasticAPM4D.Error;
 
 type
   TndJson = class

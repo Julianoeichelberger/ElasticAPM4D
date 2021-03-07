@@ -8,16 +8,9 @@ uses
   MVCFramework,
 {$ENDIF}
   IdHTTP,
-  System.Rtti,
-  System.SysUtils,
-  System.classes,
-  System.Generics.Collections,
-  ElasticAPM4D.Resources,
-  ElasticAPM4D.Error,
-  ElasticAPM4D.Span,
-  ElasticAPM4D.Transaction,
-  ElasticAPM4D.User,
-  ElasticAPM4D.SendPackage;
+  System.Rtti, System.SysUtils, System.classes, System.Generics.Collections,
+  ElasticAPM4D.Resources, ElasticAPM4D.Error, ElasticAPM4D.Span, ElasticAPM4D.Transaction,
+  ElasticAPM4D.User, ElasticAPM4D.SendPackage;
 
 type
   TTransaction = ElasticAPM4D.Transaction.TTransaction;
@@ -56,13 +49,6 @@ type
     class procedure AddError(AError: TError); overload;
     class procedure AddError(E: Exception); overload;
     class procedure AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException); overload;
-
-{$IFDEF dmvcframework}
-    class function StartTransaction(AActionName: string; AContext: TWebContext): TTransaction; overload;
-    class procedure EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient; const AResponse: IRESTResponse;
-      const AHttpMethod: string); overload;
-    class procedure EndTransaction(const AContext: TWebContext); overload;
-{$ENDIF}
   end;
 
 implementation
@@ -70,8 +56,7 @@ implementation
 { TElasticAPM4D }
 
 uses
-  ElasticAPM4D.Config,
-  ElasticAPM4D.Context;
+  ElasticAPM4D.Utils, ElasticAPM4D.Context;
 
 class procedure TElasticAPM4D.AddUser(AUserId, AUsername, AUserMail: string);
 begin
@@ -116,7 +101,7 @@ class function TElasticAPM4D.StartTransaction(const AType, AName, ATraceId: stri
 begin
   if Assigned(FPackage) then
     FPackage.Free;
-//    raise EElasticAPM4DException.Create(sDuplicateTransaction);
+  // raise EElasticAPM4DException.Create(sDuplicateTransaction);
 
   FPackage := TSendPackage.Create;
   FPackage.Transaction.Start(AType, AName);
@@ -280,52 +265,6 @@ begin
   FPackage.ErrorList.Add(LError);
 end;
 
-{$IFDEF dmvcframework}
-
-
-class function TElasticAPM4D.StartTransaction(AActionName: string; AContext: TWebContext): TTransaction;
-begin
-  Result := StartCustomTransaction('DMVCFramework', AActionName);
-  FPackage.Header := AContext.Request.Headers[HeaderKey];
-end;
-
-{$ENDIF}
-{$IFDEF dmvcframework}
-
-
-class procedure TElasticAPM4D.EndTransaction(const ARESTClient: MVCFramework.RESTClient.TRESTClient;
-  const AResponse: IRESTResponse; const AHttpMethod: string);
-var
-  LError: TError;
-begin
-  CurrentTransaction.Context.AutoConfigureContext(AResponse);
-  CurrentTransaction.Context.Request.url.full := ARESTClient.url;
-  CurrentTransaction.Context.Request.Method := AHttpMethod;
-  if AResponse.HasError then
-  begin
-    LError := GetError;
-
-    LError.Exception.code := AResponse.Error.HTTPError.ToString;
-    LError.Exception.&type := AResponse.Error.ExceptionClassname;
-    LError.Exception.message := AResponse.Error.ExceptionMessage;
-
-    AddError(LError);
-    EndTransaction('Error');
-  end
-  else
-    EndTransaction;
-end;
-{$ENDIF}
-{$IFDEF dmvcframework}
-
-
-class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
-begin
-  CurrentTransaction.Context.AutoConfigureContext(AContext);
-  EndTransaction;
-end;
-
-{$ENDIF}
 
 initialization
 
