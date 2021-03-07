@@ -1,14 +1,12 @@
-unit ElasticAPM4D.IdHTTP;
+unit ElasticAPM4D.Helper.Indy;
 
 interface
 
 uses
-  System.Classes,
-  System.SysUtils,
-  IdHTTP;
+  System.Classes, System.SysUtils, IdHTTP;
 
 type
-  TElasticAPM4DIdHttp = class(TIdCustomHTTP)
+  TIdHTTP = class(IdHTTP.TIdHTTP)
   protected
     procedure DoRequest(const AMethod: TIdHTTPMethod; AURL: string; ASource, AResponseContent: TStream;
       AIgnoreReplies: array of Int16); override;
@@ -19,9 +17,9 @@ implementation
 Uses
   ElasticAPM4D;
 
-{ TElasticAPM4DIdHttp }
+{ TIdHTTP }
 
-procedure TElasticAPM4DIdHttp.DoRequest(const AMethod: TIdHTTPMethod; AURL: string;
+procedure TIdHTTP.DoRequest(const AMethod: TIdHTTPMethod; AURL: string;
   ASource, AResponseContent: TStream; AIgnoreReplies: array of Int16);
 var
   LExistsTransaction: Boolean;
@@ -31,7 +29,7 @@ begin
   LName := AURL;
   if not LExistsTransaction then
   begin
-    TElasticAPM4D.StartTransaction(Self, AURL);
+    TElasticAPM4D.StartTransaction('Indy', AURL);
     LName := 'DoRequest';
   end;
   TElasticAPM4D.StartSpan(Self, LName);
@@ -53,7 +51,7 @@ begin
   Finally
     TElasticAPM4D.EndSpan(Self);
     if not LExistsTransaction then
-      TElasticAPM4D.EndTransaction(Self);
+      TElasticAPM4D.EndTransaction;
   End;
 end;
 

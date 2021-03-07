@@ -58,7 +58,8 @@ contains
   ElasticAPM4D.System in 'source\ElasticAPM4D.System.pas',
   ElasticAPM4D.Transaction in 'source\ElasticAPM4D.Transaction.pas',
   ElasticAPM4D.User in 'source\ElasticAPM4D.User.pas',
-  ElasticAPM4D.Helper.DMVCFramework in 'source\ElasticAPM4D.Helper.DMVCFramework.pas';
+  ElasticAPM4D.Helper.DMVCFramework in 'source\ElasticAPM4D.Helper.DMVCFramework.pas',
+  ElasticAPM4D.Helper.Indy in 'source\ElasticAPM4D.Helper.Indy.pas';
 
 end.
 

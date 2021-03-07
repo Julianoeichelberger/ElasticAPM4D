@@ -136,6 +136,7 @@
         <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
         <DCCReference Include="source\ElasticAPM4D.User.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Helper.DMVCFramework.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Helper.Indy.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
