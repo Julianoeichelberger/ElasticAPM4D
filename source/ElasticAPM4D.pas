@@ -3,13 +3,9 @@ unit ElasticAPM4D;
 interface
 
 uses
-{$IFDEF dmvcframework}
-  MVCFramework.RESTClient,
-  MVCFramework,
-{$ENDIF}
   System.Rtti, System.SysUtils, System.classes, System.Generics.Collections,
   ElasticAPM4D.Resources, ElasticAPM4D.Error, ElasticAPM4D.Span, ElasticAPM4D.Transaction,
-  ElasticAPM4D.User, ElasticAPM4D.Package;
+  ElasticAPM4D.User, ElasticAPM4D.Package, IdHTTP;
 
 type
   TTransaction = ElasticAPM4D.Transaction.TTransaction;
@@ -42,6 +38,7 @@ type
 
     class procedure AddError(AError: TError); overload;
     class procedure AddError(E: Exception); overload;
+    class procedure AddError(E: EIdHTTPProtocolException); overload;
   end;
 
 implementation
@@ -168,29 +165,10 @@ begin
   CurrentTransaction.span_count.Inc;
 end;
 
-// class function TElasticAPM4D.StartSpan(const AIdHttp: TIdCustomHTTP; const AName: string): TSpan;
-// begin
-// Result := StartCustomSpan(AName, 'Request');
-// AIdHttp.Request.CustomHeaders.AddValue(HeaderKey, HeaderValue);
-// end;
-
 class function TElasticAPM4D.CurrentSpan: TSpan;
 begin
   Result := FPackage.CurrentSpan;
 end;
-
-// class procedure TElasticAPM4D.EndSpan(const AIdHttp: TIdCustomHTTP);
-// begin
-// if not ExistsTransaction then
-// exit;
-//
-// if not FPackage.SpanIsOpen then
-// exit;
-//
-// CurrentSpan.action := AIdHttp.Request.Method;
-// CurrentSpan.Context.AutoCreateHttp(AIdHttp);
-// EndSpan;
-// end;
 
 class procedure TElasticAPM4D.EndSpan;
 begin
@@ -233,27 +211,23 @@ begin
   FPackage.ErrorList.Add(AError);
 end;
 
-// class procedure TElasticAPM4D.AddError(AIdHttp: TIdCustomHTTP; E: EIdHTTPProtocolException);
-// var
-// LError: TError;
-// begin
-// if not Assigned(FPackage) then
-// exit;
-//
-// LError := GetError;
-//
-// // LError.AutoConfigureError(AIdHttp);
-//
-// LError.Exception.code := E.ErrorCode.ToString;
-// LError.Exception.&type := E.ClassName;
-// LError.Exception.message := E.message;
-//
-// FPackage.ErrorList.Add(LError);
-// end;
+class procedure TElasticAPM4D.AddError(E: EIdHTTPProtocolException);
+var
+  LError: TError;
+begin
+  if not Assigned(FPackage) then
+    Exit;
+
+  LError := GetError;
+
+  LError.Exception.Code := E.ErrorCode.ToString;
+  LError.Exception.message := E.ErrorMessage;
+  LError.Exception.&type := E.ClassName;
+
+  FPackage.ErrorList.Add(LError)
+end;
 
 initialization
-
-// TElasticAPM4DConfig.InitializeFile;
 
 finalization
 

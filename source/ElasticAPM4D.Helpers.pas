@@ -7,8 +7,6 @@ uses
 
 function StartTransaction(AIdHTTP: TIdHTTP; const AType, AName: string): TTransaction;
 procedure EndTransaction(AIdHTTP: TIdHTTP);
-procedure AddError(AIdHTTP: TIdHTTP; E: EIdHTTPProtocolException); overload;
-procedure AddError(E: Exception); overload;
 function StartSpan(AName: string): TSpan;
 procedure EndSpan(AIdHTTP: TIdHTTP);
 {$IFDEF dmvcframework}
@@ -51,31 +49,6 @@ begin
   TElasticAPM4D.CurrentTransaction.Context.Response.status_code := AIdHTTP.ResponseCode;
 
   TElasticAPM4D.EndTransaction;
-end;
-
-procedure AddError(AIdHTTP: TIdHTTP; E: EIdHTTPProtocolException); overload;
-var
-  Erro: TError;
-begin
-  if not TElasticAPM4D.ExistsTransaction then
-    exit;
-
-  if TElasticAPM4D.CurrentSpan <> nil then
-    Erro := TError.Create(TElasticAPM4D.CurrentSpan.Trace_id,
-      TElasticAPM4D.CurrentSpan.Transaction_id, TElasticAPM4D.CurrentSpan.Id)
-  else
-    Erro := TError.Create(TElasticAPM4D.CurrentTransaction.Trace_id,
-      TElasticAPM4D.CurrentTransaction.Id, TElasticAPM4D.CurrentTransaction.Id);
-  Erro.Exception.Code := E.ErrorCode.ToString;
-  Erro.Exception.Message := E.ErrorMessage;
-  Erro.Exception.&Type := E.ClassName;
-
-  TElasticAPM4D.AddError(Erro);
-end;
-
-procedure AddError(E: Exception); overload;
-begin
-  TElasticAPM4D.AddError(E);
 end;
 
 function StartSpan(AName: string): TSpan;
