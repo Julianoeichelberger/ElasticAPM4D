@@ -9,125 +9,58 @@ type
   EElasticAPM4DException = Exception;
 
   TConfig = class
-  strict private
-  type
-    TProperties = Record
-    private
-      FEnabled: Boolean;
-      FServiceName: string;
-      FDatabase: string;
-      FURL: string;
-      FAppVersion: string;
-    public
-      property Enabled: Boolean read FEnabled write FEnabled;
-      property URL: string read FURL write FURL;
-      property ServiceName: string read FServiceName write FServiceName;
-      property AppVersion: string read FAppVersion write FAppVersion;
-      property Database: string read FDatabase write FDatabase;
-    end;
-  strict private
-    class var FFile: TIniFile;
-    class var FConfigs: TProperties;
-    class function GetFileName: string;
+  private
+    class var FDatabase: string;
+    class var FDatabaseUser: string;
+    class var FAppName: string;
+    class var FAppVersion: string;
+    class var FUrlElasticAPM: string;
+    class var FIsActive: Boolean;
+    class var FUserId: string;
+    class var FUserName: string;
+    class var FUserMail: string;
   public
-    class procedure InitializeFile;
-    class procedure RealeseFile;
+    class function GetAppName: string; static;
+    class function GetAppVersion: string; static;
+    class function GetDatabase: string;
+    class function GetDatabaseUser: string; static;
+    class function GetIsActive: Boolean; static;
+    class function GetUrlElasticAPM: string; static;
+    class function GetUserId: string; static;
+    class function GetUserMail: string; static;
+    class function GetUserName: string; static;
 
-    class function Enabled: Boolean;
-    class function URL: string;
-    class function ServiceName: string;
-    class function Database: string;
-    class function AppVersion: string;
+    class procedure SetAppName(const Value: string); static;
+    class procedure SetAppVersion(const Value: string); static;
+    class procedure SetDatabase(const Value: string);
+    class procedure SetDatabaseUser(const Value: string); static;
+    class procedure SetIsActive(const Value: Boolean); static;
+    class procedure SetUrlElasticAPM(const Value: string); static;
+    class procedure SetUserId(const Value: string); static;
+    class procedure SetUserMail(const Value: string); static;
+    class procedure SetUserName(const Value: string); static;
   end;
 
   TUUid = class
   private
-    class procedure RemoveChars(var AStr: string);
+    class
+      procedure RemoveChars(var AStr: string);
   public
-    class function Get64b: string;
-    class function Get128b: string;
+    class
+      function Get64b: string;
+    class
+      function Get128b: string;
   end;
 
   TTimestampEpoch = class
-    class function Get(ADate: TDatetime): Int64;
+    class
+      function Get(ADate: TDatetime): Int64;
   end;
 
 implementation
 
 Uses
-  System.DateUtils, System.IOUtils;
-
-{ TConfig }
-
-class function TConfig.AppVersion: string;
-begin
-  Result := FConfigs.AppVersion;
-end;
-
-class function TConfig.Database: string;
-begin
-  Result := FConfigs.Database;
-end;
-
-class function TConfig.Enabled: Boolean;
-begin
-  Result := FConfigs.Enabled;
-end;
-
-class function TConfig.ServiceName: string;
-begin
-  Result := FConfigs.ServiceName;
-end;
-
-class function TConfig.URL: string;
-begin
-  Result := FConfigs.URL;
-end;
-
-class function TConfig.GetFileName: string;
-begin
-  Result := IncludeTrailingPathDelimiter(TDirectory.GetCurrentDirectory) + 'ElasticAPM4D.ini';
-end;
-
-class procedure TConfig.InitializeFile;
-begin
-  if GetFileName.Contains('Windows') then
-    Exit;
-  FFile := TIniFile.Create(GetFileName);
-
-  if not FFile.ValueExists('apm', 'enabled') then
-    FFile.WriteString('apm', 'enabled', 'False');
-
-  FConfigs.Enabled := FFile.ReadString('apm', 'enabled', 'False').ToBoolean;
-  if not FConfigs.Enabled then
-    Exit;
-
-  if not FFile.ValueExists('apm', 'url') then
-    FFile.WriteString('apm', 'url', 'http://127.0.0.1:8200/intake/v2/events');
-
-  FConfigs.URL := FFile.ReadString('apm', 'url', '');
-
-  if not FFile.ValueExists('service', 'name') then
-    FFile.WriteString('service', 'name', '');
-
-  FConfigs.ServiceName := FFile.ReadString('service', 'name', '');
-
-  if not FFile.ValueExists('service', 'database') then
-    FFile.WriteString('service', 'database', '');
-
-  FConfigs.ServiceName := FFile.ReadString('service', 'database', '');
-
-  if not FFile.ValueExists('service', 'appversion') then
-    FFile.WriteString('service', 'appversion', '');
-
-  FConfigs.ServiceName := FFile.ReadString('service', 'appversion', '');
-end;
-
-class procedure TConfig.RealeseFile;
-begin
-  if Assigned(FFile) then
-    FFile.Free;
-end;
+{$IFDEF MSWINDOWS} Windows, Vcl.Forms, {$ENDIF} System.IOUtils, System.DateUtils;
 
 { TUUid }
 
@@ -164,5 +97,137 @@ class function TTimestampEpoch.Get(ADate: TDatetime): Int64;
 begin
   Result := StrToInt64(FormatFloat('0', DateTimeToUnix(ADate, False)) + FormatDateTime('zzz', ADate) + '000');
 end;
+
+{ TConfig }
+
+class function TConfig.GetAppName: string;
+begin
+{$IFDEF MSWINDOWS}
+  if FAppName.IsEmpty then
+    FAppName := TPath.GetFileNameWithoutExtension(Application.ExeName);
+{$ENDIF}
+  Result := FAppName;
+end;
+
+class function TConfig.GetAppVersion: string;
+{$IFDEF MSWINDOWS}
+var
+  Exe: string;
+  Size, Handle: DWORD;
+  Buffer: TBytes;
+  FixedPtr: PVSFixedFileInfo;
+{$ENDIF}
+begin
+  if FAppVersion.IsEmpty then
+  begin
+{$IFDEF MSWINDOWS}
+    Exe := ParamStr(0);
+    Size := GetFileVersionInfoSize(PChar(Exe), Handle);
+    if Size = 0 then
+    begin
+      FAppVersion := '0';
+      Exit;
+    end;
+    SetLength(Buffer, Size);
+    if not GetFileVersionInfo(PChar(Exe), Handle, Size, Buffer) or
+      not VerQueryValue(Buffer, '\', Pointer(FixedPtr), Size) then
+      RaiseLastOSError;
+    FAppVersion := Format('%d.%d.%d.%d',
+      [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
+      LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
+{$ENDIF}
+  end;
+  Result := FAppVersion;
+end;
+
+class function TConfig.GetDatabase: string;
+begin
+  Result := FDatabase;
+end;
+
+class function TConfig.GetDatabaseUser: string;
+begin
+  Result := FDatabaseUser;
+end;
+
+class function TConfig.GetIsActive: Boolean;
+begin
+  Result := FIsActive;
+end;
+
+class function TConfig.GetUrlElasticAPM: string;
+begin
+  if FUrlElasticAPM.IsEmpty then
+    FUrlElasticAPM := 'http://127.0.0.1:8200/intake/v2/events';
+  Result := FUrlElasticAPM;
+end;
+
+class function TConfig.GetUserId: string;
+begin
+  Result := FUserId;
+end;
+
+class function TConfig.GetUserMail: string;
+begin
+  Result := FUserMail;
+end;
+
+class function TConfig.GetUserName: string;
+begin
+  Result := FUserName;
+end;
+
+class procedure TConfig.SetAppName(const Value: string);
+begin
+  FAppName := Value;
+end;
+
+class procedure TConfig.SetAppVersion(const Value: string);
+begin
+  FAppVersion := Value;
+end;
+
+class procedure TConfig.SetDatabase(const Value: string);
+begin
+  FDatabase := Value;
+end;
+
+class procedure TConfig.SetDatabaseUser(const Value: string);
+begin
+  FDatabaseUser := Value;
+end;
+
+class procedure TConfig.SetIsActive(const Value: Boolean);
+begin
+  FIsActive := Value;
+end;
+
+class procedure TConfig.SetUrlElasticAPM(const Value: string);
+begin
+  FUrlElasticAPM := Value;
+end;
+
+class procedure TConfig.SetUserId(const Value: string);
+begin
+  FUserId := Value;
+end;
+
+class procedure TConfig.SetUserMail(const Value: string);
+begin
+  FUserMail := Value;
+end;
+
+class procedure TConfig.SetUserName(const Value: string);
+begin
+  FUserName := Value;
+end;
+
+initialization
+
+TConfig.SetIsActive(True);
+
+finalization
+
+TConfig.SetIsActive(False);
 
 end.

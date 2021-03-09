@@ -17,8 +17,8 @@ type
     procedure Dec;
     procedure Reset;
 
-    property dropped: Integer read FDropped;
-    property started: Integer read FStarted;
+    property Dropped: Integer read FDropped;
+    property Started: Integer read FStarted;
   end;
 
   TTransaction = class
@@ -39,21 +39,21 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Start(AType, AName: string);
+    procedure Start(const AType, AName: string);
     procedure &End;
 
-    function toJsonString: string;
+    function ToJsonString: string;
 
-    property id: string read Fid;
-    property trace_id: string read Ftrace_id write Ftrace_id;
-    property parent_id: string read Fparent_id write Fparent_id;
-    property name: string read Fname write Fname;
+    property Id: string read Fid;
+    property Trace_id: string read Ftrace_id write Ftrace_id;
+    property Parent_id: string read Fparent_id write Fparent_id;
+    property Name: string read Fname write Fname;
     property &type: string read Ftype;
-    property span_count: TSpanCount read Fspan_count;
-    property Context: TContext read Fcontext;
-    property duration: int64 read Fduration write Fduration;
+    property Span_count: TSpanCount read Fspan_count;
+    property Context: TContext read Fcontext write Fcontext;
+    property Duration: int64 read Fduration write Fduration;
     property &result: string read Fresult write Fresult;
-    property sampled: boolean read Fsampled write Fsampled;
+    property Sampled: boolean read Fsampled write Fsampled;
     property Timestamp: int64 read Ftimestamp write Ftimestamp;
   end;
 
@@ -90,26 +90,18 @@ end;
 
 constructor TTransaction.Create;
 begin
-  Fcontext := TContext.Create;
   Fspan_count := TSpanCount.Create;
+  Fid := TUUid.Get64b;
+  Ftrace_id := TUUid.Get128b;
+  Fsampled := true;
 end;
 
 destructor TTransaction.Destroy;
 begin
-  Fcontext.Free;
+  if Assigned(Fcontext) then
+    Fcontext.Free;
   Fspan_count.Free;
   inherited;
-end;
-
-procedure TTransaction.Start(AType, AName: string);
-begin
-  FStartDate := now;
-  Fid := TUUid.Get64b;
-  Ftrace_id := TUUid.Get128b;
-  Ftimestamp := TTimestampEpoch.Get(FStartDate);
-  Fsampled := true;
-  Ftype := AType;
-  Fname := AName;
 end;
 
 procedure TTransaction.&End;
@@ -117,7 +109,15 @@ begin
   Fduration := MilliSecondsBetween(now, FStartDate);
 end;
 
-function TTransaction.toJsonString: string;
+procedure TTransaction.Start(const AType, AName: string);
+begin
+  FStartDate := now;
+  Ftimestamp := TTimestampEpoch.Get(FStartDate);
+  Ftype := AType;
+  Fname := AName;
+end;
+
+function TTransaction.ToJsonString: string;
 begin
   Result := format(sTransactionJsonId, [TJson.ObjectToJsonString(Self, [joIgnoreEmptyStrings])]);
 end;

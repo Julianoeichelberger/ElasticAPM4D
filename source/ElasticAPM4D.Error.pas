@@ -3,10 +3,10 @@ unit ElasticAPM4D.Error;
 interface
 
 uses
-  IdHTTP, System.SysUtils, ElasticAPM4D.Context, ElasticAPM4D.Stacktrace, ElasticAPM4D.Transaction, ElasticAPM4D.Span;
+  System.SysUtils, ElasticAPM4D.Stacktrace, ElasticAPM4D.Span;
 
 type
-  TErrorException = class
+  TException = class
   private
     FCode: String;
     FHandled: Boolean;
@@ -34,20 +34,17 @@ type
   TError = class
   private
     FCulprit: String;
-    FException: TErrorException;
+    FException: TException;
     FId: String;
     FParent_id: String;
     FTrace_id: String;
     FTransaction_id: String;
     FTimestamp: Int64;
     Fcontext: TContext;
-    procedure InternalCreate;
   public
-    constructor Create(ASpan: TSpan); overload;
-    constructor Create(ATransaction: TTransaction); overload;
+    constructor Create(const ATraceId, ATransactionId, AParentId: string);
     destructor Destroy; override;
 
-    procedure AutoConfigureError(const AIdHttp: TIdCustomHTTP);
     function ToJsonString: string;
 
     property id: String read FId;
@@ -57,7 +54,7 @@ type
     property Transaction_id: String read FTransaction_id;
     property Culprit: String read FCulprit write FCulprit;
     property Context: TContext read Fcontext write Fcontext;
-    property Exception: TErrorException read FException write FException;
+    property Exception: TException read FException write FException;
   end;
 
 implementation
@@ -65,52 +62,32 @@ implementation
 uses
   Rest.Json, ElasticAPM4D.Utils, ElasticAPM4D.StackTraceJCL, ElasticAPM4D.Resources;
 
-{ TErrorException }
+{ TException }
 
-destructor TErrorException.Destroy;
+destructor TException.Destroy;
 var
-  LCause: TObject;
+  Item: TObject;
 begin
   if Assigned(Fattributes) then
     Fattributes.Free;
-  for LCause in Fcause do
-    LCause.Free;
+  for Item in Fcause do
+    Item.Free;
   inherited;
 end;
 
 { TError }
 
-procedure TError.InternalCreate;
+constructor TError.Create(const ATraceId, ATransactionId, AParentId: string);
 begin
   FId := TUUid.Get128b;
-  FException := TErrorException.Create;
+  FException := TException.Create;
   FException.Stacktrace := TStacktraceJCL.Get;
   Fcontext := TContext.Create;
   FCulprit := '';
   FTimestamp := TTimestampEpoch.Get(now);
-end;
-
-procedure TError.AutoConfigureError(const AIdHttp: TIdCustomHTTP);
-begin
-  Fcontext.AutoCreatePage(AIdHttp);
-  Fcontext.AutoCreateResponse(AIdHttp);
-  Fcontext.AutoCreateRequest(AIdHttp);
-end;
-
-constructor TError.Create(ATransaction: TTransaction);
-begin
-  InternalCreate;
-  FTrace_id := ATransaction.Trace_id;
-  FTransaction_id := ATransaction.id;
-  FParent_id := ATransaction.id;
-end;
-
-constructor TError.Create(ASpan: TSpan);
-begin
-  InternalCreate;
-  FTrace_id := ASpan.Trace_id;
-  FTransaction_id := ASpan.Transaction_id;
-  FParent_id := ASpan.id;
+  FTrace_id := ATraceId;
+  FTransaction_id := ATransactionId;
+  FParent_id := AParentId;
 end;
 
 destructor TError.Destroy;
@@ -122,8 +99,7 @@ end;
 
 function TError.ToJsonString: string;
 begin
-  Result := format(sErrorJsonId, [TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings,
-    joIgnoreEmptyArrays])]);
+  Result := format(sErrorJsonId, [TJson.ObjectToJsonString(self, [joIgnoreEmptyStrings, joIgnoreEmptyArrays])]);
 end;
 
 end.

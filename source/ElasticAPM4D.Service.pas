@@ -3,7 +3,7 @@ unit ElasticAPM4D.Service;
 interface
 
 type
-  TServiceAgent = class
+  TAgent = class
   private
     FName: String;
     FVersion: String;
@@ -11,48 +11,48 @@ type
   public
     constructor Create;
 
-    property name: String read FName;
-    property version: String read FVersion;
-    property ephemeral_id: string read Fephemeral_id write Fephemeral_id;
+    property Name: String read FName;
+    property Version: String read FVersion;
+    property Ephemeral_id: string read Fephemeral_id write Fephemeral_id;
   end;
 
-  TServiceLanguage = class
+  TLanguage = class
   private
     FName: String;
     FVersion: String;
   public
     constructor Create;
 
-    property name: String read FName write FName;
-    property version: String read FVersion write FVersion;
+    property Name: String read FName write FName;
+    property Version: String read FVersion write FVersion;
   end;
 
-  TServiceFramework = class
+  TFramework = class
   private
     FName: String;
     FVersion: String;
   public
-    property name: String read FName write FName;
-    property version: String read FVersion write FVersion;
+    property Name: String read FName write FName;
+    property Version: String read FVersion write FVersion;
   end;
 
-  TServiceRuntime = class
+  TRuntime = class
   private
     FName: String;
     FVersion: String;
   public
     constructor Create;
 
-    property name: String read FName write FName;
-    property version: String read FVersion write FVersion;
+    property Name: String read FName write FName;
+    property Version: String read FVersion write FVersion;
   end;
 
   TService = class
   private
-    FFramework: TServiceFramework;
-    FLanguage: TServiceLanguage;
-    FRuntime: TServiceRuntime;
-    FAgent: TServiceAgent;
+    FFramework: TFramework;
+    FLanguage: TLanguage;
+    FRuntime: TRuntime;
+    FAgent: TAgent;
     FVersion: String;
     FEnvironment: string;
     FName: String;
@@ -60,32 +60,32 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    property name: String read FName;
-    property version: string read FVersion write FVersion;
-    property Agent: TServiceAgent read FAgent;
-    property environment: string read FEnvironment write FEnvironment;
-    property Framework: TServiceFramework read FFramework;
-    property Language: TServiceLanguage read FLanguage;
-    property Runtime: TServiceRuntime read FRuntime;
+    property Name: String read FName;
+    property Version: string read FVersion write FVersion;
+    property Agent: TAgent read FAgent;
+    property Environment: string read FEnvironment write FEnvironment;
+    property Framework: TFramework read FFramework;
+    property Language: TLanguage read FLanguage;
+    property Runtime: TRuntime read FRuntime;
   end;
 
 implementation
 
 uses
-{$IFDEF MSWINDOWS} Windows, Vcl.Forms, {$ENDIF} System.IOUtils, System.SysUtils;
+  System.SysUtils, ElasticAPM4D.Utils;
 
-{ TServiceAgent }
+{ TAgent }
 
-constructor TServiceAgent.Create;
+constructor TAgent.Create;
 begin
-  FVersion := '1.1.0';
+  FVersion := '1.2.0';
   FName := 'ElasticAPM4D';
   Fephemeral_id := '';
 end;
 
-{ TServiceLanguage }
+{ TLanguage }
 
-constructor TServiceLanguage.Create;
+constructor TLanguage.Create;
 begin
   FName := 'Delphi/Object Pascal';
   FVersion :=
@@ -117,47 +117,24 @@ begin
 {$IFDEF VER331} 'Delphi 10.4 Sidney'; {$ENDIF}
 end;
 
-{ TServiceRuntime }
+{ TRuntime }
 
-constructor TServiceRuntime.Create;
-{$IFDEF MSWINDOWS}
-var
-  Exe: string;
-  Size, Handle: DWORD;
-  Buffer: TBytes;
-  FixedPtr: PVSFixedFileInfo;
-{$ENDIF}
+constructor TRuntime.Create;
 begin
-{$IFDEF MSWINDOWS}
-  FName := TPath.GetFileNameWithoutExtension(Application.ExeName);
-
-  Exe := ParamStr(0);
-  Size := GetFileVersionInfoSize(PChar(Exe), Handle);
-  if Size = 0 then
-  begin
-    FVersion := '0';
-    exit;
-  end;
-  SetLength(Buffer, Size);
-  if not GetFileVersionInfo(PChar(Exe), Handle, Size, Buffer) or
-    not VerQueryValue(Buffer, '\', Pointer(FixedPtr), Size) then
-    RaiseLastOSError;
-  FVersion := Format('%d.%d.%d.%d',
-    [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
-    LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
-{$ENDIF}
+  FName := TConfig.GetAppName;
+  Version := TConfig.GetAppVersion;
 end;
 
 { TService }
 
 constructor TService.Create;
 begin
-  FAgent := TServiceAgent.Create;
-  FLanguage := TServiceLanguage.Create;
-  FRuntime := TServiceRuntime.Create;
-  FFramework := TServiceFramework.Create;
-  FVersion := FRuntime.version;
-  FName := FRuntime.name;
+  FAgent := TAgent.Create;
+  FLanguage := TLanguage.Create;
+  FRuntime := TRuntime.Create;
+  FFramework := TFramework.Create;
+  FVersion := TConfig.GetAppVersion;
+  FName := TConfig.GetAppName;
 end;
 
 destructor TService.Destroy;

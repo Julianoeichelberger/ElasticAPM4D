@@ -2,43 +2,40 @@ unit ElasticAPM4D.Request;
 
 interface
 
-Uses
-  IdHTTP;
-
 type
   TSocket = class
   private
     FEncrypted: Boolean;
-    FRemote_address: String;
+    FRemote_address: string;
   public
-    property encrypted: Boolean read FEncrypted write FEncrypted;
-    property remote_address: String read FRemote_address write FRemote_address;
+    property Encrypted: Boolean read FEncrypted write FEncrypted;
+    property Remote_address: string read FRemote_address write FRemote_address;
   end;
 
   TURL = class
   private
-    FFull: String;
-    FHash: String;
-    FHostname: String;
-    FPathname: String;
+    FFull: string;
+    FHash: string;
+    FHostname: string;
+    FPathname: string;
     FPort: Integer;
-    FProtocol: String;
-    FRaw: String;
-    FSearch: String;
+    FProtocol: string;
+    FRaw: string;
+    FSearch: string;
   public
-    property full: String read FFull write FFull;
-    property hash: String read FHash write FHash;
-    property hostname: String read FHostname write FHostname;
-    property pathname: String read FPathname write FPathname;
-    property port: Integer read FPort write FPort;
-    property protocol: String read FProtocol write FProtocol;
-    property raw: String read FRaw write FRaw;
-    property search: String read FSearch write FSearch;
+    property Full: string read FFull write FFull;
+    property Hash: string read FHash write FHash;
+    property Hostname: string read FHostname write FHostname;
+    property Pathname: string read FPathname write FPathname;
+    property Port: Integer read FPort write FPort;
+    property Protocol: string read FProtocol write FProtocol;
+    property Raw: string read FRaw write FRaw;
+    property Search: string read FSearch write FSearch;
   end;
 
   TRequest = class
   private
-    FBody: String;
+    FBody: string;
     Fcookies: TObject;
     Fheaders: string;
     FHttp_version: String;
@@ -46,23 +43,22 @@ type
     FSocket: TSocket;
     FUrl: TURL;
   public
-    constructor Create; overload;
-    constructor Create(AIdHTTP: TIdCustomHTTP); overload;
+    constructor Create;
     destructor Destroy; override;
 
-    property body: String read FBody write FBody;
-    property cookies: TObject read Fcookies write Fcookies;
-    property headers: string read Fheaders write Fheaders;
-    property http_version: String read FHttp_version write FHttp_version;
-    property method: String read FMethod write FMethod;
-    property socket: TSocket read FSocket;
-    property url: TURL read FUrl;
+    property Body: string read FBody write FBody;
+    property Cookies: TObject read Fcookies write Fcookies;
+    property Headers: string read Fheaders write Fheaders;
+    property Http_version: string read FHttp_version write FHttp_version;
+    property Method: string read FMethod write FMethod;
+    property Socket: TSocket read FSocket;
+    property Url: TURL read FUrl;
   end;
 
 implementation
 
 Uses
-  System.StrUtils, System.SysUtils;
+  System.SysUtils;
 
 { TRequest }
 
@@ -70,30 +66,6 @@ constructor TRequest.Create;
 begin
   FSocket := TSocket.Create;
   FUrl := TURL.Create;
-end;
-
-constructor TRequest.Create(AIdHTTP: TIdCustomHTTP);
-var
-  I: Integer;
-begin
-  Create;
-  FMethod := AIdHTTP.Request.method;
-  FHttp_version := AIdHTTP.Version;
-  FSocket.encrypted := Assigned(AIdHTTP.socket);
-
-  FUrl.hostname := AIdHTTP.url.Host;
-  FUrl.full := AIdHTTP.url.GetFullURI;
-  FUrl.protocol := AIdHTTP.url.protocol;
-  FUrl.pathname := AIdHTTP.url.Path;
-  FUrl.port := StrToIntDef(AIdHTTP.url.port, 0);
-  FUrl.search := AIdHTTP.url.Params;
-  FUrl.raw := AIdHTTP.url.Document;
-
-  for I := 0 to pred(AIdHTTP.Request.CustomHeaders.Count) do
-    Fheaders := Fheaders + ', ' + AIdHTTP.Request.CustomHeaders.Strings[I];
-
-  if not Fheaders.isEmpty then
-    Fheaders := Fheaders.Remove(1, 1);
 end;
 
 destructor TRequest.Destroy;

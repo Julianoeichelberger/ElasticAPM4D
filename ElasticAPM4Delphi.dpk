@@ -47,19 +47,15 @@ contains
   ElasticAPM4D.MetricSet in 'source\ElasticAPM4D.MetricSet.pas',
   ElasticAPM4D.ndJson in 'source\ElasticAPM4D.ndJson.pas',
   ElasticAPM4D in 'source\ElasticAPM4D.pas',
-  ElasticAPM4D.Process in 'source\ElasticAPM4D.Process.pas',
   ElasticAPM4D.Request in 'source\ElasticAPM4D.Request.pas',
   ElasticAPM4D.Resources in 'source\ElasticAPM4D.Resources.pas',
-  ElasticAPM4D.SendPackage in 'source\ElasticAPM4D.SendPackage.pas',
-  ElasticAPM4D.SendThread in 'source\ElasticAPM4D.SendThread.pas',
+  ElasticAPM4D.Package in 'source\ElasticAPM4D.Package.pas',
   ElasticAPM4D.Service in 'source\ElasticAPM4D.Service.pas',
   ElasticAPM4D.Span in 'source\ElasticAPM4D.Span.pas',
   ElasticAPM4D.Stacktrace in 'source\ElasticAPM4D.Stacktrace.pas',
-  ElasticAPM4D.System in 'source\ElasticAPM4D.System.pas',
   ElasticAPM4D.Transaction in 'source\ElasticAPM4D.Transaction.pas',
   ElasticAPM4D.User in 'source\ElasticAPM4D.User.pas',
-  ElasticAPM4D.Helper.DMVCFramework in 'source\ElasticAPM4D.Helper.DMVCFramework.pas',
-  ElasticAPM4D.Helper.Indy in 'source\ElasticAPM4D.Helper.Indy.pas';
+  ElasticAPM4D.Helpers in 'source\ElasticAPM4D.Helpers.pas';
 
 end.
 

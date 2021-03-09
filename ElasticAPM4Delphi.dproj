@@ -124,19 +124,15 @@
         <DCCReference Include="source\ElasticAPM4D.MetricSet.pas"/>
         <DCCReference Include="source\ElasticAPM4D.ndJson.pas"/>
         <DCCReference Include="source\ElasticAPM4D.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Process.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Request.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Resources.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.SendPackage.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.SendThread.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Package.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Span.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Stacktrace.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.System.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
         <DCCReference Include="source\ElasticAPM4D.User.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Helper.DMVCFramework.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Helper.Indy.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Helpers.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

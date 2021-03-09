@@ -1,4 +1,4 @@
-unit ElasticAPM4D.SendPackage;
+unit ElasticAPM4D.Package;
 
 interface
 
@@ -7,9 +7,7 @@ uses
   ElasticAPM4D.Transaction, ElasticAPM4D.Metadata, ElasticAPM4D.User, ElasticAPM4D.Span, ElasticAPM4D.Error;
 
 type
-  EElasticAPM4DException = Exception;
-
-  TSendPackage = class
+  TPackage = class
   private
     FMetadata: TMetadata;
     FTransaction: TTransaction;
@@ -18,15 +16,15 @@ type
     FOpenSpanStack: TList;
     FUser: TUser;
     FHeader: string;
-    procedure SetHeader(const Value: string);
     function ExtractTraceId: string;
     function ExtractParentID: string;
     function GetHeader: string;
+    procedure SetHeader(const Value: string);
   public
     constructor Create;
     destructor Destroy; override;
 
-    procedure Send;
+    procedure ToSend;
     function SpanIsOpen: Boolean;
     function CurrentSpan: TSpan;
 
@@ -42,14 +40,50 @@ type
 implementation
 
 Uses
-  ElasticAPM4D.SendThread, ElasticAPM4D.ndJson, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
+  IdHTTP, ElasticAPM4D.ndJson, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
+
+function SendToElasticAPM(AURL, AHeader: string; const AJson: WideString): Boolean;
+var
+  CouldSend: Boolean;
+begin
+  CouldSend := True;
+  TThread.CreateAnonymousThread(
+    procedure
+    var
+      Http: TIdHTTP;
+      DataSend, Result: TStringStream;
+    begin
+      Http := TIdHTTP.Create;
+      DataSend := TStringStream.Create(AJson, TEncoding.UTF8);
+      Result := TStringStream.Create('');
+      try
+        Http.Request.ContentType := 'application/x-ndjson';
+        Http.Request.Charset := 'gzip';
+        Http.Request.CustomHeaders.AddValue(sHEADER_KEY, AHeader);
+        try
+          Http.Post(AURL, DataSend, Result);
+          // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+          // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+        except
+          CouldSend := False;
+          // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+          // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+        end;
+      finally
+        DataSend.Free;
+        Result.Free;
+        Http.Free;
+      end;
+    end).Start;
+  Result := CouldSend;
+end;
 
 { TSendPackage }
 
-constructor TSendPackage.Create;
+constructor TPackage.Create;
 begin
-  FTransaction := TTransaction.Create;
   FMetadata := TMetadata.Create;
+  FTransaction := TTransaction.Create;
   FSpanList := TObjectList<TSpan>.Create;
   FOpenSpanStack := TList.Create;
   FErrorList := TObjectList<TError>.Create;
@@ -57,15 +91,15 @@ begin
   FHeader := '';
 end;
 
-function TSendPackage.CurrentSpan: TSpan;
+function TPackage.CurrentSpan: TSpan;
 begin
   if not SpanIsOpen then
-    raise EElasticAPM4DException.Create('Current span not found');
+    Exit(nil);
 
   Result := FOpenSpanStack.Items[Pred(FOpenSpanStack.Count)];
 end;
 
-destructor TSendPackage.Destroy;
+destructor TPackage.Destroy;
 begin
   FTransaction.Free;
   FMetadata.Free;
@@ -76,12 +110,12 @@ begin
   inherited;
 end;
 
-function TSendPackage.SpanIsOpen: Boolean;
+function TPackage.SpanIsOpen: Boolean;
 begin
   Result := FOpenSpanStack.Count > 0;
 end;
 
-function TSendPackage.GetHeader: string;
+function TPackage.GetHeader: string;
 begin
   Result := FHeader;
   if Result.IsEmpty then
@@ -93,39 +127,37 @@ begin
   end
 end;
 
-procedure TSendPackage.Send;
+procedure TPackage.ToSend;
 var
-  LndJson: TndJson;
-  LThread: TSendThread;
+  ndJson: TndJson;
 begin
-  if not TConfig.Enabled then
-    exit;
-  LndJson := TndJson.Create;
+  if not TConfig.GetIsActive then
+    Exit;
+  ndJson := TndJson.Create;
   try
-    LndJson.Add(FMetadata);
-    LndJson.Add(FTransaction);
-    LndJson.Add(FSpanList);
-    LndJson.Add(FErrorList);
+    ndJson.Add(FMetadata);
+    ndJson.Add(FTransaction);
+    ndJson.Add(FSpanList);
+    ndJson.Add(FErrorList);
 
-    LThread := TSendThread.Create(TConfig.URL);
-    LThread.Send(GetHeader, LndJson.Get);
+    SendToElasticAPM(TConfig.GetUrlElasticAPM, GetHeader, ndJson.Get);
   finally
     FHeader := '';
-    LndJson.Free;
+    ndJson.Free;
   end;
 end;
 
-function TSendPackage.ExtractParentID: string;
+function TPackage.ExtractParentID: string;
 begin
   Result := Copy(FHeader, 37, 16);
 end;
 
-function TSendPackage.ExtractTraceId: string;
+function TPackage.ExtractTraceId: string;
 begin
   Result := Copy(FHeader, 4, 32);
 end;
 
-procedure TSendPackage.SetHeader(const Value: string);
+procedure TPackage.SetHeader(const Value: string);
 begin
   FHeader := Value;
   if not FHeader.IsEmpty then

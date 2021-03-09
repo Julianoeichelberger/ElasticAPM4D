@@ -3,10 +3,10 @@ unit ElasticAPM4D.Span;
 interface
 
 Uses
-  IdHttp, System.SysUtils, ElasticAPM4D.Service, ElasticAPM4D.Stacktrace, ElasticAPM4D.Transaction;
+  System.SysUtils, ElasticAPM4D.Service, ElasticAPM4D.Stacktrace;
 
 type
-  TSpanContextDB = class
+  TDB = class
   private
     FInstance: String;
     FStatement: String;
@@ -14,14 +14,14 @@ type
     FUser: String;
     Flink: string;
   public
-    property instance: String read FInstance write FInstance;
-    property link: string read Flink write Flink;
-    property statement: String read FStatement write FStatement;
+    property Instance: String read FInstance write FInstance;
+    property Link: string read Flink write Flink;
+    property Statement: String read FStatement write FStatement;
     property &type: String read FType write FType;
     property User: String read FUser write FUser;
   end;
 
-  TSpanContextHttp = class
+  THttp = class
   private
     FMethod: String;
     FStatus_code: Integer;
@@ -32,39 +32,37 @@ type
     property url: String read FUrl write FUrl;
   end;
 
-  TSpanService = class
+  TService = class
   private
-    FAgent: TServiceAgent;
+    FAgent: TAgent;
     FName: String;
   public
     constructor Create;
     destructor Destroy; override;
 
-    property Agent: TServiceAgent read FAgent;
+    property Agent: TAgent read FAgent;
     property name: String read FName;
   end;
 
-  TSpanContext = class
+  TContext = class
   private
-    FService: TSpanService;
-    FHttp: TSpanContextHttp;
-    FDb: TSpanContextDB;
+    FService: TService;
+    FHttp: THttp;
+    FDb: TDB;
   public
     constructor Create; virtual;
     destructor Destroy; override;
 
-    procedure AutoCreateHttp(AIdHttp: TIdCustomHTTP);
-
-    property Service: TSpanService read FService write FService;
-    property db: TSpanContextDB read FDb write FDb;
-    property http: TSpanContextHttp read FHttp write FHttp;
+    property Service: TService read FService write FService;
+    property db: TDB read FDb write FDb;
+    property http: THttp read FHttp write FHttp;
   end;
 
   TSpan = class
   private
     FStartDate: TDateTime;
     FAction: String;
-    FContext: TSpanContext;
+    FContext: TContext;
     FDuration: Int64;
     FId: String;
     FName: String;
@@ -77,8 +75,7 @@ type
     FType: String;
     Ftimestamp: Int64;
   public
-    constructor Create(AParent: TSpan); overload;
-    constructor Create(AParent: TTransaction); overload;
+    constructor Create(const ATraceId, ATransactionId, AParentId: string);
     destructor Destroy; override;
 
     function ToJsonString: string;
@@ -86,18 +83,18 @@ type
     procedure Start;
     procedure &End;
 
-    property id: String read FId;
-    property transaction_id: String read FTransaction_id;
-    property name: String read FName write FName;
+    property Id: String read FId;
+    property Transaction_id: String read FTransaction_id;
+    property Name: String read FName write FName;
     property &type: String read FType write FType;
-    property parent_id: String read FParent_id;
-    property trace_id: String read FTrace_id;
-    property subtype: String read FSubtype write FSubtype;
-    property action: String read FAction write FAction;
-    property duration: Int64 read FDuration write FDuration;
-    property Context: TSpanContext read FContext;
+    property Parent_id: String read FParent_id;
+    property Trace_id: String read FTrace_id;
+    property Subtype: String read FSubtype write FSubtype;
+    property Action: String read FAction write FAction;
+    property Duration: Int64 read FDuration write FDuration;
+    property Context: TContext read FContext write FContext;
     property Stacktrace: TArray<TStacktrace> read FStacktrace write FStacktrace;
-    property sync: Boolean read FSync write FSync default true;
+    property Sync: Boolean read FSync write FSync default true;
     property Timestamp: Int64 read Ftimestamp;
   end;
 
@@ -108,12 +105,12 @@ Uses
 
 { TSpanService }
 
-constructor TSpanService.Create;
+constructor TService.Create;
 begin
-  FAgent := TServiceAgent.Create;
+  FAgent := TAgent.Create;
 end;
 
-destructor TSpanService.Destroy;
+destructor TService.Destroy;
 begin
   FAgent.Free;
   inherited;
@@ -121,21 +118,13 @@ end;
 
 { TSpanContext }
 
-procedure TSpanContext.AutoCreateHttp(AIdHttp: TIdCustomHTTP);
+constructor TContext.Create;
 begin
-  FHttp := TSpanContextHttp.Create;
-  FHttp.method := AIdHttp.Request.method;
-  FHttp.url := AIdHttp.Request.url;
-  FHttp.status_code := AIdHttp.ResponseCode;
+  FService := TService.Create;
+  FDb := TDB.Create;
 end;
 
-constructor TSpanContext.Create;
-begin
-  FService := TSpanService.Create;
-  FDb := TSpanContextDB.Create;
-end;
-
-destructor TSpanContext.Destroy;
+destructor TContext.Destroy;
 begin
   FService.Free;
   FDb.Free;
@@ -146,28 +135,16 @@ end;
 
 { TSpan }
 
-constructor TSpan.Create(AParent: TSpan);
+constructor TSpan.Create(const ATraceId, ATransactionId, AParentId: string);
 begin
   FId := TUUid.Get64b;
-  FTrace_id := AParent.trace_id;
-  FTransaction_id := AParent.transaction_id;
-  FParent_id := AParent.id;
+  FTrace_id := ATraceId;
+  FTransaction_id := ATransactionId;
+  FParent_id := AParentId;
   FAction := '';
   FSubtype := '';
   FSync := true;
-  FContext := TSpanContext.Create;
-end;
-
-constructor TSpan.Create(AParent: TTransaction);
-begin
-  FId := TUUid.Get64b;
-  FTrace_id := AParent.trace_id;
-  FTransaction_id := AParent.id;
-  FParent_id := AParent.id;
-  FAction := '';
-  FSubtype := '';
-  FSync := true;
-  FContext := TSpanContext.Create;
+  FContext := TContext.Create;
 end;
 
 destructor TSpan.Destroy;
@@ -197,3 +174,4 @@ begin
 end;
 
 end.
+
