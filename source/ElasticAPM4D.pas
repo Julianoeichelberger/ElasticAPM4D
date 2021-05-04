@@ -97,6 +97,7 @@ begin
 
   if Assigned(FUser) then
   begin
+    FPackage.Transaction.Context := TContext.Create;
     FPackage.Transaction.Context.User.id := FUser.id;
     FPackage.Transaction.Context.User.username := FUser.username;
     FPackage.Transaction.Context.User.email := FUser.email;
