@@ -25,7 +25,7 @@ type
     destructor Destroy; override;
 
     procedure ToSend;
-    function SpanIsOpen: Boolean;
+    function SpanIsOpened: Boolean;
     function CurrentSpan: TSpan;
 
     property Metadata: TMetadata read FMetadata write FMetadata;
@@ -93,7 +93,7 @@ end;
 
 function TPackage.CurrentSpan: TSpan;
 begin
-  if not SpanIsOpen then
+  if not SpanIsOpened then
     Exit(nil);
 
   Result := FOpenSpanStack.Items[Pred(FOpenSpanStack.Count)];
@@ -110,7 +110,7 @@ begin
   inherited;
 end;
 
-function TPackage.SpanIsOpen: Boolean;
+function TPackage.SpanIsOpened: Boolean;
 begin
   Result := FOpenSpanStack.Count > 0;
 end;
@@ -120,7 +120,7 @@ begin
   Result := FHeader;
   if Result.IsEmpty then
   begin
-    if SpanIsOpen then
+    if SpanIsOpened then
       Result := Format(sHEADER, [FTransaction.trace_id, CurrentSpan.id])
     else
       Result := Format(sHEADER, [FTransaction.trace_id, FTransaction.id]);

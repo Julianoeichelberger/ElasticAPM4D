@@ -19,14 +19,20 @@ class procedure EndTransaction(const AContext: TWebContext); overload;
 implementation
 
 Uses
-  ElasticAPM4D, ElasticAPM4D.Context, ElasticAPM4D.Request, ElasticAPM4D.Error;
+  ElasticAPM4D, ElasticAPM4D.Context, ElasticAPM4D.Request;
+
+procedure IndyHttpURL(var AIdHTTP: TIdHTTP);
+begin
+
+end;
+
 
 function StartTransaction(AIdHTTP: TIdHTTP; const AType, AName: string): TTransaction;
 begin
-  if TElasticAPM4D.ExistsTransaction then
-    Result := TElasticAPM4D.CurrentTransaction
+  if not TElasticAPM4D.ExistsTransaction then
+    Result := TElasticAPM4D.StartTransaction(AName, 'Request')
   else
-    Result := TElasticAPM4D.StartTransaction(AType, AName);
+    Result := TElasticAPM4D.Transaction;
 
   Result.Context.Request.url.Hostname := AIdHTTP.url.Host;
   Result.Context.Request.url.Full := AIdHTTP.url.GetFullURI;
@@ -43,25 +49,25 @@ begin
   if not TElasticAPM4D.ExistsTransaction then
     exit;
 
-  TElasticAPM4D.CurrentTransaction.Context.Response := TResponse.Create;
-  TElasticAPM4D.CurrentTransaction.Context.Response.finished := True;
-  TElasticAPM4D.CurrentTransaction.Context.Response.headers_sent := AIdHTTP.Request.CustomHeaders.Count > 0;
-  TElasticAPM4D.CurrentTransaction.Context.Response.status_code := AIdHTTP.ResponseCode;
+  TElasticAPM4D.Transaction.Context.Response := TResponse.Create;
+  TElasticAPM4D.Transaction.Context.Response.finished := True;
+  TElasticAPM4D.Transaction.Context.Response.headers_sent := AIdHTTP.Request.CustomHeaders.Count > 0;
+  TElasticAPM4D.Transaction.Context.Response.status_code := AIdHTTP.ResponseCode;
 
   TElasticAPM4D.EndTransaction;
 end;
 
 function StartSpan(AName: string): TSpan;
 begin
-  Result := TElasticAPM4D.StartCustomSpan(AName, 'Request');
+  Result := TElasticAPM4D.StartSpan(AName, 'Request');
 end;
 
 procedure EndSpan(AIdHTTP: TIdHTTP);
 begin
-  TElasticAPM4D.CurrentSpan.Context.http := THttp.Create;
-  TElasticAPM4D.CurrentSpan.Context.http.Method := AIdHTTP.Request.Method;
-  TElasticAPM4D.CurrentSpan.Context.http.status_code := AIdHTTP.ResponseCode;
-  TElasticAPM4D.CurrentSpan.Context.http.url := AIdHTTP.url.URI;
+  TElasticAPM4D.Span.Context.http := THttp.Create;
+  TElasticAPM4D.Span.Context.http.Method := AIdHTTP.Request.Method;
+  TElasticAPM4D.Span.Context.http.status_code := AIdHTTP.ResponseCode;
+  TElasticAPM4D.Span.Context.http.url := AIdHTTP.url.URI;
   TElasticAPM4D.EndSpan;
 end;
 
@@ -79,9 +85,9 @@ class procedure TElasticAPM4D.EndTransaction(const ARESTClient: MVCFramework.RES
 var
   LError: TError;
 begin
-  CurrentTransaction.Context.AutoConfigureContext(AResponse);
-  CurrentTransaction.Context.Request.url.Full := ARESTClient.url;
-  CurrentTransaction.Context.Request.Method := AHttpMethod;
+  // TElasticAPM4D.Transaction.Context.AutoConfigureContext(AResponse);
+  TElasticAPM4D.Transaction.Context.Request.url.Full := ARESTClient.url;
+  TElasticAPM4D.Transaction.Context.Request.Method := AHttpMethod;
   if AResponse.HasError then
   begin
     LError := GetError;
@@ -91,15 +97,13 @@ begin
     LError.Exception.Message := AResponse.Error.ExceptionMessage;
 
     AddError(LError);
-    EndTransaction('failure');
-  end
-  else
-    EndTransaction;
+  end;
+  EndTransaction;
 end;
 
 class procedure TElasticAPM4D.EndTransaction(const AContext: TWebContext);
 begin
-  CurrentTransaction.Context.AutoConfigureContext(AContext);
+  // CurrentTransaction.Context.AutoConfigureContext(AContext);
   EndTransaction;
 end;
 

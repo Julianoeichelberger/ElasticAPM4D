@@ -3,6 +3,9 @@ unit ElasticAPM4D.Service;
 interface
 
 type
+  // <summary>
+  // Agent holds information about the APM agent capturing the event - ElasticAPM4D
+  // </summary>
   TAgent = class
   private
     FName: String;
@@ -13,9 +16,15 @@ type
 
     property Name: String read FName;
     property Version: String read FVersion;
+    // <summary>
+    // phemeralID is a free format ID used for metrics correlation by agents
+    // </summary>
     property Ephemeral_id: string read Fephemeral_id write Fephemeral_id;
   end;
 
+  // <summary>
+  // Language holds information about the programming language of the monitored service.
+  // </summary>
   TLanguage = class
   private
     FName: String;
@@ -27,6 +36,9 @@ type
     property Version: String read FVersion write FVersion;
   end;
 
+  // <summary>
+  // Framework holds information about the framework used in the monitored service.
+  // </summary>
   TFramework = class
   private
     FName: String;
@@ -36,9 +48,12 @@ type
     property Version: String read FVersion write FVersion;
   end;
 
+  // <summary>
+  // Runtime holds information about the language runtime running the monitored service
+  // </summary>
   TRuntime = class
   private
-    FName: String;
+    FName: string;
     FVersion: String;
   public
     constructor Create;
@@ -47,6 +62,23 @@ type
     property Version: String read FVersion write FVersion;
   end;
 
+  // <summary>
+  // Node must be a unique meaningful name of the service node
+  // </summary>
+  TNode = class
+  private
+    FConfigured_name: string;
+  public
+    // <summary>
+    // Name of the service node
+    // </summary>
+    property Configured_name: string read FConfigured_name write FConfigured_name;
+  end;
+
+  // <summary>
+  // Service related information can be sent per event. Information provided here will override the more generic
+  // information retrieved from metadata, missing service fields will be retrieved from the metadata information.
+  // </summary>
   TService = class
   private
     FFramework: TFramework;
@@ -56,17 +88,31 @@ type
     FVersion: String;
     FEnvironment: string;
     FName: String;
+    FNode: TNode;
   public
     constructor Create;
     destructor Destroy; override;
 
-    property Name: String read FName;
-    property Version: string read FVersion write FVersion;
-    property Agent: TAgent read FAgent;
-    property Environment: string read FEnvironment write FEnvironment;
-    property Framework: TFramework read FFramework;
-    property Language: TLanguage read FLanguage;
-    property Runtime: TRuntime read FRuntime;
+    // <summary>
+    // name of the service node
+    // </summary>
+    procedure AddServiceNode(const AName: string);
+
+    // <summary>
+    // Environment in which the monitored service is running, e.g. `production` or `staging`.
+    // </summary>
+    procedure AddEnvironment(const AName: string);
+
+    // <summary>
+    // Information about the framework used
+    // </summary>
+    procedure AddFramework(const AName, AVersion: string);
+
+    // <summary>
+    // Name of the monitored service.
+    // Version of the monitored service
+    // </summary>
+    procedure ChangeServiceInfo(const AName, AVersion: string);
   end;
 
 implementation
@@ -127,14 +173,38 @@ end;
 
 { TService }
 
+procedure TService.AddEnvironment(const AName: string);
+begin
+  FEnvironment := AName;
+end;
+
+procedure TService.AddFramework(const AName, AVersion: string);
+begin
+  FFramework := TFramework.Create;
+  FFramework.Name := AName;
+  FFramework.Version := AVersion;
+end;
+
+procedure TService.AddServiceNode(const AName: string);
+begin
+  FNode := TNode.Create;
+  FNode.Configured_name := AName;
+end;
+
+procedure TService.ChangeServiceInfo(const AName, AVersion: string);
+begin
+  FName := AName;
+  FVersion := AVersion;
+end;
+
 constructor TService.Create;
 begin
   FAgent := TAgent.Create;
   FLanguage := TLanguage.Create;
   FRuntime := TRuntime.Create;
-  FFramework := TFramework.Create;
   FVersion := TConfig.GetAppVersion;
   FName := TConfig.GetAppName;
+  FEnvironment := 'staging';
 end;
 
 destructor TService.Destroy;
@@ -142,7 +212,10 @@ begin
   FAgent.Free;
   FLanguage.Free;
   FRuntime.Free;
-  FFramework.Free;
+  if Assigned(FFramework) then
+    FFramework.Free;
+  if Assigned(FNode) then
+    FNode.Free;
   inherited;
 end;
 

@@ -8,10 +8,13 @@ Uses
 type
   EElasticAPM4DException = Exception;
 
+  TOutcome = (success, failure, unknown);
+
   TConfig = class
   private
     class var FDatabase: string;
     class var FDatabaseUser: string;
+    class var FDatabaseInstance: string;
     class var FAppName: string;
     class var FAppVersion: string;
     class var FUrlElasticAPM: string;
@@ -24,6 +27,7 @@ type
     class function GetAppVersion: string; static;
     class function GetDatabase: string;
     class function GetDatabaseUser: string; static;
+    class function GetDatabaseInstance: string; static;
     class function GetIsActive: Boolean; static;
     class function GetUrlElasticAPM: string; static;
     class function GetUserId: string; static;
@@ -34,6 +38,7 @@ type
     class procedure SetAppVersion(const Value: string); static;
     class procedure SetDatabase(const Value: string);
     class procedure SetDatabaseUser(const Value: string); static;
+    class procedure SetDatabaseInstance(const Value: string); static;
     class procedure SetIsActive(const Value: Boolean); static;
     class procedure SetUrlElasticAPM(const Value: string); static;
     class procedure SetUserId(const Value: string); static;
@@ -43,18 +48,14 @@ type
 
   TUUid = class
   private
-    class
-      procedure RemoveChars(var AStr: string);
+    class procedure RemoveChars(var AStr: string);
   public
-    class
-      function Get64b: string;
-    class
-      function Get128b: string;
+    class function Get64b: string;
+    class function Get128b: string;
   end;
 
   TTimestampEpoch = class
-    class
-      function Get(ADate: TDatetime): Int64;
+    class function Get(ADate: TDatetime): Int64;
   end;
 
 implementation
@@ -145,6 +146,11 @@ begin
   Result := FDatabase;
 end;
 
+class function TConfig.GetDatabaseInstance: string;
+begin
+  Result := FDatabaseInstance;
+end;
+
 class function TConfig.GetDatabaseUser: string;
 begin
   Result := FDatabaseUser;
@@ -190,6 +196,11 @@ end;
 class procedure TConfig.SetDatabase(const Value: string);
 begin
   FDatabase := Value;
+end;
+
+class procedure TConfig.SetDatabaseInstance(const Value: string);
+begin
+  FDatabaseInstance := Value;
 end;
 
 class procedure TConfig.SetDatabaseUser(const Value: string);

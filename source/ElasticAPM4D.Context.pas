@@ -3,9 +3,12 @@ unit ElasticAPM4D.Context;
 interface
 
 uses
-  System.SysUtils, ElasticAPM4D.User, ElasticAPM4D.Request, ElasticAPM4D.Service;
+  System.SysUtils, ElasticAPM4D.User, ElasticAPM4D.Request, ElasticAPM4D.Service, ElasticAPM4D.Message;
 
 type
+  // <summary>
+  // Page holds information related to the current page and page referers. It is only sent from RUM agents.
+  // </summary>
   TPage = class
   private
     FReferer: String;
@@ -15,6 +18,9 @@ type
     property Url: String read FUrl write FUrl;
   end;
 
+  // <summary>
+  // Response describes the HTTP response information in case the event was created as a result of an HTTP request
+  // </summary>
   TResponse = class
   private
     FFinished: Boolean;
@@ -28,6 +34,9 @@ type
     property Headers: TObject read Fheaders write Fheaders;
   end;
 
+  // <summary>
+  // Context holds arbitrary contextual information for the event.
+  // </summary>
   TContext = class
   private
     FPage: TPage;
@@ -35,6 +44,8 @@ type
     FRequest: TRequest;
     FService: TService;
     FUser: TUser;
+    FMessage: TMessage;
+    FCustom: TObject;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -44,6 +55,13 @@ type
     property Request: TRequest read FRequest write FRequest;
     property Page: TPage read FPage write FPage;
     property Response: TResponse read FResponse write FResponse;
+    property Message: TMessage read FMessage write FMessage;
+
+    // <summary>
+    // Custom can contain additional metadata to be stored with the event. The format is unspecified and can be deeply
+    // nested objects. The information will not be indexed or searchable in Elasticsearch.
+    // </summary>
+    property Custom: TObject read FCustom write FCustom;
   end;
 
 implementation
@@ -64,6 +82,10 @@ begin
     FResponse.Free;
   if Assigned(FRequest) then
     FRequest.Free;
+  if Assigned(FMessage) then
+    FMessage.Free;
+  if Assigned(FCustom) then
+    FCustom.Free;
   inherited;
 end;
 

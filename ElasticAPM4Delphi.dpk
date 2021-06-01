@@ -55,9 +55,14 @@ contains
   ElasticAPM4D.Stacktrace in 'source\ElasticAPM4D.Stacktrace.pas',
   ElasticAPM4D.Transaction in 'source\ElasticAPM4D.Transaction.pas',
   ElasticAPM4D.User in 'source\ElasticAPM4D.User.pas',
-  ElasticAPM4D.Helpers in 'source\ElasticAPM4D.Helpers.pas';
+  ElasticAPM4D.Helpers in 'source\ElasticAPM4D.Helpers.pas',
+  ElasticAPM4D.Message in 'source\ElasticAPM4D.Message.pas',
+  ElasticAPM4D.Experience in 'source\ElasticAPM4D.Experience.pas',
+  ElasticAPM4D.Destination in 'source\ElasticAPM4D.Destination.pas',
+  ElasticAPM4D.Indy in 'source\ElasticAPM4D.Indy.pas';
 
 end.
+
 
 
 

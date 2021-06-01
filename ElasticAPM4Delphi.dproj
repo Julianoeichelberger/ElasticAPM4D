@@ -133,6 +133,10 @@
         <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
         <DCCReference Include="source\ElasticAPM4D.User.pas"/>
         <DCCReference Include="source\ElasticAPM4D.Helpers.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Message.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Experience.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Destination.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Indy.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
