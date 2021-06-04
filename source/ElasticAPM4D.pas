@@ -42,8 +42,6 @@ implementation
 
 { TElasticAPM4D }
 
-
-
 class function TElasticAPM4D.HeaderValue: string;
 begin
   if not Assigned(FPackage) then
@@ -147,17 +145,17 @@ end;
 
 class procedure TElasticAPM4D.AddError(E: Exception);
 var
-  LError: TError;
+  Error: TError;
 begin
   if not Assigned(FPackage) then
     Exit;
 
-  LError := GetError;
+  Error := GetError;
 
-  LError.Exception.&type := E.ClassName;
-  LError.Exception.message := E.message;
+  Error.Exception.&type := E.ClassName;
+  Error.Exception.message := E.message;
 
-  FPackage.ErrorList.Add(LError)
+  FPackage.ErrorList.Add(Error)
 end;
 
 class procedure TElasticAPM4D.AddError(AError: TError);
@@ -170,18 +168,18 @@ end;
 
 class procedure TElasticAPM4D.AddError(E: EIdHTTPProtocolException);
 var
-  LError: TError;
+  Error: TError;
 begin
   if not Assigned(FPackage) then
     Exit;
 
-  LError := GetError;
+  Error := GetError;
 
-  LError.Exception.Code := E.ErrorCode.ToString;
-  LError.Exception.message := E.ErrorMessage;
-  LError.Exception.&type := E.ClassName;
+  Error.Exception.Code := E.ErrorCode.ToString;
+  Error.Exception.message := E.ErrorMessage;
+  Error.Exception.&type := E.ClassName;
 
-  FPackage.ErrorList.Add(LError)
+  FPackage.ErrorList.Add(Error)
 end;
 
 end.

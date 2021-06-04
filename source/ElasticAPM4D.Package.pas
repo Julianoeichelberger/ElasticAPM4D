@@ -40,7 +40,7 @@ type
 implementation
 
 Uses
-  IdHTTP, ElasticAPM4D.ndJson, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
+  IdHTTP, Forms, IOUtils, ElasticAPM4D.ndJson, ElasticAPM4D.Utils, ElasticAPM4D.Resources;
 
 function SendToElasticAPM(AURL, AHeader: string; const AJson: WideString): Boolean;
 var
@@ -61,13 +61,16 @@ begin
         Http.Request.Charset := 'gzip';
         Http.Request.CustomHeaders.AddValue(sHEADER_KEY, AHeader);
         try
-          Http.Post(AURL, DataSend, Result);
-          // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
-          // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+          Http.Post(AURL, DataSend, Result); 
         except
           CouldSend := False;
-          // LDataSend.SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
-          // + LHttp.ResponseCode.ToString + '_' + FHeader + '.txt');
+//          with TStringList.Create do
+//          begin
+//            Text := AJson;
+//            SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
+//              + Http.ResponseCode.ToString + '_' + FormatDateTime('hh-mm-sss', now) + '.txt');
+//            Free;
+//          end;
         end;
       finally
         DataSend.Free;

@@ -52,6 +52,10 @@ type
     property Parent_id: String read FParent_id;
     property Trace_id: String read FTrace_id;
     property Transaction_id: String read FTransaction_id;
+
+    // <summary>
+    // Culprit identifies the function call which was the primary perpetrator of this event
+    // </summary>
     property Culprit: String read FCulprit write FCulprit;
     property Context: TContext read Fcontext write Fcontext;
     property Exception: TException read FException write FException;

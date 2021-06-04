@@ -59,7 +59,8 @@ contains
   ElasticAPM4D.Message in 'source\ElasticAPM4D.Message.pas',
   ElasticAPM4D.Experience in 'source\ElasticAPM4D.Experience.pas',
   ElasticAPM4D.Destination in 'source\ElasticAPM4D.Destination.pas',
-  ElasticAPM4D.Indy in 'source\ElasticAPM4D.Indy.pas';
+  ElasticAPM4D.Indy in 'source\ElasticAPM4D.Indy.pas',
+  ElasticAPM4D.RESTClient in 'source\ElasticAPM4D.RESTClient.pas';
 
 end.
 

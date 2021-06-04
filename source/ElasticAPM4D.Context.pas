@@ -28,6 +28,7 @@ type
     FStatus_code: Integer;
     Fheaders: TObject;
   public
+    constructor Create;
     property Finished: Boolean read FFinished write FFinished;
     property Headers_sent: Boolean read FHeaders_sent write FHeaders_sent;
     property Status_code: Integer read FStatus_code write FStatus_code;
@@ -87,6 +88,13 @@ begin
   if Assigned(FCustom) then
     FCustom.Free;
   inherited;
+end;
+
+{ TResponse }
+
+constructor TResponse.Create;
+begin
+  FFinished := True;
 end;
 
 end.

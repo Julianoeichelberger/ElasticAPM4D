@@ -51,7 +51,8 @@ begin
   if not Assigned(AErro) then
     exit;
   for LError in AErro.List do
-    FJson := FJson + sNDJsonSeparator + LError.ToJsonString;
+    if LError <> nil then
+      FJson := FJson + sNDJsonSeparator + LError.ToJsonString;
 end;
 
 procedure TndJson.Add(ATransaction: TTransaction);
