@@ -3,183 +3,230 @@ unit ElasticAPM4D;
 interface
 
 uses
-  System.Rtti, System.SysUtils, System.classes, System.Generics.Collections,
-  ElasticAPM4D.Resources, ElasticAPM4D.Error, ElasticAPM4D.Span, ElasticAPM4D.Transaction,
-  ElasticAPM4D.Utils, ElasticAPM4D.Package, IdHTTP;
+  System.Rtti, System.SysUtils, System.classes, System.Generics.Collections, IdHTTP,
+  Span, Transaction, Metadata, Error, Share.Types, REST.Client,
+  ElasticAPM4D.DataController, ElasticAPM4D.Config;
 
 type
-  TTransaction = ElasticAPM4D.Transaction.TTransaction;
-  TSpan = ElasticAPM4D.Span.TSpan;
-  TOutcome = ElasticAPM4D.Utils.TOutcome;
-  TConfig = ElasticAPM4D.Utils.TConfig;
+  TTransaction = Transaction.TTransaction;
+  TSpan = Span.TSpan;
+  TOutcome = Share.Types.TOutcome;
+  TConfig = ElasticAPM4D.Config.TConfig;
 
-  TElasticAPM4D = class
-  strict private
-    class threadvar FPackage: TPackage;
-  protected
-    class function GetError: TError;
+  TApm = class
+  strict protected
+    class threadvar FData: TDataController;
+    class function GetErrorInstance: TError; static;
+  public const
+    HeaderKey = 'elastic-apm-traceparent';
   public
-    class function HeaderKey: string;
-    class function HeaderValue: string;
+    class function HeaderValue: string; static;
 
     class function StartTransaction(const AName: string;
-      const AType: string = 'Undefined'; const ATraceId: string = ''): TTransaction;
-    class function ExistsTransaction: Boolean;
-    class function Transaction: TTransaction;
-    class procedure EndTransaction(const AOutcome: TOutcome = success); overload;
+      const AType: string = 'Undefined'; const ATraceId: string = ''): TTransaction; static;
+    class function StartTransactionRequest(const AResource: string; const AMethod: string = 'GET';
+      const ATraceId: string = ''): TTransaction; static;
+    class function ExistsTransaction: Boolean; static;
+    class function Transaction: TTransaction; static;
+    class procedure EndTransaction(const AOutcome: TOutcome = success); overload; static;
+    class procedure EndTransaction(const AStatusCode: Integer); overload; static;
 
-    class function StartSpan(const AName: string; const AType: string = 'Method'): TSpan; overload;
-    class function StartSpanSQL(const AName, ASQL: string): TSpan; overload;
-    class function Span: TSpan;
-    class procedure EndSpan; overload;
+    class function StartSpan(const AName: string; const AType: string = 'Method'): TSpan; static;
+    class function StartSpanSQL(const AName, ASQL: string): TSpan; static;
+    class function StartSpanRequest(const AResource: string; const AMethod: string): TSpan; static;
+    class function Span: TSpan; static;
+    class procedure EndSpan; overload; static;
+    class procedure EndSpan(const StatusCode: Integer); overload; static;
 
-    class procedure AddError(AError: TError); overload;
-    class procedure AddError(E: Exception); overload;
-    class procedure AddError(E: EIdHTTPProtocolException); overload;
+    class procedure AddError(AError: TError); overload; static;
+    class procedure AddError(E: Exception); overload; static;
+    class procedure AddError(E: EIdHTTPProtocolException); overload; static;
+    class procedure AddError(AResponse: TCustomRESTResponse); overload; static;
   end;
 
 implementation
 
+uses
+  Share.Context;
+
 { TElasticAPM4D }
 
-class function TElasticAPM4D.HeaderValue: string;
+class function TApm.HeaderValue: string;
 begin
-  if not Assigned(FPackage) then
+  if not Assigned(FData) then
     Exit('');
 
-  Result := FPackage.Header;
+  Result := FData.Header;
 end;
 
-class function TElasticAPM4D.HeaderKey: string;
-begin
-  Result := sHEADER_KEY;
-end;
-
-class function TElasticAPM4D.StartTransaction(const AName, AType, ATraceId: string): TTransaction;
+class function TApm.StartTransaction(const AName, AType, ATraceId: string): TTransaction;
 begin
   if ExistsTransaction then
     EndTransaction(unknown);
 
-  FPackage := TPackage.Create;
-  FPackage.Transaction.Start(AType, AName);
+  FData := TDataController.Create;
+  FData.Transaction.Start(AType, AName);
 
   if not ATraceId.IsEmpty then
-    FPackage.Transaction.trace_id := ATraceId;
+    FData.Transaction.trace_id := ATraceId;
 
-  Result := FPackage.Transaction;
+  Result := FData.Transaction;
 end;
 
-class function TElasticAPM4D.StartSpanSQL(const AName, ASQL: string): TSpan;
+class function TApm.StartTransactionRequest(const AResource, AMethod, ATraceId: string): TTransaction;
 begin
-  Result := StartSpan(AName, 'Sql');
-  Result.Context.db.statement := ASQL;
+  Result := StartTransaction(AResource, 'Request', ATraceId);
+  Result.AddContextRequest(AMethod);
 end;
 
-class function TElasticAPM4D.Transaction: TTransaction;
+class function TApm.Transaction: TTransaction;
 begin
-  if not Assigned(FPackage) then
-    raise EElasticAPM4DException.Create(sTransactionNotFount);
+  if not Assigned(FData) then
+    raise ETransactionNotFound.Create('Transaction not found');
 
-  Result := FPackage.Transaction;
+  Result := FData.Transaction;
 end;
 
-class procedure TElasticAPM4D.EndTransaction(const AOutcome: TOutcome);
+class procedure TApm.EndTransaction(const AOutcome: TOutcome);
 begin
-  if not Assigned(FPackage) then
+  if not Assigned(FData) then
     Exit;
 
-  if (AOutcome = success) and (FPackage.ErrorList.Count > 0) then
-    FPackage.Transaction.SetOutcome(failure);
+  if (AOutcome = success) and (FData.ErrorList.Count > 0) then
+    FData.Transaction.SetOutcome(failure);
   try
-    FPackage.Transaction.&End(AOutcome);
-    FPackage.ToSend;
+    FData.Transaction.ToEnd(AOutcome);
+    FData.ToQueue;
   finally
-    FreeAndNil(FPackage);
+    FreeAndNil(FData);
   end;
 end;
 
-class function TElasticAPM4D.ExistsTransaction: Boolean;
+class procedure TApm.EndTransaction(const AStatusCode: Integer);
 begin
-  Result := Assigned(FPackage);
+  if not Assigned(FData) then
+    Exit;
+
+  FData.Transaction.Context.AddResponse(AStatusCode);
+  EndTransaction;
 end;
 
-class function TElasticAPM4D.StartSpan(const AName, AType: string): TSpan;
+class function TApm.ExistsTransaction: Boolean;
 begin
-  if FPackage.SpanIsOpened then
-    Result := TSpan.Create(Span.trace_id, Span.transaction_id, Span.id)
-  else
-    Result := TSpan.Create(Transaction.trace_id, Transaction.id, Transaction.id);
-  Result.Start(AName, AType);
-
-  Result.Context.db.instance := TConfig.GetDatabaseInstance;
-  Result.Context.db.&type := TConfig.GetDatabase;
-  Result.Context.db.User := TConfig.GetDatabaseUser;
-
-  FPackage.SpanList.Add(Result);
-  FPackage.OpenSpanStack.Add(Result);
-  Transaction.span_count.Inc;
+  Result := Assigned(FData);
 end;
 
-class function TElasticAPM4D.Span: TSpan;
+class function TApm.StartSpan(const AName, AType: string): TSpan;
 begin
-  Result := FPackage.CurrentSpan;
+  Result := FData.StartSpan(AName, AType);
 end;
 
-class procedure TElasticAPM4D.EndSpan;
+class function TApm.StartSpanSQL(const AName, ASQL: string): TSpan;
+begin
+  Result := StartSpan(AName, 'Sql');
+  Result.Context.db.AddSQL(ASQL);
+end;
+
+class function TApm.StartSpanRequest(const AResource, AMethod: string): TSpan;
+begin
+  Result := StartSpan(AResource, 'Request');
+  Result.Context.CreateHttp(AMethod);
+end;
+
+class function TApm.Span: TSpan;
+begin
+  Result := FData.CurrentSpan;
+end;
+
+class procedure TApm.EndSpan;
 begin
   if not ExistsTransaction then
     Exit;
 
-  Span.&End;
-  FPackage.OpenSpanStack.Delete(Pred(FPackage.OpenSpanStack.Count));
-  FPackage.Transaction.span_count.Dec;
+  if not FData.SpanIsOpened then
+    Exit;
+
+  FData.EndSpan;
 end;
 
-class function TElasticAPM4D.GetError: TError;
+class procedure TApm.EndSpan(const StatusCode: Integer);
 begin
-  if FPackage.SpanIsOpened then
+  if not ExistsTransaction then
+    Exit;
+
+  if not FData.SpanIsOpened then
+    Exit;
+
+  FData.CurrentSpan.Context.Http.AddStatusCode(StatusCode);
+  FData.Transaction.Result := 'HTTP ' + StatusCode.ToString;
+  FData.EndSpan;
+end;
+
+class function TApm.GetErrorInstance: TError;
+begin
+  if FData.SpanIsOpened then
     Result := TError.Create(Span.trace_id, Span.transaction_id, Span.id)
   else
     Result := TError.Create(Transaction.trace_id, Transaction.id, Transaction.id);
 end;
 
-class procedure TElasticAPM4D.AddError(E: Exception);
+class procedure TApm.AddError(E: Exception);
 var
   Error: TError;
 begin
-  if not Assigned(FPackage) then
+  if not Assigned(FData) then
     Exit;
 
-  Error := GetError;
+  Error := GetErrorInstance;
 
   Error.Exception.&type := E.ClassName;
   Error.Exception.message := E.message;
+  FData.Transaction.Result := E.message;
 
-  FPackage.ErrorList.Add(Error)
+  AddError(Error);
 end;
 
-class procedure TElasticAPM4D.AddError(AError: TError);
+class procedure TApm.AddError(AError: TError);
 begin
-  if not Assigned(FPackage) then
+  if not Assigned(FData) then
     Exit;
 
-  FPackage.ErrorList.Add(AError);
+  FData.ErrorList.Add(AError);
 end;
 
-class procedure TElasticAPM4D.AddError(E: EIdHTTPProtocolException);
+class procedure TApm.AddError(AResponse: TCustomRESTResponse);
 var
   Error: TError;
 begin
-  if not Assigned(FPackage) then
+  if not Assigned(FData) then
     Exit;
 
-  Error := GetError;
+  Error := GetErrorInstance;
+  Error.Exception.Code := AResponse.StatusCode.ToString;
+  Error.Exception.message := AResponse.ErrorMessage;
+  Error.Exception.&type := AResponse.StatusText;
+  Error.Context.AddResponse(AResponse.StatusCode);
+  FData.Transaction.Result := AResponse.StatusCode.ToString + ' ' + AResponse.StatusText;
+
+  AddError(Error);
+end;
+
+class procedure TApm.AddError(E: EIdHTTPProtocolException);
+var
+  Error: TError;
+begin
+  if not Assigned(FData) then
+    Exit;
+
+  Error := GetErrorInstance;
 
   Error.Exception.Code := E.ErrorCode.ToString;
   Error.Exception.message := E.ErrorMessage;
   Error.Exception.&type := E.ClassName;
+  Error.Context.AddResponse(E.ErrorCode);
+  FData.Transaction.Result := Error.Exception.Code + ' ' + E.ErrorMessage;
 
-  FPackage.ErrorList.Add(Error)
+  AddError(Error);
 end;
 
 end.

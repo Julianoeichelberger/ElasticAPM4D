@@ -36,7 +36,7 @@ object Form1: TForm1
     Top = 88
     Width = 137
     Height = 25
-    Caption = 'Sleep with errors'
+    Caption = 'RESTClient with errors'
     TabOrder = 2
     OnClick = Button3Click
   end
@@ -53,6 +53,7 @@ object Form1: TForm1
     Params = <>
     Response = RESTResponse
     SynchronizedEvents = False
+    OnHTTPProtocolError = RESTRequestHTTPProtocolError
     Left = 464
     Top = 32
   end

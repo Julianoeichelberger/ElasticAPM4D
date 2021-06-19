@@ -65,13 +65,13 @@
         <RuntimeOnlyPackage>true</RuntimeOnlyPackage>
         <VerInfo_Locale>1046</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_Define>Jcl;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <DCC_Define>jcl;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
@@ -115,29 +115,57 @@
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="RESTComponents.dcp"/>
         <DCCReference Include="Jcl.dcp"/>
-        <DCCReference Include="source\ElasticAPM4D.Utils.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Context.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Error.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.StackTraceJCL.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Metadata.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.MetricSet.Defaults.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.MetricSet.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.ndJson.pas"/>
         <DCCReference Include="source\ElasticAPM4D.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Request.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Resources.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Package.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Service.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Span.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Stacktrace.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Transaction.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.User.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Helpers.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Message.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Experience.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Destination.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.Indy.pas"/>
-        <DCCReference Include="source\ElasticAPM4D.RESTClient.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.Machine.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.Account.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.Instance.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.Project.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.Service.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Cloud.pas"/>
+        <DCCReference Include="source\metadata\Metadata.Process.pas"/>
+        <DCCReference Include="source\metadata\Metadata.System.pas"/>
+        <DCCReference Include="source\share\Share.User.pas"/>
+        <DCCReference Include="source\share\Share.Service.Agent.pas"/>
+        <DCCReference Include="source\share\Share.Service.Framework.pas"/>
+        <DCCReference Include="source\share\Share.Service.Language.pas"/>
+        <DCCReference Include="source\share\Share.Service.Runtime.pas"/>
+        <DCCReference Include="source\share\Share.Service.Node.pas"/>
+        <DCCReference Include="source\share\Share.Service.pas"/>
+        <DCCReference Include="source\metadata\Metadata.pas"/>
+        <DCCReference Include="source\share\Share.Stacktrace.pas"/>
+        <DCCReference Include="source\share\Share.Stacktrace.Jcl.pas"/>
+        <DCCReference Include="source\error\Error.Exception.pas"/>
+        <DCCReference Include="source\share\Share.Context.Message.pas"/>
+        <DCCReference Include="source\share\Share.Context.Message.Age.pas"/>
+        <DCCReference Include="source\share\Share.Context.Message.Queue.pas"/>
+        <DCCReference Include="source\share\Share.Context.Page.pas"/>
+        <DCCReference Include="source\share\Share.Response.pas"/>
+        <DCCReference Include="source\share\Share.Context.Request.Socket.pas"/>
+        <DCCReference Include="source\share\Share.Context.Request.Url.pas"/>
+        <DCCReference Include="source\share\Share.Context.Request.pas"/>
+        <DCCReference Include="source\span\Span.Context.Http.pas"/>
+        <DCCReference Include="source\span\Span.Context.Db.pas"/>
+        <DCCReference Include="source\span\Span.Context.pas"/>
+        <DCCReference Include="source\transaction\Transaction.Experience.pas"/>
+        <DCCReference Include="source\transaction\Transaction.Experience.Longtask.pas"/>
+        <DCCReference Include="source\transaction\Transaction.SpanCount.pas"/>
+        <DCCReference Include="source\transaction\Transaction.Session.pas"/>
+        <DCCReference Include="source\span\Span.Context.Destination.pas"/>
+        <DCCReference Include="source\span\Span.Context.Destination.Service.pas"/>
+        <DCCReference Include="source\span\Span.pas"/>
+        <DCCReference Include="source\share\Share.Uuid.pas"/>
+        <DCCReference Include="source\share\Share.TimestampEpoch.pas"/>
+        <DCCReference Include="source\share\Share.Context.pas"/>
+        <DCCReference Include="source\transaction\Transaction.pas"/>
+        <DCCReference Include="source\share\Share.Types.pas"/>
+        <DCCReference Include="source\error\Error.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.DataController.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.QueueSingleton.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.SendThread.pas"/>
+        <DCCReference Include="source\ElasticAPM4D.Config.pas"/>
+        <DCCReference Include="source\metricset\Metricset.Defaults.pas"/>
+        <DCCReference Include="source\metricset\Metricset.pas"/>
+        <DCCReference Include="source\metricset\Metricset.Samples.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -162,14 +190,7 @@
                 <Source>
                     <Source Name="MainSource">ElasticAPM4Delphi.dpk</Source>
                 </Source>
-                <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSControls.bpl">ZoneSoft - Controls</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSAccess.bpl">Zonesoft - Access Controls</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZDesignControls.bpl">Zonesoft - ZDesign controls</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\USER\Documents\zs-new\bin\Win32\bpl\ZSLookup.bpl">Zonesoft - Lookup controls</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                </Excluded_Packages>
+                <Excluded_Packages/>
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">

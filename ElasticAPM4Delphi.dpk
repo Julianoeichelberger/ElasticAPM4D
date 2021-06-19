@@ -24,7 +24,7 @@ package ElasticAPM4Delphi;
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
-{$DEFINE jcl}
+{$DEFINE Jcl}
 {$ENDIF IMPLICITBUILDING}
 {$RUNONLY}
 {$IMPLICITBUILD ON}
@@ -38,31 +38,61 @@ requires
   Jcl;
 
 contains
-  ElasticAPM4D.Utils in 'source\ElasticAPM4D.Utils.pas',
-  ElasticAPM4D.Context in 'source\ElasticAPM4D.Context.pas',
-  ElasticAPM4D.Error in 'source\ElasticAPM4D.Error.pas',
-  ElasticAPM4D.StackTraceJCL in 'source\ElasticAPM4D.StackTraceJCL.pas',
-  ElasticAPM4D.Metadata in 'source\ElasticAPM4D.Metadata.pas',
-  ElasticAPM4D.MetricSet.Defaults in 'source\ElasticAPM4D.MetricSet.Defaults.pas',
-  ElasticAPM4D.MetricSet in 'source\ElasticAPM4D.MetricSet.pas',
-  ElasticAPM4D.ndJson in 'source\ElasticAPM4D.ndJson.pas',
   ElasticAPM4D in 'source\ElasticAPM4D.pas',
-  ElasticAPM4D.Request in 'source\ElasticAPM4D.Request.pas',
-  ElasticAPM4D.Resources in 'source\ElasticAPM4D.Resources.pas',
-  ElasticAPM4D.Package in 'source\ElasticAPM4D.Package.pas',
-  ElasticAPM4D.Service in 'source\ElasticAPM4D.Service.pas',
-  ElasticAPM4D.Span in 'source\ElasticAPM4D.Span.pas',
-  ElasticAPM4D.Stacktrace in 'source\ElasticAPM4D.Stacktrace.pas',
-  ElasticAPM4D.Transaction in 'source\ElasticAPM4D.Transaction.pas',
-  ElasticAPM4D.User in 'source\ElasticAPM4D.User.pas',
-  ElasticAPM4D.Helpers in 'source\ElasticAPM4D.Helpers.pas',
-  ElasticAPM4D.Message in 'source\ElasticAPM4D.Message.pas',
-  ElasticAPM4D.Experience in 'source\ElasticAPM4D.Experience.pas',
-  ElasticAPM4D.Destination in 'source\ElasticAPM4D.Destination.pas',
-  ElasticAPM4D.Indy in 'source\ElasticAPM4D.Indy.pas',
-  ElasticAPM4D.RESTClient in 'source\ElasticAPM4D.RESTClient.pas';
+  Metadata.Cloud.Machine in 'source\metadata\Metadata.Cloud.Machine.pas',
+  Metadata.Cloud.Account in 'source\metadata\Metadata.Cloud.Account.pas',
+  Metadata.Cloud.Instance in 'source\metadata\Metadata.Cloud.Instance.pas',
+  Metadata.Cloud.Project in 'source\metadata\Metadata.Cloud.Project.pas',
+  Metadata.Cloud.Service in 'source\metadata\Metadata.Cloud.Service.pas',
+  Metadata.Cloud in 'source\metadata\Metadata.Cloud.pas',
+  Metadata.Process in 'source\metadata\Metadata.Process.pas',
+  Metadata.System in 'source\metadata\Metadata.System.pas',
+  Share.User in 'source\share\Share.User.pas',
+  Share.Service.Agent in 'source\share\Share.Service.Agent.pas',
+  Share.Service.Framework in 'source\share\Share.Service.Framework.pas',
+  Share.Service.Language in 'source\share\Share.Service.Language.pas',
+  Share.Service.Runtime in 'source\share\Share.Service.Runtime.pas',
+  Share.Service.Node in 'source\share\Share.Service.Node.pas',
+  Share.Service in 'source\share\Share.Service.pas',
+  Metadata in 'source\metadata\Metadata.pas',
+  Share.Stacktrace in 'source\share\Share.Stacktrace.pas',
+  Share.Stacktrace.Jcl in 'source\share\Share.Stacktrace.Jcl.pas',
+  Error.Exception in 'source\error\Error.Exception.pas',
+  Share.Context.Message in 'source\share\Share.Context.Message.pas',
+  Share.Context.Message.Age in 'source\share\Share.Context.Message.Age.pas',
+  Share.Context.Message.Queue in 'source\share\Share.Context.Message.Queue.pas',
+  Share.Context.Page in 'source\share\Share.Context.Page.pas',
+  Share.Response in 'source\share\Share.Response.pas',
+  Share.Context.Request.Socket in 'source\share\Share.Context.Request.Socket.pas',
+  Share.Context.Request.Url in 'source\share\Share.Context.Request.Url.pas',
+  Share.Context.Request in 'source\share\Share.Context.Request.pas',
+  Span.Context.Http in 'source\span\Span.Context.Http.pas',
+  Span.Context.Db in 'source\span\Span.Context.Db.pas',
+  Span.Context in 'source\span\Span.Context.pas',
+  Transaction.Experience in 'source\transaction\Transaction.Experience.pas',
+  Transaction.Experience.Longtask in 'source\transaction\Transaction.Experience.Longtask.pas',
+  Transaction.SpanCount in 'source\transaction\Transaction.SpanCount.pas',
+  Transaction.Session in 'source\transaction\Transaction.Session.pas',
+  Span.Context.Destination in 'source\span\Span.Context.Destination.pas',
+  Span.Context.Destination.Service in 'source\span\Span.Context.Destination.Service.pas',
+  Span in 'source\span\Span.pas',
+  Share.Uuid in 'source\share\Share.Uuid.pas',
+  Share.TimestampEpoch in 'source\share\Share.TimestampEpoch.pas',
+  Share.Context in 'source\share\Share.Context.pas',
+  Transaction in 'source\transaction\Transaction.pas',
+  Share.Types in 'source\share\Share.Types.pas',
+  Error in 'source\error\Error.pas',
+  ElasticAPM4D.DataController in 'source\ElasticAPM4D.DataController.pas',
+  ElasticAPM4D.QueueSingleton in 'source\ElasticAPM4D.QueueSingleton.pas',
+  ElasticAPM4D.SendThread in 'source\ElasticAPM4D.SendThread.pas',
+  ElasticAPM4D.Config in 'source\ElasticAPM4D.Config.pas',
+  Metricset.Defaults in 'source\metricset\Metricset.Defaults.pas',
+  Metricset in 'source\metricset\Metricset.pas',
+  Metricset.Samples in 'source\metricset\Metricset.Samples.pas';
 
 end.
+
+
 
 
 
