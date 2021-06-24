@@ -1,4 +1,4 @@
-program Sample;
+program SampleApp;
 
 uses
   Vcl.Forms,

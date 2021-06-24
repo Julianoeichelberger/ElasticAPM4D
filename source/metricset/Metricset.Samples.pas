@@ -49,7 +49,7 @@ end;
 procedure TMetricsetSamples.AddCustom(const AName: string;
   const AUnit: TSampleUnit; const AType: TSampleType; const AValue: Currency);
 begin
-  FList.Add(Format(' "%s": { "value": %s} ', [FormatName(AName, AUnit, AType), FormatCurr(AValue)]));
+  FList.Add(Format('"%s":{"value": %s}', [FormatName(AName, AUnit, AType), FormatCurr(AValue)]));
 end;
 
 procedure TMetricsetSamples.AddHistogram(const AName: string; const AUnit: TSampleUnit; const AValues: TArray<Currency>);
@@ -64,7 +64,7 @@ procedure TMetricsetSamples.AddHistogram(const AName: string; const AUnit: TSamp
   end;
 
 begin
-  FList.Add(Format(' "%s": { "values": [%s]} ', [FormatName(AName, AUnit, histogram), ArrayToString]));
+  FList.Add(Format('"%s":{"values": [%s]}', [FormatName(AName, AUnit, histogram), ArrayToString]));
 end;
 
 procedure TMetricsetSamples.AddPercentageGauge(const AName: string; const AValue: Currency);

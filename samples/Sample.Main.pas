@@ -40,7 +40,7 @@ begin
   try
     RESTRequest.Execute;
   finally
-    TApm.EndTransaction(RESTRequest.Response.StatusCode);
+    TApm.EndTransaction(RESTRequest.Response);
   end;
 end;
 
@@ -87,7 +87,7 @@ begin
         TApm.AddError(E);
     end;
   finally
-    TApm.EndTransaction(RESTRequest.Response.StatusCode);
+    TApm.EndTransaction(RESTRequest.Response);
   end;
 end;
 

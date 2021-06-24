@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Sample'
-  ClientHeight = 163
+  ClientHeight = 409
   ClientWidth = 593
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,16 +16,16 @@ object Form1: TForm1
   object Button1: TButton
     Left = 16
     Top = 24
-    Width = 137
+    Width = 153
     Height = 25
-    Caption = 'RESTClient'
+    Caption = 'RESTClient - 200 Ok'
     TabOrder = 0
     OnClick = Button1Click
   end
   object Button2: TButton
     Left = 16
-    Top = 57
-    Width = 137
+    Top = 86
+    Width = 153
     Height = 25
     Caption = 'Sleep'
     TabOrder = 1
@@ -33,10 +33,10 @@ object Form1: TForm1
   end
   object Button3: TButton
     Left = 16
-    Top = 88
-    Width = 137
+    Top = 55
+    Width = 153
     Height = 25
-    Caption = 'RESTClient with errors'
+    Caption = 'RESTClient - 400 Bad request'
     TabOrder = 2
     OnClick = Button3Click
   end
@@ -44,7 +44,12 @@ object Form1: TForm1
     Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
     AcceptCharset = 'utf-8, *;q=0.8'
     BaseURL = 'https://viacep.com.br/ws/'
-    Params = <>
+    Params = <
+      item
+        Kind = pkHTTPHEADER
+        Name = 'TESTE'
+        Value = 'TESTE 1'
+      end>
     Left = 384
     Top = 24
   end
@@ -59,7 +64,7 @@ object Form1: TForm1
   end
   object RESTResponse: TRESTResponse
     ContentType = 'application/json'
-    Left = 384
-    Top = 88
+    Left = 296
+    Top = 40
   end
 end

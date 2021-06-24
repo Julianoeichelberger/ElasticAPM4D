@@ -103,8 +103,7 @@ begin
   FPpid := GetParentProcessId;
 {$ENDIF}
   for I := 1 to Pred(ParamCount) do
-    FArgv := FArgv + [
-      ParamStr(I)];
+    FArgv := FArgv + [ParamStr(I)];
 end;
 
 end.

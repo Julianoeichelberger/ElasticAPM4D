@@ -25,11 +25,13 @@ type
     class function StartTransaction(const AName: string;
       const AType: string = 'Undefined'; const ATraceId: string = ''): TTransaction; static;
     class function StartTransactionRequest(const AResource: string; const AMethod: string = 'GET';
-      const ATraceId: string = ''): TTransaction; static;
+      const ATraceId: string = ''): TTransaction; overload; static;
+    class function StartTransactionRequest(const ARequest: TRESTRequest): TTransaction; overload; static;
+
     class function ExistsTransaction: Boolean; static;
     class function Transaction: TTransaction; static;
     class procedure EndTransaction(const AOutcome: TOutcome = success); overload; static;
-    class procedure EndTransaction(const AStatusCode: Integer); overload; static;
+    class procedure EndTransaction(const AResponse: TCustomRESTResponse); overload; static;
 
     class function StartSpan(const AName: string; const AType: string = 'Method'): TSpan; static;
     class function StartSpanSQL(const AName, ASQL: string): TSpan; static;
@@ -65,12 +67,24 @@ begin
     EndTransaction(unknown);
 
   FData := TDataController.Create;
-  FData.Transaction.Start(AType, AName);
+  FData.Transaction.Start(AName, AType);
 
   if not ATraceId.IsEmpty then
     FData.Transaction.trace_id := ATraceId;
 
   Result := FData.Transaction;
+end;
+
+class function TApm.StartTransactionRequest(const ARequest: TRESTRequest): TTransaction;
+var
+  Name: string;
+begin
+  Name := ARequest.Resource;
+  if Name.IsEmpty then
+    Name := ARequest.Client.BaseURL;
+  Result := StartTransactionRequest(Name);
+  Result.Context.Request.Headers := ARequest.Params;
+
 end;
 
 class function TApm.StartTransactionRequest(const AResource, AMethod, ATraceId: string): TTransaction;
@@ -102,13 +116,22 @@ begin
   end;
 end;
 
-class procedure TApm.EndTransaction(const AStatusCode: Integer);
+class procedure TApm.EndTransaction(const AResponse: TCustomRESTResponse);
 begin
   if not Assigned(FData) then
     Exit;
 
-  FData.Transaction.Context.AddResponse(AStatusCode);
-  EndTransaction;
+  FData.Transaction.Context.AddResponse(AResponse.StatusCode);
+  FData.Transaction.Result := AResponse.StatusCode.ToString + ' ' + AResponse.StatusText;
+  try
+    if AResponse.StatusCode >= 500 then
+      FData.Transaction.ToEnd(failure)
+    else
+      FData.Transaction.ToEnd;
+    FData.ToQueue;
+  finally
+    FreeAndNil(FData);
+  end;
 end;
 
 class function TApm.ExistsTransaction: Boolean;
