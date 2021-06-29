@@ -83,8 +83,6 @@ begin
   if Name.IsEmpty then
     Name := ARequest.Client.BaseURL;
   Result := StartTransactionRequest(Name);
-  Result.Context.Request.Headers := ARequest.Params;
-
 end;
 
 class function TApm.StartTransactionRequest(const AResource, AMethod, ATraceId: string): TTransaction;
