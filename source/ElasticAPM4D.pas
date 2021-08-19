@@ -1,3 +1,8 @@
+{*******************************************************}
+{                                                       }
+{             Delphi Elastic Apm Agent                  }
+{                                                       }
+{*******************************************************}
 unit ElasticAPM4D;
 
 interface
@@ -179,7 +184,7 @@ begin
     Exit;
 
   FData.CurrentSpan.Context.Http.AddStatusCode(StatusCode);
-  FData.Transaction.Result := 'HTTP ' + StatusCode.ToString;
+  FData.Transaction.Result := StatusCode.ToString;
   FData.EndSpan;
 end;
 
