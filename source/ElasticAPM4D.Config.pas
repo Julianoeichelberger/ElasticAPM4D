@@ -6,8 +6,8 @@ uses
   System.SyncObjs;
 
 type
-  TIgnoreUnitsStackTrace = (iustVCL, iustSystem, iustWinapi, iustREST, iustData, iustFireDAC, iustWeb, iustVCLTee,
-    iustXml, iustDatasnap);
+  TIgnoreUnitsStackTrace = (iustVCL, iustSystem, iustWinapi, iustREST, iustData, iustFireDAC, iustWeb, iustVCLTee, iustXml,
+    iustDatasnap);
 
   TIgnoreUnitsStackTraceSet = set of TIgnoreUnitsStackTrace;
 
@@ -27,6 +27,7 @@ type
     class var FMaxJsonPerThread: Integer;
     class var FIgnoreUnitsStackTraceSet: TIgnoreUnitsStackTraceSet;
     class var FIgnoreUnitsWasChanged: Boolean;
+    class var FOutputFileDir: string;
   private
     class var FSession: TCriticalSection;
   public
@@ -43,6 +44,7 @@ type
     class function GetUpdateTime: Integer; static;
     class function GetMaxJsonPerThread: Integer; static;
     class function GetIgnoreUnitsStackTraceSet: TIgnoreUnitsStackTraceSet; static;
+    class function GetLogOutputFilePath: string; static;
 
     class procedure SetAppName(const Value: string); static;
     class procedure SetAppVersion(const Value: string); static;
@@ -57,6 +59,7 @@ type
     class procedure SetUpdateTime(const Value: Integer); static;
     class procedure SetMaxJsonPerThread(const Value: Integer); static;
     class procedure SetIgnoreUnitsStackTraceSet(const AIgnoreUnits: TIgnoreUnitsStackTraceSet); static;
+    class procedure SetLogOutputFilePath(const Value: string); static;
   end;
 
 implementation
@@ -102,11 +105,9 @@ begin
         Exit;
       end;
       SetLength(Buffer, Size);
-      if not GetFileVersionInfo(PChar(Exe), Handle, Size, Buffer) or
-        not VerQueryValue(Buffer, '\', Pointer(FixedPtr), Size) then
+      if not GetFileVersionInfo(PChar(Exe), Handle, Size, Buffer) or not VerQueryValue(Buffer, '\', Pointer(FixedPtr), Size) then
         RaiseLastOSError;
-      FAppVersion := Format('%d.%d.%d.%d',
-        [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
+      FAppVersion := Format('%d.%d.%d.%d', [LongRec(FixedPtr.dwFileVersionMS).Hi, LongRec(FixedPtr.dwFileVersionMS).Lo,
         LongRec(FixedPtr.dwFileVersionLS).Hi, LongRec(FixedPtr.dwFileVersionLS).Lo]);
 {$ENDIF}
     end;
@@ -153,6 +154,16 @@ begin
     if not FIgnoreUnitsWasChanged then
       Exit([]);
     Result := FIgnoreUnitsStackTraceSet;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class function TConfig.GetLogOutputFilePath: string;
+begin
+  FSession.Enter;
+  try
+    Result := FOutputFileDir;
   finally
     FSession.Release;
   end;
@@ -290,6 +301,16 @@ begin
   try
     FIgnoreUnitsStackTraceSet := AIgnoreUnits;
     FIgnoreUnitsWasChanged := True;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class procedure TConfig.SetLogOutputFilePath(const Value: string);
+begin
+  FSession.Enter;
+  try
+    FOutputFileDir := Value;
   finally
     FSession.Release;
   end;

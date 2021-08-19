@@ -42,17 +42,19 @@ type
 implementation
 
 uses
-  IDHttp, Forms, IOUtils;
+  IDHttp, Forms, IOUtils, ElasticAPM4D.Config;
 
 function SendToElasticAPM(AUrl, AHeader: string; const AJson: Widestring): Integer;
 
   procedure SaveLog(ARespCode: Integer);
   begin
+    if TConfig.GetLogOutputFilePath.IsEmpty then
+      exit;
     with TStringList.Create do
     begin
       Text := AJson;
-      SaveToFile(GetCurrentDir + '/' + TPath.GetFileNameWithoutExtension(Application.ExeName) + '_'
-        + ARespCode.ToString + '_' + FormatDateTime('hh-mm-sss', now) + '.txt');
+      SaveToFile(IncludeTrailingPathDelimiter(TConfig.GetLogOutputFilePath) + TPath.GetFileNameWithoutExtension
+        (Application.ExeName) + '_' + ARespCode.ToString + '_' + FormatDateTime('hh-mm-sss', now) + '.txt');
       Free;
     end;
   end;
