@@ -13,37 +13,37 @@ object Form1: TForm1
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object Button1: TButton
+  object btnHttpOk: TButton
     Left = 16
     Top = 24
     Width = 153
     Height = 25
     Caption = 'RESTClient - 200 Ok'
     TabOrder = 0
-    OnClick = Button1Click
+    OnClick = btnHttpOkClick
   end
-  object Button2: TButton
+  object btnSimple: TButton
     Left = 16
     Top = 86
     Width = 153
     Height = 25
-    Caption = 'Sleep'
-    TabOrder = 1
-    OnClick = Button2Click
+    Caption = 'Simple test'
+    TabOrder = 2
+    OnClick = btnSimpleClick
   end
-  object Button3: TButton
+  object btnHttpBadRequest: TButton
     Left = 16
     Top = 55
     Width = 153
     Height = 25
     Caption = 'RESTClient - 400 Bad request'
-    TabOrder = 2
-    OnClick = Button3Click
+    TabOrder = 1
+    OnClick = btnHttpBadRequestClick
   end
   object RESTClient: TRESTClient
     Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
     AcceptCharset = 'utf-8, *;q=0.8'
-    BaseURL = 'https://viacep.com.br/ws/'
+    BaseURL = 'https://viacep.com.br/ws'
     Params = <
       item
         Kind = pkHTTPHEADER

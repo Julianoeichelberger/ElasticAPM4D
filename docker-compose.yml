@@ -37,9 +37,7 @@ services:
     ulimits:
       memlock:
         hard: -1
-        soft: -1
-    volumes:
-    - esdata:/usr/share/elasticsearch/data
+        soft: -1 
     ports:
     - 9200:9200
     networks:

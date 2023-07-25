@@ -2,6 +2,8 @@
 {                                                       }
 {             Delphi Elastic Apm Agent                  }
 {                                                       }
+{          Developed by Juliano Eichelberger            }
+{                                                       }
 {*******************************************************}
 unit ElasticAPM4D;
 
@@ -18,6 +20,10 @@ type
   TOutcome = Share.Types.TOutcome;
   TConfig = ElasticAPM4D.Config.TConfig;
 
+  /// <summary>
+  /// The main class of the ElasticAPM4D. This class guarantees that there will only be one open transaction per thread.
+  ///  It's thread safe.
+  /// </summary>
   TApm = class
   strict protected
     class threadvar FData: TDataController;
@@ -27,27 +33,124 @@ type
   public
     class function HeaderValue: string; static;
 
+    /// <summary>
+    ///   Method to start a customized transaction.
+    ///  Params:
+    ///    AName    -> Define the name of the transaction (of course).
+    ///    AType    -> It's a way to categorize the transaction (grouping)
+    ///    ATraceId -> Only needed if you are using continuous tracking.
+    /// </summary>
     class function StartTransaction(const AName: string;
       const AType: string = 'Undefined'; const ATraceId: string = ''): TTransaction; static;
+
+
+    /// <summary>
+    ///   Method to start a Http Request transaction.
+    ///  Params:
+    ///    AResource -> Will be used as a transaction name.
+    ///    AMethod   -> HTTP Method
+    ///    ATraceId  -> Only needed if you are using continuous tracking.
+    /// </summary>
     class function StartTransactionRequest(const AResource: string; const AMethod: string = 'GET';
       const ATraceId: string = ''): TTransaction; overload; static;
+
+    /// <summary>
+    ///   Method to start a Http Request transaction using TRESTRequest (Delphi native).
+    ///  Params:
+    ///    ARequest -> The TRESTRequest delphi object already configured.
+    /// </summary>
     class function StartTransactionRequest(const ARequest: TRESTRequest): TTransaction; overload; static;
 
+    /// <summary>
+    ///   Method to verify if a transaction is already started.
+    /// </summary>
     class function ExistsTransaction: Boolean; static;
+
+    /// <summary>
+    ///   Method to return the current transaction. If not found, it will return a exception.
+    /// </summary>
     class function Transaction: TTransaction; static;
+
+    /// <summary>
+    ///   Method to finalize the current transaction.
+    ///  Params:
+    ///    AOutcome -> The state of the end of the transaction
+    /// </summary>
     class procedure EndTransaction(const AOutcome: TOutcome = success); overload; static;
+
+    /// <summary>
+    ///   Method to finalize the http request transaction.
+    ///  Params:
+    ///    AResponse -> The response of the transaction
+    /// </summary>
     class procedure EndTransaction(const AResponse: TCustomRESTResponse); overload; static;
 
+    /// <summary>
+    ///   Method to start a span (It's a sub transaction)
+    ///  Params:
+    ///    AName -> The span name.
+    ///    AType -> It's a type/category of the transaction
+    /// </summary>
     class function StartSpan(const AName: string; const AType: string = 'Method'): TSpan; static;
+
+    /// <summary>
+    ///   Method to start a span, specific for SQL executions. (It's a sub transaction)
+    ///  Params:
+    ///    AName -> The span name.
+    ///    ASQL  -> The SQL command.
+    /// </summary>
     class function StartSpanSQL(const AName, ASQL: string): TSpan; static;
+
+    /// <summary>
+    ///   Method to start a span, specific for Http requests executions. (It's a sub transaction)
+    ///  Params:
+    ///    AResource -> The http uri resource
+    ///    AMethod   -> The http method
+    /// </summary>
     class function StartSpanRequest(const AResource: string; const AMethod: string): TSpan; static;
+
+    /// <summary>
+    ///   Method to return the current span. If not found, it will return null.
+    /// </summary>
     class function Span: TSpan; static;
+
+    /// <summary>
+    ///   Method to end the current span.
+    /// </summary>
     class procedure EndSpan; overload; static;
+    /// <summary>
+    ///   Method to end the current http request span.
+    ///  Params:
+    ///    StatusCode -> The http status code response.
+    /// </summary>
     class procedure EndSpan(const StatusCode: Integer); overload; static;
 
+    /// <summary>
+    ///   Method to add a customized error in a transaction. It must have a transaction open
+    ///  Params:
+    ///    AError -> Elastic APM Error object
+    /// </summary>
     class procedure AddError(AError: TError); overload; static;
+
+    /// <summary>
+    ///   Method to add a exception in a transaction. It must have a transaction open
+    ///  Params:
+    ///    E -> Delphi Exception
+    /// </summary>
     class procedure AddError(E: Exception); overload; static;
+
+    /// <summary>
+    ///   Method to add a http request exception in a transaction. It must have a transaction open
+    ///  Params:
+    ///    E -> Http Delphi Exception
+    /// </summary>
     class procedure AddError(E: EIdHTTPProtocolException); overload; static;
+
+    /// <summary>
+    ///   Method to add a TRESTClient exception in a http request transaction. It must have a transaction open
+    ///  Params:
+    ///    AResponse -> TRESTResponse object
+    /// </summary>
     class procedure AddError(AResponse: TCustomRESTResponse); overload; static;
   end;
 
@@ -92,7 +195,7 @@ end;
 
 class function TApm.StartTransactionRequest(const AResource, AMethod, ATraceId: string): TTransaction;
 begin
-  Result := StartTransaction(AResource, 'Request', ATraceId);
+  Result := StartTransaction(AResource, 'HttpRequest', ATraceId);
   Result.AddContextRequest(AMethod);
 end;
 
@@ -248,6 +351,8 @@ begin
 
   Error.Exception.Code := E.ErrorCode.ToString;
   Error.Exception.message := E.ErrorMessage;
+  if Error.Exception.message.IsEmpty then
+    Error.Exception.message := E.Message;
   Error.Exception.&type := E.ClassName;
   Error.Context.AddResponse(E.ErrorCode);
   FData.Transaction.Result := Error.Exception.Code + ' ' + E.ErrorMessage;

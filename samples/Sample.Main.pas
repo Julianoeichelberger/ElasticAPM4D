@@ -9,15 +9,15 @@ uses
 
 type
   TForm1 = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
+    btnHttpOk: TButton;
+    btnSimple: TButton;
     RESTClient: TRESTClient;
     RESTRequest: TRESTRequest;
     RESTResponse: TRESTResponse;
-    Button3: TButton;
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    btnHttpBadRequest: TButton;
+    procedure btnHttpOkClick(Sender: TObject);
+    procedure btnSimpleClick(Sender: TObject);
+    procedure btnHttpBadRequestClick(Sender: TObject);
     procedure RESTRequestHTTPProtocolError(Sender: TCustomRESTRequest);
   private
     { Private declarations }
@@ -33,7 +33,7 @@ implementation
 {$R *.dfm}
 
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btnHttpOkClick(Sender: TObject);
 begin
   RESTRequest.Resource := '01001000/json/';
   TApm.StartTransactionRequest(RESTRequest.Resource);
@@ -44,9 +44,9 @@ begin
   end;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.btnSimpleClick(Sender: TObject);
 begin
-  TApm.StartTransaction('Sleeps', 'Test');
+  TApm.StartTransaction('Sleeps', 'Tests');
   try
     try
       TApm.StartSpan('Sleep1');
@@ -67,7 +67,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TForm1.btnHttpBadRequestClick(Sender: TObject);
 begin
   RESTRequest.Resource := '01001000/jso/';
   TApm.StartTransactionRequest(RESTRequest.Resource);
@@ -84,6 +84,8 @@ begin
       RESTRequest.Execute;
     except
       on E: EHTTPProtocolException do
+        TApm.AddError(E);
+      on E: exception do
         TApm.AddError(E);
     end;
   finally

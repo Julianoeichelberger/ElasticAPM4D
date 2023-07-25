@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{             Delphi Elastic Apm Agent                  }
+{                                                       }
+{          Developed by Juliano Eichelberger            }
+{                                                       }
+{*******************************************************}
 unit ElasticAPM4D.SendThread;
 
 interface

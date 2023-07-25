@@ -1,3 +1,10 @@
+{*******************************************************}
+{                                                       }
+{             Delphi Elastic Apm Agent                  }
+{                                                       }
+{          Developed by Juliano Eichelberger            }
+{                                                       }
+{*******************************************************}
 unit ElasticAPM4D.Config;
 
 interface
@@ -11,6 +18,9 @@ type
 
   TIgnoreUnitsStackTraceSet = set of TIgnoreUnitsStackTrace;
 
+  /// <summary>
+  /// It's a singleton class. You can configure global application settings.
+  /// </summary>
   TConfig = class
   strict private
     class var FDatabase: string;

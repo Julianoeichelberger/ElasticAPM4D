@@ -99,7 +99,7 @@ end;
 
 procedure TSpan.StartRequest(const AName, AHttpMethod: string);
 begin
-  Start(AName, 'Request');
+  Start(AName, 'HttpRequest');
   FContext.CreateHttp(AHttpMethod);
 end;
 
