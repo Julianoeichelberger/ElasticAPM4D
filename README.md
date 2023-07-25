@@ -3,6 +3,10 @@ It´s an Agent for Elastic-APM in Delphi to collect software metrics.
 
 Compatible with Elastic-APM 7.11.1 (not tested on others).
 
+If you want to activate stacktrace (recommended) you need to install JEDI-Jcl
+and add jcl in the conditional defines. 
+
+
 Windows and Linux support.
 
 To set the global settings, you can use the TConfig class. 
