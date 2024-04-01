@@ -405,6 +405,9 @@ class function TConfig.GetEnvironment: string;
 begin
   FSession.Enter;
   try
+
+    if FEnvironment.IsEmpty then
+      FEnvironment := 'staging';
     Result := FEnvironment;
   finally
     FSession.Release;
