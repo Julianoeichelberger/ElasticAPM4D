@@ -29,6 +29,7 @@ type
   TSendThread = class(TThread)
   private
     FURL: string;
+    FSecret: string;
     FTotalErrors: Integer;
     FConnectionError: Integer;
     FInternalList: TDataSendList;
@@ -36,7 +37,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(const AUrl: string);
+    constructor Create(const AUrl: string; const ASecret: string = '');
     destructor Destroy; override;
 
     property InternalList: TDataSendList read FInternalList write FInternalList;
@@ -49,9 +50,9 @@ type
 implementation
 
 uses
-  IDHttp, Forms, IOUtils, ElasticAPM4D.Config;
+  IDHttp, Forms, IOUtils, ElasticAPM4D.Config, IdSSLOpenSSL;
 
-function SendToElasticAPM(AUrl, AHeader: string; const AJson: Widestring): Integer;
+function SendToElasticAPM(AUrl, ASecret, AHeader: string; const AJson: Widestring): Integer;
 
   procedure SaveLog(ARespCode: Integer);
   begin
@@ -69,16 +70,29 @@ function SendToElasticAPM(AUrl, AHeader: string; const AJson: Widestring): Integ
 var
   Http: TIdHTTP;
   DataSend, Stream: TStringStream;
+  SSLHandler : TIdSSLIOHandlerSocketOpenSSL;
 begin
   if AJson = '' then
     exit(200);
   Http := TIdHTTP.Create;
+  if AUrl.StartsWith('https:') then
+  begin
+    SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(Http);
+    SSLHandler.SSLOptions.SSLVersions := [sslvTLSv1_2];
+    Http.IOHandler := SSLHandler;
+  end;
+
   DataSend := TStringStream.Create(AJson, TEncoding.UTF8);
   Stream := TStringStream.Create('');
   try
     Http.Request.ContentType := 'application/x-ndjson';
     Http.Request.Charset := 'gzip';
     Http.Request.CustomHeaders.AddValue('elastic-apm-traceparent', AHeader);
+    if not ASecret.IsEmpty then
+    begin
+      Http.Request.CustomHeaders.AddValue('Authorization', 'Bearer ' + ASecret);
+    end;
+
     try
       Http.Post(AUrl, DataSend, Stream);
       Result := 200;
@@ -104,11 +118,12 @@ end;
 
 { TSendThread }
 
-constructor TSendThread.Create(const AUrl: string);
+constructor TSendThread.Create(const AUrl: string; const ASecret: string);
 begin
   inherited Create(True);
   FreeOnTerminate := False;
   FURL := AUrl;
+  FSecret:= ASecret;
   FInternalList := TDataSendList.Create;
   FResult := trSuspended;
 end;
@@ -131,12 +146,12 @@ begin
   try
     for DataSend in FInternalList.List do
     begin
-      HttpCode := SendToElasticAPM(FURL, DataSend.Header, DataSend.Json);
+      HttpCode := SendToElasticAPM(FURL, FSecret, DataSend.Header, DataSend.Json);
       if HttpCode = 429 then
       begin
         Sleep(1000);
         Inc(FTotalErrors);
-        HttpCode := SendToElasticAPM(FURL, DataSend.Header, DataSend.Json);
+        HttpCode := SendToElasticAPM(FURL, FSecret, DataSend.Header, DataSend.Json);
       end;
       if (HttpCode >= 500) or (HttpCode = 429) then
       begin

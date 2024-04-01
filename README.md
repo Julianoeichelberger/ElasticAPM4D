@@ -21,6 +21,8 @@ Uses
   TConfig.SetAppVersion('V1.1.0') //If not defined, it'll get the application version (only windows)
   TConfig.SetActive(False); // Always active, but you can inactivate de APM agent. 
   TConfig.SetUrlElasticAPM('http://192.168.1.1:8200/intake/v2/events'); // default is local (http://127.0.0.1:8200/intake/v2/events)
+  TConfig.SetSecret(''); // Set if you use secret token for authentication
+  TConfig.SetEnvironment('production'); // If not defined, it'll use 'staging'
 
   TConfig.SetUserId('123'); 
   TConfig.SetUserMail('useremail@mycompany.com'); 
