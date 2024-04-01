@@ -117,7 +117,7 @@ begin
     if not ListIsEmpty then
     begin
       FinalizeThread;
-      FThread := TSendThread.Create(TConfig.GetUrlElasticAPM);
+      FThread := TSendThread.Create(TConfig.GetUrlElasticAPM, TConfig.GetSecret);
       FThread.TotalErrors := ErrorCount;
       FThread.ConnectionError := ErrorSeq;
       CloneList(FThread.InternalList);

@@ -39,6 +39,7 @@ type
     class var FIgnoreUnitsWasChanged: Boolean;
     class var FOutputFileDir: string;
     class var FEnvironment: string;
+    class var FSecret: string;
   private
     class var FSession: TCriticalSection;
   public
@@ -57,6 +58,7 @@ type
     class function GetIgnoreUnitsStackTraceSet: TIgnoreUnitsStackTraceSet; static;
     class function GetLogOutputFilePath: string; static;
     class function GetEnvironment: string; static;
+    class function GetSecret: string;static;
 
     class procedure SetAppName(const Value: string); static;
     class procedure SetAppVersion(const Value: string); static;
@@ -73,6 +75,7 @@ type
     class procedure SetIgnoreUnitsStackTraceSet(const AIgnoreUnits: TIgnoreUnitsStackTraceSet); static;
     class procedure SetLogOutputFilePath(const Value: string); static;
     class procedure SetEnvironment(const Value: string); static;
+    class procedure SetSecret(const Value: string); static;
   end;
 
 implementation
@@ -199,6 +202,16 @@ begin
     if FMaxJsonPerThread = 0 then
       FMaxJsonPerThread := 60;
     Result := FMaxJsonPerThread;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class function TConfig.GetSecret: string;
+begin
+  FSession.Enter;
+  try
+    Result := FSecret;
   finally
     FSession.Release;
   end;
@@ -350,6 +363,16 @@ begin
   end;
 end;
 
+class procedure TConfig.SetSecret(const Value: string);
+begin
+  FSession.Enter;
+  try
+    FSecret := Value;
+  finally
+    FSession.Release;
+  end;
+end;
+
 class procedure TConfig.SetUpdateTime(const Value: Integer);
 begin
   FSession.Enter;
@@ -405,7 +428,6 @@ class function TConfig.GetEnvironment: string;
 begin
   FSession.Enter;
   try
-
     if FEnvironment.IsEmpty then
       FEnvironment := 'staging';
     Result := FEnvironment;
