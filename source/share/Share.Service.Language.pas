@@ -47,7 +47,9 @@ begin
 {$IFDEF VER310} 'Delphi 10.1 Berlin'; {$ENDIF}
 {$IFDEF VER320} 'Delphi 10.2 Tokyo'; {$ENDIF}
 {$IFDEF VER330} 'Delphi 10.3 Rio'; {$ENDIF}
-{$IFDEF VER331} 'Delphi 10.4 Sidney'; {$ENDIF}
+{$IFDEF VER340} 'Delphi 10.4 Sidney'; {$ENDIF}
+{$IFDEF VER350} 'Delphi 11 Alexandria'; {$ENDIF}
+{$IFDEF VER360} 'Delphi 12 Yukon'; {$ENDIF}
 end;
 
 end.
