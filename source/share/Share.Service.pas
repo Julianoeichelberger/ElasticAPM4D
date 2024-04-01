@@ -80,7 +80,7 @@ begin
   FLanguage := TServiceLanguage.Create;
   FVersion := TConfig.GetAppVersion;
   FName := TConfig.GetAppName;
-  FEnvironment := 'staging';
+  FEnvironment := TConfig.GetEnvironment;
 end;
 
 destructor TService.Destroy;

@@ -38,6 +38,7 @@ type
     class var FIgnoreUnitsStackTraceSet: TIgnoreUnitsStackTraceSet;
     class var FIgnoreUnitsWasChanged: Boolean;
     class var FOutputFileDir: string;
+    class var FEnvironment: string;
   private
     class var FSession: TCriticalSection;
   public
@@ -55,6 +56,7 @@ type
     class function GetMaxJsonPerThread: Integer; static;
     class function GetIgnoreUnitsStackTraceSet: TIgnoreUnitsStackTraceSet; static;
     class function GetLogOutputFilePath: string; static;
+    class function GetEnvironment: string; static;
 
     class procedure SetAppName(const Value: string); static;
     class procedure SetAppVersion(const Value: string); static;
@@ -70,6 +72,7 @@ type
     class procedure SetMaxJsonPerThread(const Value: Integer); static;
     class procedure SetIgnoreUnitsStackTraceSet(const AIgnoreUnits: TIgnoreUnitsStackTraceSet); static;
     class procedure SetLogOutputFilePath(const Value: string); static;
+    class procedure SetEnvironment(const Value: string); static;
   end;
 
 implementation
@@ -393,6 +396,26 @@ begin
   FSession.Enter;
   try
     FUserName := Value;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class function TConfig.GetEnvironment: string;
+begin
+  FSession.Enter;
+  try
+    Result := FEnvironment;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class procedure TConfig.SetEnvironment(const Value: string);
+begin
+  FSession.Enter;
+  try
+    FEnvironment := Value;
   finally
     FSession.Release;
   end;
