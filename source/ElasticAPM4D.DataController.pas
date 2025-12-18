@@ -10,7 +10,7 @@ unit ElasticAPM4D.DataController;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections, Metadata, Span, Error, Transaction;
+  System.SysUtils, System.Classes, System.Generics.Collections, Metadata, Span, Error, Transaction, Elastic.Log;
 
 type
   TDataController = class
@@ -26,6 +26,7 @@ type
       procedure Add(AMetadata: TMetadata); overload;
       procedure Add(ATransaction: TTransaction); overload;
       procedure Add(AErrors: TList<TError>); overload;
+      procedure Add(ALogs: TList<TAPMLog>); overload;
       procedure Add(AMetricSet: string); overload;
 
       function Value: Widestring;
@@ -35,6 +36,7 @@ type
     FTransaction: TTransaction;
     FSpanList: TObjectList<TSpan>;
     FErrorList: TObjectList<TError>;
+    FLogList: TObjecTList<TAPMLog>;
     FOpenSpanStack: TList;
     FHeader: string;
     function ExtractTraceId: string;
@@ -56,6 +58,7 @@ type
     property Transaction: TTransaction read FTransaction write FTransaction;
     property SpanList: TObjectList<TSpan> read FSpanList;
     property ErrorList: TObjectList<TError> read FErrorList;
+    property LogList: TObjecTList<TAPMLog> read FLogList;
     property OpenSpanStack: TList read FOpenSpanStack write FOpenSpanStack;
     property Header: string read GetHeader write SetHeader;
   end;
@@ -94,6 +97,17 @@ begin
       FValue := FValue + XndJsonSeparator + Error.ToJsonString;
 end;
 
+procedure TDataController.TXndJson.Add(ALogs: TList<TAPMLog>);
+var
+  LogEntry: TAPMLog;
+begin
+  if not Assigned(ALogs) then
+    exit;
+  for LogEntry in ALogs.List do
+    if LogEntry <> nil then
+      FValue := FValue + XndJsonSeparator + LogEntry.ToJsonString;
+end;
+
 procedure TDataController.TXndJson.Add(ATransaction: TTransaction);
 begin
   FValue := FValue + XndJsonSeparator + ATransaction.ToJsonString;
@@ -118,6 +132,7 @@ begin
   FSpanList := TObjectList<TSpan>.Create;
   FOpenSpanStack := TList.Create;
   FErrorList := TObjectList<TError>.Create;
+  FLogList := TObjecTList<TAPMLog>.Create;
   FHeader := '';
 end;
 
@@ -135,6 +150,7 @@ begin
   FMetadata.Free;
   FreeAndNil(FSpanList);
   FreeAndNil(FErrorList);
+  FreeAndNil(FLogList);
   FOpenSpanStack.Free;
   inherited;
 end;
@@ -182,6 +198,7 @@ begin
     Json.Add(FTransaction);
     Json.Add(FSpanList);
     Json.Add(FErrorList);
+    Json.Add(FLogList);
     Json.Add(TMetricSetDefaults.Get);
 
     TQueueSingleton.StackUp(Json.Value, Header);

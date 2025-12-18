@@ -16,8 +16,8 @@ type
 implementation
 
 uses
-{$IFDEF MSWINDOWS} TLHelp32, psAPI, Winapi.Windows, Vcl.Forms, {$ENDIF}
-{$IFDEF UNIX} Unix, {$ENDIF}
+{$IFDEF MSWINDOWS} Winapi.TLHelp32, Winapi.psAPI, Winapi.Windows, Vcl.Forms, {$ENDIF}
+{$IFDEF UNIX} Posix.Unistd, {$ENDIF}
   System.SysUtils;
 
 { TSystem }
@@ -36,9 +36,16 @@ function TSystem.GetHostNameInOS: string;
 var
   l: DWORD;
 {$ENDIF}
+{$IFDEF UNIX}
+var
+  HostName: array[0..255] of AnsiChar;
+{$ENDIF}
 begin
 {$IFDEF UNIX}
-  Result := Unix.GetHostName;
+  if gethostname(HostName, SizeOf(HostName)) = 0 then
+    Result := string(HostName)
+  else
+    Result := 'unknown';
 {$ENDIF}
 {$IFDEF MSWINDOWS}
   l := 255;

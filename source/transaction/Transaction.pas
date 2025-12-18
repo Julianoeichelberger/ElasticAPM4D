@@ -28,11 +28,16 @@ type
     Fexperience: TTransactionExperience;
     Foutcome: string;
     Fsession: TTransactionSession;
+    FIsPaused: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Start(const AName: string; const AType: string = 'Undefined');
+
+    procedure Pause;
+    procedure UnPause;
+
 
     procedure ToEnd(const AOutcome: TOutcome = success);
 
@@ -69,6 +74,7 @@ type
     property Sampled: boolean read Fsampled write Fsampled;
     property Timestamp: Int64 read Ftimestamp;
     property Experience: TTransactionExperience read Fexperience write Fexperience;
+    property isPaused: Boolean read FIsPaused;
   end;
 
 implementation
@@ -95,6 +101,8 @@ begin
   Fid := TUUid.Get64b;
   Ftrace_id := TUUid.Get128b;
   Fsampled := true;
+  FDuration := 0;
+  FIsPaused := false;
 end;
 
 destructor TTransaction.Destroy;
@@ -109,11 +117,27 @@ begin
   inherited;
 end;
 
+procedure TTransaction.Pause;
+begin
+  FDuration := FDuration + MilliSecondsBetween(now, FStartDate);
+  FIsPaused := true;
+end;
+
+procedure TTransaction.UnPause;
+begin
+  FIsPaused := false;
+  FStartDate := now;
+end;
+
 procedure TTransaction.ToEnd(const AOutcome: TOutcome);
 begin
+  if FIsPaused then 
+    FStartDate := now;
   if Foutcome.IsEmpty then
     SetOutcome(AOutcome);
-  Fduration := MilliSecondsBetween(now, FStartDate);
+
+  Fduration := Fduration + MilliSecondsBetween(now, FStartDate);
+  FIsPaused := false;
 end;
 
 procedure TTransaction.SetOutcome(const AOutcome: TOutcome);

@@ -22,7 +22,8 @@ type
     FTrace_id: string;
     FTransaction_id: string;
     FType: string;
-    Ftimestamp: Int64;
+    Ftimestamp: Int64; 
+    FIsPaused: Boolean;
   public
     constructor Create(const ATraceId, ATransactionId, AParentId: string);
     destructor Destroy; override;
@@ -31,6 +32,9 @@ type
 
     procedure Start(const AName: string; const AType: string = 'Undefined');
     procedure StartRequest(const AName, AHttpMethod: string);
+
+    procedure Pause;
+    procedure UnPause;
 
     procedure ToEnd;
     procedure ToEndRequest(const AHttpCode: Integer);
@@ -44,6 +48,7 @@ type
     property Stacktrace: TArray<TStacktrace> read FStacktrace write FStacktrace;
     property Sync: Boolean read FSync write FSync default true;
     property Timestamp: Int64 read Ftimestamp;
+    property isPaused: Boolean read FIsPaused;
   end;
 
 implementation
@@ -64,7 +69,9 @@ begin
   FAction := '';
   FSubtype := '';
   FSync := true;
+  FDuration := 0;
   FContext := TSpanContext.Create;
+  FIsPaused := false;
 end;
 
 destructor TSpan.Destroy;
@@ -77,10 +84,24 @@ begin
   inherited;
 end;
 
+procedure TSpan.Pause;
+begin
+  FDuration := FDuration + MilliSecondsBetween(now, FStartDate);  
+  FIsPaused := true;
+end;
+procedure TSpan.UnPause;
+begin
+  FStartDate := now;
+  FIsPaused := false;
+end;
+
 procedure TSpan.ToEnd;
 begin
+  if FIsPaused then 
+    FStartDate := now;
   FStacktrace :=  TStacktraceJCL.Get;
-  FDuration := MilliSecondsBetween(now, FStartDate);
+  FDuration := FDuration + MilliSecondsBetween(now, FStartDate);
+  FIsPaused := false;
 end;
 
 procedure TSpan.ToEndRequest(const AHttpCode: Integer);

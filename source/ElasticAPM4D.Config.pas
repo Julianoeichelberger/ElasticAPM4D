@@ -10,13 +10,22 @@ unit ElasticAPM4D.Config;
 interface
 
 uses
-  System.SyncObjs;
+  System.SyncObjs,
+  {$IFDEF MSWINDOWS}
+  Interceptor.Base,
+  {$ENDIF}
+  System.Generics.Collections;
 
 type
   TIgnoreUnitsStackTrace = (iustVCL, iustSystem, iustWinapi, iustREST, iustData, iustFireDAC, iustWeb, iustVCLTee, iustXml,
     iustDatasnap);
 
   TIgnoreUnitsStackTraceSet = set of TIgnoreUnitsStackTrace;
+
+  /// <summary>
+  /// Log levels for APM logging
+  /// </summary>
+  TLogLevel = (llTrace, llDebug, llInfo, llWarning, llError, llFatal);
 
   /// <summary>
   /// It's a singleton class. You can configure global application settings.
@@ -40,12 +49,17 @@ type
     class var FOutputFileDir: string;
     class var FEnvironment: string;
     class var FSecret: string;
+    class var FLogEnabled: Boolean;
+    class var FLogLevel: TLogLevel;
   private
     class var FSession: TCriticalSection;
+    {$IFDEF MSWINDOWS}
+    class var FInterceptors: TList<TAPMInterceptorClass>;
+    {$ENDIF}
   public
     class function GetAppName: string; static;
     class function GetAppVersion: string; static;
-    class function GetDatabase: string;
+    class function GetDatabase: string; static;
     class function GetDatabaseUser: string; static;
     class function GetDatabaseInstance: string; static;
     class function GetActive: Boolean; static;
@@ -59,10 +73,12 @@ type
     class function GetLogOutputFilePath: string; static;
     class function GetEnvironment: string; static;
     class function GetSecret: string;static;
+    class function GetLogEnabled: Boolean; static;
+    class function GetLogLevel: TLogLevel; static;
 
     class procedure SetAppName(const Value: string); static;
     class procedure SetAppVersion(const Value: string); static;
-    class procedure SetDatabase(const Value: string);
+    class procedure SetDatabase(const Value: string); static;
     class procedure SetDatabaseUser(const Value: string); static;
     class procedure SetDatabaseInstance(const Value: string); static;
     class procedure SetActive(const Value: Boolean); static;
@@ -76,12 +92,21 @@ type
     class procedure SetLogOutputFilePath(const Value: string); static;
     class procedure SetEnvironment(const Value: string); static;
     class procedure SetSecret(const Value: string); static;
+    class procedure SetLogEnabled(const Value: Boolean); static;
+    class procedure SetLogLevel(const Value: TLogLevel); static;
+    
+    {$IFDEF MSWINDOWS}
+    class procedure RegisterInterceptor(AClass: TAPMInterceptorClass);
+    class procedure UnregisterInterceptor(AClass: TAPMInterceptorClass);
+
+    class property Interceptors: TList<TAPMInterceptorClass> read FInterceptors;
+    {$ENDIF}
   end;
 
 implementation
 
 Uses
-{$IFDEF MSWINDOWS} Windows, Vcl.Forms, {$ENDIF} System.IOUtils, System.SysUtils, System.DateUtils;
+{$IFDEF MSWINDOWS} Winapi.Windows, Vcl.Forms, {$ENDIF} System.IOUtils, System.SysUtils, System.DateUtils;
 
 { TConfig }
 
@@ -446,14 +471,85 @@ begin
   end;
 end;
 
+class function TConfig.GetLogEnabled: Boolean;
+begin
+  FSession.Enter;
+  try
+    Result := FLogEnabled;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class procedure TConfig.SetLogEnabled(const Value: Boolean);
+begin
+  FSession.Enter;
+  try
+    FLogEnabled := Value;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class function TConfig.GetLogLevel: TLogLevel;
+begin
+  FSession.Enter;
+  try
+    Result := FLogLevel;
+  finally
+    FSession.Release;
+  end;
+end;
+
+class procedure TConfig.SetLogLevel(const Value: TLogLevel);
+begin
+  FSession.Enter;
+  try
+    FLogLevel := Value;
+  finally
+    FSession.Release;
+  end;
+end;
+
+{$IFDEF MSWINDOWS}
+class procedure TConfig.RegisterInterceptor(AClass: TAPMInterceptorClass);
+begin
+  FSession.Enter;
+  try
+    if not FInterceptors.Contains(AClass) then
+      FInterceptors.Add(AClass);
+  finally
+    FSession.Release;
+  end;
+end;
+
+class procedure TConfig.UnregisterInterceptor(AClass: TAPMInterceptorClass);
+begin
+  FSession.Enter;
+  try
+    FInterceptors.Remove(AClass);
+  finally
+    FSession.Release;
+  end;
+end;
+{$ENDIF}
+
 initialization
 
-TConfig.FSession := TCriticalSection.Create;
+TConfig.FSession := TCriticalSection.Create; 
+{$IFDEF MSWINDOWS}
+TConfig.FInterceptors := TList<TAPMInterceptorClass>.Create;  
+{$ENDIF}
 TConfig.SetActive(True);
+TConfig.SetLogEnabled(True);
+TConfig.SetLogLevel(llInfo);
 
 finalization
 
 TConfig.SetActive(False);
+{$IFDEF MSWINDOWS}
+TConfig.FInterceptors.Free;
+{$ENDIF}
 TConfig.FSession.Free;
 
 end.

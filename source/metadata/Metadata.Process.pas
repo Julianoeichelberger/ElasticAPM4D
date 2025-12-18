@@ -21,7 +21,8 @@ type
 implementation
 
 Uses
-{$IFDEF MSWINDOWS} TLHelp32, psAPI, Winapi.Windows, Vcl.Forms; {$ENDIF}
+{$IFDEF MSWINDOWS} Winapi.TLHelp32, Winapi.psAPI, Winapi.Windows, Vcl.Forms; {$ENDIF}
+{$IFDEF UNIX} Posix.Unistd, System.SysUtils; {$ENDIF}
 
 { TProcess }
 
@@ -93,11 +94,32 @@ constructor TMetadataProcess.Create;
 
 {$ENDIF}
 
+{$IFDEF UNIX}
+  function GetProcessName: string;
+  begin
+    Result := ExtractFileName(ParamStr(0));
+  end;
+
+  function GetProcessId: longint;
+  begin
+    Result := getpid;
+  end;
+
+  function GetParentProcessId: longint;
+  begin
+    Result := getppid;
+  end;
+{$ENDIF}
 
 var
   I: Integer;
 begin
 {$IFDEF MSWINDOWS}
+  Ftitle := GetProcessName;
+  FPid := GetProcessId;
+  FPpid := GetParentProcessId;
+{$ENDIF}
+{$IFDEF UNIX}
   Ftitle := GetProcessName;
   FPid := GetProcessId;
   FPpid := GetParentProcessId;

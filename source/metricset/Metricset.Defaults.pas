@@ -26,7 +26,7 @@ implementation
 {$IFDEF MSWINDOWS}
 
 uses
-  ActiveX, ComObj, Variants, TLHelp32, psAPI, Winapi.Windows;
+  Winapi.ActiveX, System.Win.ComObj, System.Variants, Winapi.TLHelp32, Winapi.psAPI, Winapi.Windows;
 {$ENDIF}
 
 

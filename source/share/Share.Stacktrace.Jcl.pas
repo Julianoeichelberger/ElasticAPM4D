@@ -128,9 +128,9 @@ end;
 
 function TStacktraceJCL.IsIgnoreUnit(const AUnitName: string): Boolean;
 const
-  Units: array [0 .. 8] of string =
+  Units: array [0 .. 9] of string =
     (
-    'jcldebug', 'share', 'error', 'elasticapm4d',
+    'jcldebug', 'share', 'error', 'elasticapm4d', 'interceptor', 
     'transaction', 'metricset', 'span', 'error', 'metadata'
     );
 var
