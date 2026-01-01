@@ -1,0 +1,110 @@
+﻿package Apm4D;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES ON}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST OFF}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$DEFINE Jcl}
+{$ENDIF IMPLICITBUILDING}
+{$RUNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  IndySystem,
+  IndyProtocols,
+  IndyCore,
+  vcl,
+  RESTComponents;
+
+contains
+  Apm4D.DataController in 'source\Apm4D.DataController.pas',
+  Apm4D.Error.Exception in 'source\Apm4D.Error.Exception.pas',
+  Apm4D.Error in 'source\Apm4D.Error.pas',
+  Apm4D.Interceptors.Base in 'source\Apm4D.Interceptors.Base.pas',
+  Apm4D.Interceptors.ControlClick in 'source\Apm4D.Interceptors.ControlClick.pas',
+  Apm4D.Interceptors.DataSet in 'source\Apm4D.Interceptors.DataSet.pas',
+  Apm4D.Interceptors.DBConnection in 'source\Apm4D.Interceptors.DBConnection.pas',
+  Apm4D.Interceptors.Handler in 'source\Apm4D.Interceptors.Handler.pas',
+  Apm4D.Log in 'source\Apm4D.Log.pas',
+  Apm4D.Metadata.Cloud.Account in 'source\Apm4D.Metadata.Cloud.Account.pas',
+  Apm4D.Metadata.Cloud.Instance in 'source\Apm4D.Metadata.Cloud.Instance.pas',
+  Apm4D.Metadata.Cloud.Machine in 'source\Apm4D.Metadata.Cloud.Machine.pas',
+  Apm4D.Metadata.Cloud in 'source\Apm4D.Metadata.Cloud.pas',
+  Apm4D.Metadata.Cloud.Project in 'source\Apm4D.Metadata.Cloud.Project.pas',
+  Apm4D.Metadata.Cloud.Service in 'source\Apm4D.Metadata.Cloud.Service.pas',
+  Apm4D.Metadata in 'source\Apm4D.Metadata.pas',
+  Apm4D.Metadata.Process in 'source\Apm4D.Metadata.Process.pas',
+  Apm4D.Metadata.System in 'source\Apm4D.Metadata.System.pas',
+  Apm4D.Metricset.Defaults in 'source\Apm4D.Metricset.Defaults.pas',
+  Apm4D.Metricset in 'source\Apm4D.Metricset.pas',
+  Apm4D.Metricset.Samples in 'source\Apm4D.Metricset.Samples.pas',
+  Apm4D in 'source\Apm4D.pas',
+  Apm4D.QueueSingleton in 'source\Apm4D.QueueSingleton.pas',
+  Apm4D.SendThread in 'source\Apm4D.SendThread.pas',
+  Apm4D.Serializer in 'source\Apm4D.Serializer.pas',
+  Apm4D.Settings.Application in 'source\Apm4D.Settings.Application.pas',
+  Apm4D.Settings.Database in 'source\Apm4D.Settings.Database.pas',
+  Apm4D.Settings.Elastic in 'source\Apm4D.Settings.Elastic.pas',
+  Apm4D.Settings.Log in 'source\Apm4D.Settings.Log.pas',
+  Apm4D.Settings in 'source\Apm4D.Settings.pas',
+  Apm4D.Settings.User in 'source\Apm4D.Settings.User.pas',
+  Apm4D.Share.Context.Message.Age in 'source\Apm4D.Share.Context.Message.Age.pas',
+  Apm4D.Share.Context.Message in 'source\Apm4D.Share.Context.Message.pas',
+  Apm4D.Share.Context.Message.Queue in 'source\Apm4D.Share.Context.Message.Queue.pas',
+  Apm4D.Share.Context.Page in 'source\Apm4D.Share.Context.Page.pas',
+  Apm4D.Share.Context in 'source\Apm4D.Share.Context.pas',
+  Apm4D.Share.Context.Request in 'source\Apm4D.Share.Context.Request.pas',
+  Apm4D.Share.Context.Request.Socket in 'source\Apm4D.Share.Context.Request.Socket.pas',
+  Apm4D.Share.Context.Request.Url in 'source\Apm4D.Share.Context.Request.Url.pas',
+  Apm4D.Share.Response in 'source\Apm4D.Share.Response.pas',
+  Apm4D.Share.Service.Agent in 'source\Apm4D.Share.Service.Agent.pas',
+  Apm4D.Share.Service.Framework in 'source\Apm4D.Share.Service.Framework.pas',
+  Apm4D.Share.Service.Language in 'source\Apm4D.Share.Service.Language.pas',
+  Apm4D.Share.Service.Node in 'source\Apm4D.Share.Service.Node.pas',
+  Apm4D.Share.Service in 'source\Apm4D.Share.Service.pas',
+  Apm4D.Share.Service.Runtime in 'source\Apm4D.Share.Service.Runtime.pas',
+  Apm4D.Share.Stacktrace.Jcl in 'source\Apm4D.Share.Stacktrace.Jcl.pas',
+  Apm4D.Share.Stacktrace in 'source\Apm4D.Share.Stacktrace.pas',
+  Apm4D.Share.TimestampEpoch in 'source\Apm4D.Share.TimestampEpoch.pas',
+  Apm4D.Share.Types in 'source\Apm4D.Share.Types.pas',
+  Apm4D.Share.User in 'source\Apm4D.Share.User.pas',
+  Apm4D.Share.Uuid in 'source\Apm4D.Share.Uuid.pas',
+  Apm4D.Span.Context.Db in 'source\Apm4D.Span.Context.Db.pas',
+  Apm4D.Span.Context.Destination in 'source\Apm4D.Span.Context.Destination.pas',
+  Apm4D.Span.Context.Destination.Service in 'source\Apm4D.Span.Context.Destination.Service.pas',
+  Apm4D.Span.Context.Http in 'source\Apm4D.Span.Context.Http.pas',
+  Apm4D.Span.Context in 'source\Apm4D.Span.Context.pas',
+  Apm4D.Span in 'source\Apm4D.Span.pas',
+  Apm4D.Transaction.Experience.Longtask in 'source\Apm4D.Transaction.Experience.Longtask.pas',
+  Apm4D.Transaction.Experience in 'source\Apm4D.Transaction.Experience.pas',
+  Apm4D.Transaction in 'source\Apm4D.Transaction.pas',
+  Apm4D.Transaction.Session in 'source\Apm4D.Transaction.Session.pas',
+  Apm4D.Transaction.SpanCount in 'source\Apm4D.Transaction.SpanCount.pas';
+
+end.
+
+
+
+
+
+

@@ -1,7 +1,7 @@
-# ElasticAPM4D
-It´s an Agent for Elastic-APM in Delphi to collect software metrics. 
+# Apm4D
+Application Performance Monitoring for Delphi - An agent to collect software metrics for Elastic APM.
 
-Compatible with Elastic-APM 7.11.1 (not tested on others).
+Compatible with Elastic APM 7.11.1 (not tested on others).
 
 If you want to activate stacktrace (recommended) you need to install JEDI-Jcl
 and add jcl in the conditional defines. 
@@ -9,13 +9,21 @@ and add jcl in the conditional defines.
 
 Windows and Linux support.
 
+## Installation
+
+1. Open `Apm4D.dpk` in Delphi IDE
+2. Build and install the package
+3. Add `Apm4D` to your project's search path
+
+## Configuration
+
 To set the global settings, you can use the TConfig class. 
 Example:
 
 ```delphi
 
 Uses
-  ElasticAPM4D.Config;
+  Apm4D.Config;
 
   TConfig.SetAppName('My App'); // If not defined, it'll use the application.name
   TConfig.SetAppVersion('V1.1.0') //If not defined, it'll get the application version (only windows)
@@ -29,13 +37,15 @@ Uses
   TConfig.SetUserName('user name'); // if not defined, it'll get windows user
 ```
 
-Transactions examples:
+## Usage
+
+### Transactions examples:
 
 Simple transaction
 
 ```delphi
 Uses 
-  ElasticAPM4D;
+  Apm4D;
 
  TApm.StartTransaction('MyTransactionName', 'MyType');
   try

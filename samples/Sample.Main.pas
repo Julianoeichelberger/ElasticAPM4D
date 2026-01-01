@@ -1,10 +1,10 @@
-unit Sample.Main;
+﻿unit Sample.Main;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ELasticAPM4D, REST.HttpClient,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Apm4D, REST.HttpClient,
   REST.Types, REST.Client, Data.Bind.Components, Data.Bind.ObjectScope;
 
 type
