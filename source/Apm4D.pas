@@ -12,7 +12,7 @@ interface
 uses
   System.Rtti, System.SysUtils, System.classes, System.Generics.Collections, IdHTTP,
   Apm4D.Span, Apm4D.Transaction, Apm4D.Error, Apm4D.Share.Types, REST.Client,
-  Apm4D.DataController, Apm4D.Settings, Apm4D.Settings.Log, Apm4D.Log, Apm4D.Interceptors.Handler;
+  Apm4D.DataController, Apm4D.Settings, Apm4D.Settings.Log, Apm4D.Log, Apm4D.Interceptor.Handler;
 
 type
   TTransaction = Apm4D.Transaction.TTransaction;
@@ -20,18 +20,18 @@ type
   TOutcome = Apm4D.Share.Types.TOutcome;
   TApm4DSettings = Apm4D.Settings.TApm4DSettings;
   TLogLevel = Apm4D.Settings.Log.TLogLevel;
-  IApm4DInterceptorHandler = Apm4D.Interceptors.Handler.IApm4DInterceptorHandler;
-  TApm4DInterceptorHandler = Apm4D.Interceptors.Handler.TApm4DInterceptorHandler;
+  IApm4DInterceptorHandler = Apm4D.Interceptor.Handler.IApm4DInterceptorHandler;
+  TApm4DInterceptorBuilder = Apm4D.Interceptor.Handler.TApm4DInterceptorBuilder;
 
   /// <summary>
-  /// The main class of the Apm4D. This class guarantees that there will only be one open Transaction per thread.
+  /// The main class of the Apm4D.
+  /// This class guarantees that there will only be one open Transaction per thread.
   /// It's thread safe.
   /// </summary>
   TApm4D = class
   strict protected
     class threadvar FData: TDataController;
     class function GetErrorInstance: TError; static;
-    class procedure InternalSendLog(const AMessage: string; ALevel: TLogLevel; const ALoggerName: string); static;
   public const
     HeaderKey = 'elastic-apm-traceparent';
   public
@@ -58,41 +58,41 @@ type
       const ATraceId: string = ''): TTransaction; overload; static;
 
     /// <summary>
-    /// Method to start a Http Request Apm4D.Transaction using TRESTRequest (Delphi native).
+    /// Method to start a Http Request Transaction using TRESTRequest (Delphi native).
     /// Params:
     /// ARequest -> The TRESTRequest delphi object already configured.
     /// </summary>
     class function StartTransactionRequest(const ARequest: TRESTRequest): TTransaction; overload; static;
 
     /// <summary>
-    /// Method to verify if a Apm4D.Transaction is already started.
+    /// Method to verify if a Transaction is already started.
     /// </summary>
     class function ExistsTransaction: Boolean; static;
 
     /// <summary>
-    /// Method to return the current Apm4D.Transaction. If not found, it will return a exception.
+    /// Method to return the current Transaction. If not found, it will return a exception.
     /// </summary>
     class function Transaction: TTransaction; static;
 
     /// <summary>
-    /// Method to finalize the current Apm4D.Transaction.
+    /// Method to finalize the current Transaction.
     /// Params:
-    /// AOutcome -> The state of the end of the Apm4D.Transaction
+    /// AOutcome -> The state of the end of the Transaction
     /// </summary>
     class procedure EndTransaction(const AOutcome: TOutcome = success); overload; static;
 
     /// <summary>
-    /// Method to finalize the http request Apm4D.Transaction.
+    /// Method to finalize the http request Transaction.
     /// Params:
-    /// AResponse -> The response of the Apm4D.Transaction
+    /// AResponse -> The response of the Transaction
     /// </summary>
     class procedure EndTransaction(const AResponse: TCustomRESTResponse); overload; static;
 
     /// <summary>
-    /// Method to start a Apm4D.Span (It's a sub Apm4D.Transaction)
+    /// Method to start a Span (It's a sub Transaction)
     /// Params:
-    /// AName -> The Apm4D.Span name.
-    /// AType -> It's a type/category of the Apm4D.Transaction
+    /// AName -> The Span name.
+    /// AType -> It's a type/category of the Transaction
     /// </summary>
     class function StartSpan(const AName: string; const AType: string = 'Method'): TSpan; static;
 
@@ -104,15 +104,15 @@ type
     class procedure SetSQLToCurrentSpan(const ASQL: string);
 
     /// <summary>
-    /// Method to start a Apm4D.Span, specific for SQL executions. (It's a sub Apm4D.Transaction)
+    /// Method to start a Span, specific for SQL executions. (It's a sub Transaction)
     /// Params:
-    /// AName -> The Apm4D.Span name.
+    /// AName -> The Span name.
     /// ADatabase  -> Database engine. Ex: mssql, mysql, etc
     /// </summary>
     class function StartSpanDb(const AName, ADatabase: string): TSpan; static;
 
     /// <summary>
-    /// Method to start a Apm4D.Span, specific for Http requests executions. (It's a sub Apm4D.Transaction)
+    /// Method to start a Span, specific for Http requests executions. (It's a sub Transaction)
     /// Params:
     /// AResource -> The http uri resource
     /// AMethod   -> The http method
@@ -120,108 +120,60 @@ type
     class function StartSpanRequest(const AResource: string; const AMethod: string): TSpan; static;
 
     /// <summary>
-    /// Method to return the current Apm4D.Span. If not found, it will return null.
+    /// Method to return the current Span. If not found, it will return null.
     /// </summary>
     class function Span: TSpan; static;
 
     /// <summary>
-    /// Method to end the current Apm4D.Span.
+    /// Method to end the current Span.
     /// </summary>
     class procedure EndSpan; overload; static;
     /// <summary>
-    /// Method to end the current http request Apm4D.Span.
+    /// Method to end the current http request Span.
     /// Params:
     /// StatusCode -> The http status code response.
     /// </summary>
     class procedure EndSpan(const StatusCode: Integer); overload; static;
     /// <summary>
-    /// Method to pause the current Apm4D.Transaction and Apm4D.Span.
+    /// Method to pause the current Transaction and Apm4D.Span.
     /// </summary>
     class procedure Pause; overload; static;
     /// <summary>
-    /// Method to unpause the current Apm4D.Transaction and Apm4D.Span.
+    /// Method to unpause the current Transaction and Apm4D.Span.
     /// </summary>
     class procedure UnPause; overload; static;
     /// <summary>
-    /// Method to check if the current Apm4D.Transaction/Apm4D.Span is paused.
+    /// Method to check if the current Transaction/Span is paused.
     /// </summary>
     class function IsPaused: Boolean; static;
 
     /// <summary>
-    /// Method to add a customized Apm4D.Error in a Apm4D.Transaction. It must have a Apm4D.Transaction open
+    /// Method to add a customized Error in a Transaction. It must have a Transaction open
     /// Params:
-    /// AError -> Elastic APM Apm4D.Error object
+    /// AError -> Elastic APM Error object
     /// </summary>
     class procedure AddError(AError: TError); overload; static;
 
     /// <summary>
-    /// Method to add a exception in a Apm4D.Transaction. It must have a Apm4D.Transaction open
+    /// Method to add a exception in a Transaction. It must have a Transaction open
     /// Params:
     /// E -> Delphi Exception
     /// </summary>
     class procedure AddError(E: Exception); overload; static;
 
     /// <summary>
-    /// Method to add a http request exception in a Apm4D.Transaction. It must have a Apm4D.Transaction open
+    /// Method to add a http request exception in a Transaction. It must have a Transaction open
     /// Params:
     /// E -> Http Delphi Exception
     /// </summary>
     class procedure AddError(E: EIdHTTPProtocolException); overload; static;
 
     /// <summary>
-    /// Method to add a TRESTClient exception in a http request Apm4D.Transaction. It must have a Apm4D.Transaction open
+    /// Method to add a TRESTClient exception in a http request Transaction. It must have a Transaction open
     /// Params:
     /// AResponse -> TRESTResponse object
     /// </summary>
     class procedure AddError(AResponse: TCustomRESTResponse); overload; static;
-
-    /// <summary>
-    /// Send a TRACE level log message correlated with the current Apm4D.Transaction/Apm4D.Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogTrace(const AMessage: string; const ALoggerName: string = ''); static;
-
-    /// <summary>
-    /// Send a DEBUG level log message correlated with the current Apm4D.Transaction/Apm4D.Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogDebug(const AMessage: string; const ALoggerName: string = ''); static;
-
-    /// <summary>
-    /// Send an INFO level log message correlated with the current Apm4D.Transaction/Apm4D.Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogInfo(const AMessage: string; const ALoggerName: string = ''); static;
-
-    /// <summary>
-    /// Send a WARNING level log message correlated with the current Apm4D.Transaction/Apm4D.Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogWarning(const AMessage: string; const ALoggerName: string = ''); static;
-
-    /// <summary>
-    /// Send an Apm4D.Error level log message correlated with the current Apm4D.Transaction/Apm4D.Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogError(const AMessage: string; const ALoggerName: string = ''); static;
-
-    /// <summary>
-    /// Send a Critical level log message correlated with the current Transaction/Span.
-    /// Params:
-    /// AMessage -> The log message
-    /// ALoggerName -> Optional logger name for categorization
-    /// </summary>
-    class procedure LogCritical(const AMessage: string; const ALoggerName: string = ''); static;
   end;
 
 implementation
@@ -468,83 +420,5 @@ begin
   AddError(Error);
 end;
 
-class procedure TApm4D.InternalSendLog(const AMessage: string; ALevel: TLogLevel; const ALoggerName: string);
-var
-  LogEntry: TAPMLog;
-  TraceId, TransactionId, SpanId: string;
-  ConfigLevel: TLogLevel;
-begin
-  // Verifica se logs estão habilitados
-  if not TApm4DSettings.Log.Enabled then
-    Exit;
-
-  // Verifica o nível de log configurado
-  ConfigLevel := TApm4DSettings.Log.Level;
-  if ALevel < ConfigLevel then
-    Exit;
-
-  // Obtem IDs de correlação se houver transação ativa
-  if Assigned(FData) then
-  begin
-    TraceId := FData.Transaction.Trace_id;
-    TransactionId := FData.Transaction.id;
-    if FData.SpanIsOpened then
-      SpanId := FData.CurrentSpan.id
-    else
-      SpanId := '';
-  end
-  else
-  begin
-    TraceId := '';
-    TransactionId := '';
-    SpanId := '';
-  end;
-
-  LogEntry := TAPMLog.Create(TraceId, TransactionId, SpanId);
-  try
-    LogEntry.SetMessage(AMessage, ALevel);
-
-    if not ALoggerName.IsEmpty then
-      LogEntry.SetLogger(ALoggerName);
-
-    if Assigned(FData) then
-      FData.LogList.Add(LogEntry)
-    else
-      LogEntry.Free; // Se n?o houver transa??o, descarta o log
-  except
-    LogEntry.Free;
-    raise;
-  end;
-end;
-
-class procedure TApm4D.LogTrace(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llTrace, ALoggerName);
-end;
-
-class procedure TApm4D.LogDebug(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llDebug, ALoggerName);
-end;
-
-class procedure TApm4D.LogInfo(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llInfo, ALoggerName);
-end;
-
-class procedure TApm4D.LogWarning(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llWarning, ALoggerName);
-end;
-
-class procedure TApm4D.LogError(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llError, ALoggerName);
-end;
-
-class procedure TApm4D.LogCritical(const AMessage: string; const ALoggerName: string);
-begin
-  InternalSendLog(AMessage, llCritical, ALoggerName);
-end;
 
 end.

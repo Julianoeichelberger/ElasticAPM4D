@@ -58,9 +58,8 @@ begin
 {$IFDEF VER330} 'Delphi 10.3 Rio'; {$ENDIF}
 {$IFDEF VER340} 'Delphi 10.4 Sidney'; {$ENDIF}
 {$IFDEF VER350} 'Delphi 11 Alexandria'; {$ENDIF}
-{$IFDEF VER360} 'Delphi 12 Yukon'
-{$ELSE} 'Unknown Delphi Version'
-{$ENDIF};
+{$IFDEF VER360} 'Delphi 12 Yukon' {$ENDIF}
+{$IFDEF VER370} 'Delphi 13 Florense' {$ENDIF} 
 end;
 
 end.

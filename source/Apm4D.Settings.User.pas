@@ -100,21 +100,21 @@ end;
 
 function TUserSettings.GetEmail: string;
 {$IFDEF MSWINDOWS}
-var
-  ADSysInfo: OleVariant;
-  ADUser: OleVariant;
+//var
+//  ADSysInfo: OleVariant;
+//  ADUser: OleVariant;
 {$ENDIF}
 begin
   result := '';
 {$IFDEF MSWINDOWS}
-  try
-    ADSysInfo := CreateOleObject('ADSystemInfo');
-    ADUser := CreateOleObject('LDAP');
-    ADUser := ADUser.OpenDSObject('LDAP://' + VarToStr(ADSysInfo.UserName), '', '', 0);
-    if not VarIsNull(ADUser.mail) and not VarIsEmpty(ADUser.mail) then
-      result := VarToStr(ADUser.mail);
-  except
-  end;
+//  try
+//    ADSysInfo := CreateOleObject('ADSystemInfo');
+//    ADUser := CreateOleObject('LDAP');
+//    ADUser := ADUser.OpenDSObject('LDAP://' + VarToStr(ADSysInfo.UserName), '', '', 0);
+//    if not VarIsNull(ADUser.mail) and not VarIsEmpty(ADUser.mail) then
+//      result := VarToStr(ADUser.mail);
+//  except
+//  end;
 {$ENDIF}
 end;
 

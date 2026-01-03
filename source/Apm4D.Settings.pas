@@ -13,7 +13,9 @@ uses
   System.SyncObjs,
   System.Generics.Collections,
 {$IFDEF MSWINDOWS}
-  Apm4D.Interceptors.Base,
+  Apm4D.Interceptor,
+  Apm4D.Interceptor.DataSet,
+  Apm4D.Interceptor.OnClick,
 {$ENDIF}
   Apm4D.Settings.Database,
   Apm4D.Settings.User,
@@ -22,6 +24,10 @@ uses
   Apm4D.Settings.Log;
 
 type
+{$IFDEF MSWINDOWS}
+  TApm4DInterceptOnClick = Apm4D.Interceptor.OnClick.TApm4DInterceptOnClick;
+  TApm4DInterceptDataSet = Apm4D.Interceptor.DataSet.TApm4DInterceptDataSet;
+{$ENDIF}
   /// <summary>
   /// It's a singleton class. You can configure global application settings.
   /// </summary>
@@ -35,7 +41,7 @@ type
     class var FElastic: TElasticSettings;
     class var FLog: TLogSettings;
 {$IFDEF MSWINDOWS}
-    class var FInterceptors: TList<TApm4DInterceptorClass>;
+    class var FInterceptors: TDictionary<TApm4DInterceptorClass, TArray<TClass>>;
 {$ENDIF}
   public
     class function Database: TDatabaseSettings; static;
@@ -51,9 +57,8 @@ type
     class procedure ReleaseInstance;
 
 {$IFDEF MSWINDOWS}
-    class procedure RegisterInterceptor(AClass: TApm4DInterceptorClass);
-    class procedure UnregisterInterceptor(AClass: TApm4DInterceptorClass);
-    class function GetInterceptors: TList<TApm4DInterceptorClass>;
+    class procedure RegisterInterceptor(AInterceptor: TApm4DInterceptorClass; AClasses: TArray<TClass>);
+    class function GetInterceptors: TDictionary<TApm4DInterceptorClass, TArray<TClass>>;
 {$ENDIF}
   end;
 
@@ -181,39 +186,24 @@ end;
 {$IFDEF MSWINDOWS}
 
 
-class procedure TApm4DSettings.RegisterInterceptor(AClass: TApm4DInterceptorClass);
+class procedure TApm4DSettings.RegisterInterceptor(AInterceptor: TApm4DInterceptorClass; AClasses: TArray<TClass>);
 begin
   FLock.Enter;
   try
     if not assigned(FInterceptors) then
-      FInterceptors := TList<TApm4DInterceptorClass>.Create;
-
-    if not FInterceptors.Contains(AClass) then
-      FInterceptors.Add(AClass);
+      FInterceptors := TDictionary < TApm4DInterceptorClass, TArray < TClass >>.Create;
+    FInterceptors.AddOrSetValue(AInterceptor, AClasses);
   finally
     FLock.Leave;
   end;
 end;
 
-class procedure TApm4DSettings.UnregisterInterceptor(AClass: TApm4DInterceptorClass);
+class function TApm4DSettings.GetInterceptors: TDictionary<TApm4DInterceptorClass, TArray<TClass>>;
 begin
   FLock.Enter;
   try
     if not assigned(FInterceptors) then
-      FInterceptors := TList<TApm4DInterceptorClass>.Create;
-
-    FInterceptors.Remove(AClass);
-  finally
-    FLock.Leave;
-  end;
-end;
-
-class function TApm4DSettings.GetInterceptors: TList<TApm4DInterceptorClass>;
-begin
-  FLock.Enter;
-  try
-    if not assigned(FInterceptors) then
-      FInterceptors := TList<TApm4DInterceptorClass>.Create;
+      FInterceptors := TDictionary < TApm4DInterceptorClass, TArray < TClass >>.Create;
 
     Result := FInterceptors;
   finally

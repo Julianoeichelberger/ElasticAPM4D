@@ -64,7 +64,7 @@ end;
 constructor TQueueSingleton.TThreadController.Create;
 begin
   inherited Create(True);
-  FEvent := TEvent.Create(nil, False, True, 'TThreadControllerEvent');
+  FEvent := TEvent.Create(nil, False, True, 'TApm4D.NotifyThread');
   FSession := TCriticalSection.Create;
   FMasterList := TDataSendList.Create;
 end;

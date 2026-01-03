@@ -76,7 +76,7 @@ begin
   if AJson = '' then
     exit(200);
   Http := TIdHTTP.Create;
-  if AUrl.StartsWith('https:') then
+  if AUrl.StartsWith('https') then
   begin
     SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(Http);
     SSLHandler.SSLOptions.SSLVersions := [sslvTLSv1_2];

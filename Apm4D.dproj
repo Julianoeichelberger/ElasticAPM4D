@@ -131,11 +131,11 @@
         <DCCReference Include="source\Apm4D.DataController.pas"/>
         <DCCReference Include="source\Apm4D.Error.Exception.pas"/>
         <DCCReference Include="source\Apm4D.Error.pas"/>
-        <DCCReference Include="source\Apm4D.Interceptors.Base.pas"/>
-        <DCCReference Include="source\Apm4D.Interceptors.ControlClick.pas"/>
-        <DCCReference Include="source\Apm4D.Interceptors.DataSet.pas"/>
-        <DCCReference Include="source\Apm4D.Interceptors.DBConnection.pas"/>
-        <DCCReference Include="source\Apm4D.Interceptors.Handler.pas"/>
+        <DCCReference Include="source\Apm4D.Interceptor.pas"/>
+        <DCCReference Include="source\Apm4D.Interceptor.OnClick.pas"/>
+        <DCCReference Include="source\Apm4D.Interceptor.DataSet.pas"/>
+        <DCCReference Include="source\Apm4D.Interceptor.DBConnection.pas"/>
+        <DCCReference Include="source\Apm4D.Interceptor.Handler.pas"/>
         <DCCReference Include="source\Apm4D.Log.pas"/>
         <DCCReference Include="source\Apm4D.Metadata.Cloud.Account.pas"/>
         <DCCReference Include="source\Apm4D.Metadata.Cloud.Instance.pas"/>

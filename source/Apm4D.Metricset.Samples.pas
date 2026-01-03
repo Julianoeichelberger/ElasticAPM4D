@@ -36,7 +36,8 @@ type
     // If Unit is unknown, it will be ignored.
 
     procedure AddPercentageGauge(const AName: string; const AValue: Currency);
-    procedure AddBytesGauge(const AName: string; const AValue: Int64);
+    procedure AddBytesGauge(const AName: string; const AValue: UInt64);
+    procedure AddDecimalGauge(const AName: string; const AValue: Currency);
     procedure AddHistogram(const AName: string; const AUnit: TSampleUnit; const AValues: TArray<Currency>);
     procedure AddCustom(const AName: string; const AUnit: TSampleUnit; const AType: TSampleType; const AValue: Currency);
 
@@ -82,11 +83,18 @@ begin
   AddCustom(AName, msuPercent, gauge, AValue / 100);
 end;
 
-procedure TMetricsetSamples.AddBytesGauge(const AName: string; const AValue: Int64);
+procedure TMetricsetSamples.AddBytesGauge(const AName: string; const AValue: UInt64);
 begin
   // For byte metrics, we add directly without unit suffix as per Elastic APM spec
   // Format: "metric.name":{"value":12345}
-  FList.Add(Format('"%s":{"value":%d}', [AName, AValue]));
+  FList.Add(Format('"%s":{"value":%u}', [AName, AValue]));
+end;
+
+procedure TMetricsetSamples.AddDecimalGauge(const AName: string; const AValue: Currency);
+begin
+  // For metrics with complete names (e.g., already have .pct suffix), add directly without unit suffix
+  // Format: "metric.name":{"value":0.50}
+  FList.Add(Format('"%s":{"value":%s}', [AName, FormatCurr(AValue)]));
 end;
 
 constructor TMetricsetSamples.Create;
