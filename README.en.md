@@ -176,6 +176,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   TApm4DSettings.RegisterInterceptor(TApm4DInterceptOnClick, [TButton]);
   TApm4DSettings.RegisterInterceptor(TApm4DInterceptDataSet, [TDataSet]);
+  TApm4DSettings.RegisterInterceptor(TApm4DInterceptRESTRequest, [TRESTRequest]);
   
   FInterceptorHandler := TApm4DInterceptorBuilder.CreateDefault(Self);
 end;

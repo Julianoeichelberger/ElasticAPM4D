@@ -224,7 +224,7 @@ end;
 class function TApm4D.Transaction: TTransaction;
 begin
   if not Assigned(FData) then
-    raise ETransactionNotFound.Create('Apm4D.Transaction not found');
+    raise ETransactionNotFound.Create('Apm4D -> Transaction not found');
 
   Result := FData.Transaction;
 end;
@@ -280,8 +280,9 @@ end;
 
 class function TApm4D.StartSpanRequest(const AResource, AMethod: string): TSpan;
 begin
-  Result := StartSpan(AResource, 'Request');
+  Result := StartSpan(AResource, 'external');
   Result.Context.CreateHttp(AMethod);
+  Result.subtype := 'http';
 end;
 
 class procedure TApm4D.SetSQLToCurrentSpan(const ASQL: string);

@@ -16,6 +16,7 @@ uses
   Apm4D.Interceptor,
   Apm4D.Interceptor.DataSet,
   Apm4D.Interceptor.OnClick,
+  Apm4D.Interceptor.RESTRequest,
 {$ENDIF}
   Apm4D.Settings.Database,
   Apm4D.Settings.User,
@@ -27,6 +28,7 @@ type
 {$IFDEF MSWINDOWS}
   TApm4DInterceptOnClick = Apm4D.Interceptor.OnClick.TApm4DInterceptOnClick;
   TApm4DInterceptDataSet = Apm4D.Interceptor.DataSet.TApm4DInterceptDataSet;
+  TApm4DInterceptRESTRequest = Apm4D.Interceptor.RESTRequest.TApm4DInterceptRESTRequest;
 {$ENDIF}
   /// <summary>
   /// It's a singleton class. You can configure global application settings.

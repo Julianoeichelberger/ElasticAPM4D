@@ -65,21 +65,13 @@ Compatível com **Elastic APM 7.11.1+** e testado em **Windows** e **Linux**.
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/seu-usuario/Apm4D.git
+   git clone https://github.com/seu-usuario/ElasticAPM4D.git
    ```
-
-2. **Abra o package no Delphi**
-   - Abra `Apm4D.dpk` no Delphi IDE
-
-3. **Compile e Instale**
-   - Clique com o botão direito → **Build**
-   - Clique com o botão direito → **Install**
-
-4. **Adicione ao projeto**
+2. **Adicione ao projeto**
    - Adicione `Apm4D` na cláusula `uses` dos seus arquivos
    - Configure o caminho de busca para a pasta `source`
 
-5. **[Opcional] Ative Stacktrace**
+3. **[Opcional] Ative Stacktrace**
    - Instale JEDI-JCL: https://jedi-apilib.sourceforge.net/
    - Adicione `jcl` nas definições condicionais do projeto
 
@@ -94,42 +86,32 @@ uses
   Apm4D, Apm4D.Settings;
 
 procedure ConfigureAPM;
-begin
-  // Ativar o agente
-  TApm4DSettings.Activate;
-  
+begin  
   // Configurações da aplicação
-  TApm4DSettings.Application
-    .SetName('MeuApp')
-    .SetVersion('1.0.0')
-    .SetEnvironment('production'); // staging, development, production
+  TApm4DSettings.Application.Name := "Minha Aplicação"; // Default é o nome do executável
+  TApm4DSettings.Application.Version := "1.0.0"; // Default é a versão do executável 
+  TApm4DSettings.Application.Environment := "production"; // staging, development, production 
   
   // Configurações do Elastic APM
-  TApm4DSettings.Elastic
-    .SetUrl('http://localhost:8200')
-    .SetSecretToken('seu-token-aqui'); // Opcional
+  TApm4DSettings.Elastic.Url := 'http://localhost:8200'; // URL do APM Server (Default = http://localhost:8200)
+  TApm4DSettings.Elastic.SecretToken := 'seu-token-aqui'; // Opcional
+  TApm4DSettings.Elastic.UpdateTime := 60000; // Intervalo de envio de métricas em milissegundos (Default = 60000)
+  TApm4DSettings.Elastic.MaxJsonPerThread := 60; // Máximo de eventos JSON por thread na fila (Default = 60)
   
   // Configurações do usuário (opcional)
-  TApm4DSettings.User
-    .SetId('12345')
-    .SetUsername('joao.silva')
-    .SetEmail('joao@empresa.com');
-  
-  // Configurações de log (opcional)
-  TApm4DSettings.Log
-    .SetLevel(llDebug)
-    .SetPath('C:\logs\apm.log');
+  TApm4DSettings.User.Id := '12345'; // Default ID único do usuário no SO
+  TApm4DSettings.User.Username := 'joao.silva'; // Default Nome do usuário logado no SO 
+  TApm4DSettings.User.Email := 'joao.silva@empresa.com'; // Email do usuário (Default '')
+
+  // Configurações do banco de dados (opcional)
+  TApm4DSettings.Database.Instance := 'MinhaBaseDados'; // Nome da base de dados (Default '')
+  TApm4DSettings.Database.Server := 'localhost'; // Servidor de banco de dados (Default '')
+  TApm4DSettings.Database.Type := 'mssql'; // Tipo do banco de dados (mssql, mysql, postgres, oracle) (Default '')
+  TApm4DSettings.Database.User := 'dbuser'; // Usuário do banco de dados (Default '')
+
+  // Ativar o agente
+  TApm4DSettings.Activate;
 end;
-```
-
-### Variáveis de Ambiente (Alternativa)
-
-```bash
-APM_SERVER_URL=http://localhost:8200
-APM_SECRET_TOKEN=seu-token-aqui
-APM_SERVICE_NAME=MeuApp
-APM_SERVICE_VERSION=1.0.0
-APM_ENVIRONMENT=production
 ```
 
 ---
@@ -297,6 +279,89 @@ begin
 end;
 ```
 
+#### Com TRESTRequest (Nativo Delphi)
+
+```delphi
+uses
+  Apm4D, REST.Client, REST.Types;
+
+procedure ConsultarAPI;
+var
+  RESTClient: TRESTClient;
+  RESTRequest: TRESTRequest;
+  RESTResponse: TRESTResponse;
+begin
+  RESTClient := TRESTClient.Create('https://api.exemplo.com');
+  RESTRequest := TRESTRequest.Create(nil);
+  RESTResponse := TRESTResponse.Create(nil);
+  try
+    RESTRequest.Client := RESTClient;
+    RESTRequest.Response := RESTResponse;
+    RESTRequest.Resource := 'api/v1/dados';
+    RESTRequest.Method := rmGET;
+    
+    // Transaction/Span criado automaticamente pelo interceptor
+    TApm4D.StartTransactionRequest(RESTRequest);
+    try
+      RESTRequest.Execute; // Monitorado automaticamente
+      
+      if RESTResponse.StatusCode = 200 then
+        TApm4D.EndTransaction(RESTResponse)
+      else
+        TApm4D.EndTransaction(failure);
+    except
+      on E: Exception do
+      begin
+        TApm4D.AddError(RESTResponse); // Captura erro HTTP
+        TApm4D.EndTransaction(failure);
+        raise;
+      end;
+    end;
+  finally
+    RESTResponse.Free;
+    RESTRequest.Free;
+    RESTClient.Free;
+  end;
+end;
+```
+
+**Com Interceptor Automático:**
+```delphi
+// Registre o interceptor uma vez no FormCreate:
+TApm4DSettings.RegisterInterceptor(TApm4DInterceptRESTRequest, [TRESTRequest]);
+
+// Depois, apenas execute normalmente:
+procedure TFormPrincipal.btnBuscarClick(Sender: TObject);
+begin
+  RESTRequest1.Execute; // Span HTTP criado automaticamente!
+  // O interceptor:
+  // - Cria uma transaction se não existir nenhuma
+  // - SEMPRE cria um span com todas as informações HTTP (método, URL, host, porta)
+  // - Adiciona informações de destino (destination) para rastreamento distribuído
+  // - Finaliza o span automaticamente com o status code correto
+  // - Finaliza a transaction somente se foi ele quem a criou
+  // - Captura erros HTTP automaticamente
+end;
+```
+
+**Exemplo de Span Gerado pelo Interceptor:**
+```
+Transaction: ProcessarPedido
+  Span: GET https://api.exemplo.com/pedidos/123
+    Type: external
+    Subtype: http
+    Context:
+      - HTTP Method: GET
+      - URL: https://api.exemplo.com/pedidos/123
+      - Status Code: 200
+      - Destination Address: api.exemplo.com
+      - Destination Port: 443
+    Duration: 350ms
+```
+  // - Captura erros HTTP automaticamente
+end;
+```
+
 #### Com Indy (IdHTTP)
 
 ```delphi
@@ -437,6 +502,7 @@ begin
   TApm4DSettings.RegisterInterceptor(TApm4DInterceptOnClick, [TButton, TSpeedButton, TBitBtn]);
   TApm4DSettings.RegisterInterceptor(TApm4DInterceptDataSet, [TDataSet]);
   TApm4DSettings.RegisterInterceptor(TApm4DInterceptDBConnection, [TFDConnection]);
+  TApm4DSettings.RegisterInterceptor(TApm4DInterceptRESTRequest, [TRESTRequest]);
   
   // Injetar interceptors no formulário
   FInterceptorHandler := TApm4DInterceptorBuilder.CreateDefault(Self);
@@ -448,6 +514,12 @@ end;
 - **Clicks em Botões**: Cria transaction para cada click
 - **Operações de DataSet**: Monitora `Open`, `Post`, `Delete`, `Execute`
 - **Conexões de Banco**: Monitora reconexão, rollback, disconnect
+- **Requisições REST (TRESTRequest)**: 
+  - SEMPRE cria um span com informações HTTP completas (método, URL, host, porta)
+  - Cria uma transaction apenas se não existir nenhuma
+  - Adiciona contexto de destino (destination) para rastreamento distribuído
+  - Finaliza automaticamente com status code
+  - Captura erros HTTP
 
 #### Exemplo de Span Gerado Automaticamente
 
@@ -456,6 +528,15 @@ Quando você clica em um botão:
 Transaction: FormPrincipal.btnSalvar.Click
   Type: UI.Click
   Duration: 250ms
+```
+
+Quando você executa um TRESTRequest dentro de uma transaction existente:
+```
+Transaction: ProcessarPedido
+  Span: GET https://api.exemplo.com/pedidos
+    Type: Request
+    Duration: 350ms
+    Status Code: 200
 ```
 
 ### Métricas do Sistema

@@ -44,6 +44,7 @@ contains
   Apm4D.Interceptor.OnClick in 'source\Apm4D.Interceptor.OnClick.pas',
   Apm4D.Interceptor.DataSet in 'source\Apm4D.Interceptor.DataSet.pas',
   Apm4D.Interceptor.DBConnection in 'source\Apm4D.Interceptor.DBConnection.pas',
+  Apm4D.Interceptor.RESTRequest in 'source\Apm4D.Interceptor.RESTRequest.pas',
   Apm4D.Interceptor.Handler in 'source\Apm4D.Interceptor.Handler.pas',
   Apm4D.Log in 'source\Apm4D.Log.pas',
   Apm4D.Metadata.Cloud.Account in 'source\Apm4D.Metadata.Cloud.Account.pas',

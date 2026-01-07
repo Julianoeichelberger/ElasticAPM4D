@@ -1,10 +1,10 @@
-﻿{*******************************************************}
-{                                                       }
-{             Delphi Elastic Apm Agent                  }
-{                                                       }
-{          Developed by Juliano Eichelberger            }
-{                                                       }
-{*******************************************************}
+﻿{ ******************************************************* }
+{ }
+{ Delphi Elastic Apm Agent }
+{ }
+{ Developed by Juliano Eichelberger }
+{ }
+{ ******************************************************* }
 unit Apm4D.Metadata.Process;
 
 interface
@@ -31,7 +31,7 @@ type
 
 implementation
 
-uses 
+uses
 {$IFDEF MSWINDOWS} Winapi.TLHelp32, Winapi.psAPI, Winapi.Windows, Vcl.Forms, System.SysUtils; {$ENDIF}
 {$IFDEF UNIX} Posix.Unistd, System.SysUtils; {$ENDIF}
 
@@ -64,7 +64,7 @@ constructor TMetadataProcess.Create;
   begin
     Result := GetCurrentProcessId; // Use Windows API directly
     Exit;
-    
+
     // Fallback method (commented out, using direct API above)
     LExeName := ExtractFileName(Application.ExeName);
     try
@@ -81,7 +81,7 @@ constructor TMetadataProcess.Create;
       end;
       CloseHandle(LHandle);
     except
-      Result := GetCurrentProcessId; // Fallback
+      // ignore
     end;
   end;
 
@@ -130,6 +130,7 @@ constructor TMetadataProcess.Create;
     Result := getppid;
   end;
 {$ENDIF}
+
 
 var
   I: Integer;
