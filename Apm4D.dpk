@@ -101,7 +101,8 @@ contains
   Apm4D.Metricset.Base in 'source\Apm4D.Metricset.Base.pas',
   Apm4D.Metricset.Defaults in 'source\Apm4D.Metricset.Defaults.pas',
   Apm4D.Metricset.Formatter in 'source\Apm4D.Metricset.Formatter.pas',
-  Apm4D.Metricset in 'source\Apm4D.Metricset.pas';
+  Apm4D.Metricset in 'source\Apm4D.Metricset.pas',
+  Apm4D.Interceptor.Actions in 'source\Apm4D.Interceptor.Actions.pas';
 
 end.
 

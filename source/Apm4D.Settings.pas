@@ -15,6 +15,7 @@ uses
 {$IFDEF MSWINDOWS}
   Apm4D.Interceptor,
   Apm4D.Interceptor.DataSet,
+  Apm4D.Interceptor.Actions,
   Apm4D.Interceptor.OnClick,
   Apm4D.Interceptor.RESTRequest,
 {$ENDIF}
@@ -29,6 +30,7 @@ uses
 type
 {$IFDEF MSWINDOWS}
   TApm4DInterceptOnClick = Apm4D.Interceptor.OnClick.TApm4DInterceptOnClick;
+  TApm4DInterceptActions = Apm4D.Interceptor.Actions.TApm4DInterceptActions;
   TApm4DInterceptDataSet = Apm4D.Interceptor.DataSet.TApm4DInterceptDataSet;
   TApm4DInterceptRESTRequest = Apm4D.Interceptor.RESTRequest.TApm4DInterceptRESTRequest;
 {$ENDIF}

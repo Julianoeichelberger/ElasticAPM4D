@@ -52,7 +52,28 @@ implementation
 uses
   IDHttp, Forms, IOUtils, Apm4D.Settings, IdSSLOpenSSL;
 
+function RemoveEmptyLines(const AJson: Widestring): Widestring;
+var
+  Lines: TStringList;
+  I: Integer;
+begin
+  Lines := TStringList.Create;
+  try
+    Lines.Text := AJson;
+    // The Elastic APM intake API rejects the whole request (400) if any line is
+    // not a valid JSON event, so blank lines in the ND-JSON must never be sent.
+    for I := Lines.Count - 1 downto 0 do
+      if Trim(Lines[I]) = '' then
+        Lines.Delete(I);
+    Result := Lines.Text;
+  finally
+    Lines.Free;
+  end;
+end;
+
 function SendToElasticAPM(AUrl, ASecret, AHeader: string; const AJson: Widestring): Integer;
+var
+  LJson: Widestring;
 
   procedure SaveLog(ARespCode: Integer; AMessage: string);
   begin
@@ -61,7 +82,7 @@ function SendToElasticAPM(AUrl, ASecret, AHeader: string; const AJson: Widestrin
     with TStringList.Create do
     begin
       Add(AMessage);
-      Add(AJson);
+      Add(LJson);
       SaveToFile(IncludeTrailingPathDelimiter(TApm4DSettings.Log.OutputFileDir) + TPath.GetFileNameWithoutExtension
         (Application.ExeName) + '_' + ARespCode.ToString + '_' + FormatDateTime('hh-mm-sss', now) + '.log');
       Free;
@@ -73,7 +94,8 @@ var
   DataSend, Stream: TStringStream;
   SSLHandler: TIdSSLIOHandlerSocketOpenSSL;
 begin
-  if AJson = '' then
+  LJson := RemoveEmptyLines(AJson);
+  if Trim(LJson) = '' then
     exit(200);
   Http := TIdHTTP.Create;
   if AUrl.StartsWith('https') then
@@ -83,11 +105,11 @@ begin
     Http.IOHandler := SSLHandler;
   end;
 
-  DataSend := TStringStream.Create(AJson, TEncoding.UTF8);
+  DataSend := TStringStream.Create(LJson, TEncoding.UTF8);
   Stream := TStringStream.Create('');
   try
     Http.Request.ContentType := 'application/x-ndjson';
-    Http.Request.Charset := 'gzip';
+    Http.Request.Charset := 'utf-8';
     Http.Request.CustomHeaders.AddValue('elastic-apm-traceparent', AHeader);
     if not ASecret.IsEmpty then
     begin
@@ -102,7 +124,9 @@ begin
       on E: EIdHTTPProtocolException do
       begin
         Result := E.ErrorCode;
-        SaveLog(Result, E.Message);
+        // E.ErrorMessage carries the APM Server response body, which describes
+        // exactly which event/field was rejected on a 400.
+        SaveLog(Result, E.Message + sLineBreak + E.ErrorMessage);
       end;
       on E: Exception do
       begin
